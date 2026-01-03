@@ -30,6 +30,9 @@ export interface OrderFormState {
   customScent: string;
   color: SoapColor | null;
   quantity: string;
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
 }
 
 export interface ContactInfo {
