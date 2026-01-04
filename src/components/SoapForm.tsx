@@ -77,6 +77,15 @@ export const SoapForm: React.FC = () => {
     setCurrentStep('quantity');
   };
 
+  useEffect(() => {
+    if (currentStep === 'quantity' && (!formData.scent || !formData.color)) {
+      setCurrentStep(formData.scent ? 'color' : 'scent');
+    }
+    if (currentStep === 'color' && !formData.scent) {
+      setCurrentStep('scent');
+    }
+  }, [currentStep, formData.scent, formData.color]);
+
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/[^0-9]/g, '');
     setFormData(prev => ({ ...prev, quantity: value }));
@@ -291,6 +300,7 @@ export const SoapForm: React.FC = () => {
           )}
       </section>
 
+      {formData.scent ? (
       <section className={`bg-white rounded-2xl p-8 shadow-sm border border-earth-100 transition-all hover:shadow-md ${
         currentStep === 'color' ? 'ring-2 ring-earth-300' : ''
       }`}>
@@ -364,7 +374,9 @@ export const SoapForm: React.FC = () => {
           })}
         </div>
       </section>
+      ) : null}
 
+      {formData.scent && formData.color ? (
       <section className={`bg-white rounded-2xl p-8 shadow-sm border border-earth-100 transition-all hover:shadow-md ${
         currentStep === 'quantity' ? 'ring-2 ring-earth-300' : ''
       }`}>
@@ -414,6 +426,7 @@ export const SoapForm: React.FC = () => {
           </div>
         </div>
       </section>
+      ) : null}
 
       <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-earth-200 p-4 z-40 shadow-[0_-4px_20px_-5px_rgba(0,0,0,0.15)]">
         <div className="max-w-3xl mx-auto">
