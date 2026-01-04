@@ -43,10 +43,10 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, isSubmi
     const newErrors: { name?: string; email?: string; phone?: string } = {};
     
     if (formData.name.trim().length < 2) {
-      newErrors.name = 'Please enter your name';
+      newErrors.name = 'Please enter your name (at least 2 characters)';
     }
     if (!validateEmail(formData.email)) {
-      newErrors.email = 'Please enter a valid email';
+      newErrors.email = 'Please enter a valid email address (like yourname@email.com)';
     }
     if (!validatePhone(formData.phone)) {
       newErrors.phone = 'Please enter a valid phone number';
@@ -68,7 +68,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, isSubmi
 
   return (
     <div className="p-4">
-      <h3 className="text-lg font-serif font-bold text-earth-800 mb-4">Contact Details</h3>
+      <h3 className="text-lg font-serif font-bold text-earth-800 mb-4">Your Contact Details</h3>
       
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Name Field */}
@@ -82,7 +82,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, isSubmi
             value={formData.name}
             onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
             onFocus={() => setErrors(prev => ({ ...prev, name: undefined }))}
-            placeholder="John Doe"
+            placeholder="Your full name"
             className={`w-full p-3 rounded-lg border ${errors.name ? 'border-red-300' : 'border-gray-300'} focus:border-earth-500 focus:ring-2 focus:ring-earth-200 outline-none transition-all`}
             disabled={isSubmitting}
           />
@@ -100,7 +100,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, isSubmi
             value={formData.email}
             onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
             onFocus={() => setErrors(prev => ({ ...prev, email: undefined }))}
-            placeholder="john@example.com"
+            placeholder="you@example.com"
             className={`w-full p-3 rounded-lg border ${errors.email ? 'border-red-300' : 'border-gray-300'} focus:border-earth-500 focus:ring-2 focus:ring-earth-200 outline-none transition-all`}
             disabled={isSubmitting}
           />
@@ -111,14 +111,14 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, isSubmi
         <div>
           <label className="flex items-center gap-2 text-sm text-gray-600 mb-1">
             <Phone className="w-4 h-4" />
-            Phone Number
+            Your Phone Number
           </label>
           <input
             type="tel"
             value={formData.phone}
             onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
             onFocus={() => setErrors(prev => ({ ...prev, phone: undefined }))}
-            placeholder="+1 (555) 000-0000"
+            placeholder="(555) 123-4567"
             className={`w-full p-3 rounded-lg border ${errors.phone ? 'border-red-300' : 'border-gray-300'} focus:border-earth-500 focus:ring-2 focus:ring-earth-200 outline-none transition-all`}
             disabled={isSubmitting}
           />
@@ -135,23 +135,23 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, isSubmi
           >
             Cancel
           </button>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="flex-1 py-3 rounded-full font-bold bg-earth-600 text-white hover:bg-earth-700 transition-colors flex items-center justify-center gap-2"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                Sending...
-              </>
-            ) : (
-              <>
-                <Send className="w-5 h-5" />
-                Send Order
-              </>
-            )}
-          </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="flex-1 py-3 rounded-full font-bold bg-earth-600 text-white hover:bg-earth-700 transition-colors flex items-center justify-center gap-2"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Send className="w-5 h-5" />
+                  Submit Order
+                </>
+              )}
+            </button>
         </div>
       </form>
     </div>
@@ -168,18 +168,18 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ itemCount, onCont
     <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
       <Check className="w-8 h-8 text-green-600" />
     </div>
-    <h3 className="text-xl font-serif font-bold text-earth-800 mb-2">Order Sent!</h3>
+    <h3 className="text-xl font-serif font-bold text-earth-800 mb-2">Order Sent Successfully!</h3>
     <p className="text-gray-600 mb-6">
-      We will contact you soon about the details.
+      Thank you for your order! We'll be in touch with you shortly.
     </p>
     <p className="text-sm text-gray-500 mb-6">
-      Your order: {itemCount} soap{itemCount > 1 ? 's' : ''}
+      You ordered: {itemCount} soap{itemCount > 1 ? 's' : ''}
     </p>
     <button
       onClick={onContinue}
       className="w-full py-3 rounded-full font-bold bg-earth-600 text-white hover:bg-earth-700 transition-colors"
     >
-      Continue Shopping
+      Order More Soaps
     </button>
   </div>
 );
@@ -249,11 +249,11 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
           <div className="flex items-center gap-2">
             <ShoppingCart className="w-5 h-5 text-earth-600" />
             <h2 className="text-lg font-serif font-bold text-earth-800">
-              {showConfirmation ? 'Order Complete' : 'Your Cart'}
+              {showConfirmation ? 'Thank You!' : 'Your Cart'}
             </h2>
             {!showConfirmation && cart.totalQuantity > 0 && (
               <span className="bg-earth-200 text-earth-800 text-xs px-2 py-0.5 rounded-full">
-                {cart.totalQuantity} soaps
+                {cart.totalQuantity} soap{cart.totalQuantity > 1 ? 's' : ''}
               </span>
             )}
           </div>
@@ -291,7 +291,7 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
                   <div className="text-center py-12">
                     <ShoppingCart className="w-12 h-12 text-earth-200 mx-auto mb-3" />
                     <p className="text-gray-500">Your cart is empty</p>
-                    <p className="text-sm text-gray-400 mt-1">Add soaps to get started!</p>
+                    <p className="text-sm text-gray-400 mt-1">Choose your soaps above to get started!</p>
                   </div>
                 ) : (
                   <>
@@ -305,7 +305,7 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
                             )}
                           </div>
                           <div className="text-sm text-gray-600">
-                            Color: {item.color} • Qty: {item.quantity}
+                            {item.color} color • {item.quantity} soap{item.quantity > 1 ? 's' : ''}
                           </div>
                         </div>
                         <button
@@ -328,15 +328,15 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
         {!showConfirmation && !showCheckout && cart.items.length > 0 && (
           <div className="p-4 border-t border-earth-100 bg-earth-50">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-gray-600">Total soaps:</span>
-              <span className="font-bold text-earth-800">{cart.totalQuantity}</span>
+              <span className="text-gray-600">Total in your order:</span>
+              <span className="font-bold text-earth-800">{cart.totalQuantity} soap{cart.totalQuantity > 1 ? 's' : ''}</span>
             </div>
             <button
               onClick={() => setShowCheckout(true)}
               className="w-full py-3 bg-earth-600 text-white rounded-full font-bold hover:bg-earth-700 transition-colors flex items-center justify-center gap-2"
             >
               <Send className="w-5 h-5" />
-              Send Order
+              Place Order
             </button>
           </div>
         )}
