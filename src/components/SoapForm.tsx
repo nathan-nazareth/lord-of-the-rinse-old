@@ -23,6 +23,7 @@ const SCENT_OPTIONS = [
   SoapScent.CINNAMON,
   SoapScent.LEMONGRASS,
   SoapScent.TURMERIC,
+  SoapScent.HONEY,
   SoapScent.CUSTOM
 ];
 
@@ -98,7 +99,7 @@ export const SoapForm: React.FC = () => {
       {showAddedToast && (
         <div className="fixed top-4 right-4 z-50 bg-green-600 text-white px-4 py-2 rounded-full shadow-lg animate-in fade-in slide-in-from-top-4 flex items-center gap-2">
           <Check className="w-5 h-5" />
-          Added to cart!
+          Added to your cart!
         </div>
       )}
 
@@ -119,7 +120,7 @@ export const SoapForm: React.FC = () => {
       <section className="bg-white rounded-2xl p-8 shadow-sm border border-earth-100 transition-all hover:shadow-md">
         <h2 className="text-2xl font-serif font-bold mb-6 text-earth-800 flex items-center gap-3">
           <span className="bg-earth-200 w-8 h-8 rounded-full flex items-center justify-center text-sm font-sans">1</span>
-          Choose your scent
+          Choose your soap scent
         </h2>
         
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -136,7 +137,7 @@ export const SoapForm: React.FC = () => {
               `}
             >
               <span>{option}</span>
-              {(option === SoapScent.LAVENDER || option === SoapScent.ALOE_VERA || option === SoapScent.COCONUT) && (
+              {(option === SoapScent.LAVENDER || option === SoapScent.ALOE_VERA || option === SoapScent.COCONUT || option === SoapScent.HONEY) && (
                 <span className="text-xs text-earth-600 font-medium">recommended</span>
               )}
               {formData.scent === option && <Check className="w-5 h-5 text-earth-600" />}
@@ -147,14 +148,14 @@ export const SoapForm: React.FC = () => {
         {formData.scent === SoapScent.CUSTOM && (
           <div className="mt-6 animate-in fade-in slide-in-from-top-4 duration-300">
             <label htmlFor="custom-scent" className="block text-sm font-medium text-gray-700 mb-2">
-              Describe your custom scent ingredients:
+              What scent would you like? (Tell us the ingredients)
             </label>
             <input
               type="text"
               id="custom-scent"
               value={formData.customScent}
               onChange={(e) => setFormData(prev => ({ ...prev, customScent: e.target.value }))}
-              placeholder="e.g., Turmeric & Honey"
+              placeholder="For example: Lavender & Honey, or Vanilla Bean"
               className="w-full p-4 rounded-xl border border-gray-300 focus:border-earth-500 focus:ring-2 focus:ring-earth-200 outline-none transition-all"
               autoFocus
             />
@@ -165,9 +166,9 @@ export const SoapForm: React.FC = () => {
       <section className="bg-white rounded-2xl p-8 shadow-sm border border-earth-100 transition-all hover:shadow-md">
         <h2 className="text-2xl font-serif font-bold mb-2 text-earth-800 flex items-center gap-3">
           <span className="bg-earth-200 w-8 h-8 rounded-full flex items-center justify-center text-sm font-sans">2</span>
-          Pick a subtle hue
+          Pick a color for your soap
         </h2>
-        <p className="text-gray-500 mb-6 ml-11 text-sm italic">All colors are natural and subtle.</p>
+        <p className="text-gray-500 mb-6 ml-11 text-sm italic">All colors are from natural ingredients.</p>
         
         {(formData.scent === SoapScent.COFFEE || formData.scent === SoapScent.TURMERIC) && (
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-6 ml-11 text-sm text-amber-800">
@@ -206,9 +207,9 @@ export const SoapForm: React.FC = () => {
       </section>
 
       <section className="bg-white rounded-2xl p-8 shadow-sm border border-earth-100 transition-all hover:shadow-md">
-        <h2 className="text-2xl font-serif font-bold mb-6 text-earth-800 flex items-center gap-3">
+        <h2 className="text-2xl font-serif font-bold mb-2 text-earth-800 flex items-center gap-3">
           <span className="bg-earth-200 w-8 h-8 rounded-full flex items-center justify-center text-sm font-sans">3</span>
-          Quantity
+          How many soaps would you like?
         </h2>
         
         <div className="flex items-center gap-4 max-w-xs ml-11">
@@ -233,8 +234,8 @@ export const SoapForm: React.FC = () => {
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="text-sm text-gray-500 hidden md:block">
               {cart.totalQuantity > 0 
-                ? `${cart.totalQuantity} soap${cart.totalQuantity > 1 ? 's' : ''} in cart`
-                : 'Add soaps to your cart'}
+                ? `You have ${cart.totalQuantity} soap${cart.totalQuantity > 1 ? 's' : ''} in your cart`
+                : 'Add soaps to your cart to order'}
             </div>
             
             {cart.totalQuantity > 0 ? (
@@ -259,7 +260,7 @@ export const SoapForm: React.FC = () => {
                   `}
                 >
                   <Plus className="w-5 h-5" />
-                  Add Another
+                  Add More Soaps
                 </button>
               </div>
             ) : (
@@ -283,7 +284,7 @@ export const SoapForm: React.FC = () => {
           {cart.items.length > 0 && (
             <div className="bg-earth-50 rounded-xl p-3 animate-in fade-in slide-in-from-bottom-4">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-earth-700">Your soaps:</span>
+                <span className="text-sm font-medium text-earth-700">In your cart:</span>
                 <button
                   type="button"
                   onClick={() => setIsCartOpen(true)}
@@ -293,9 +294,9 @@ export const SoapForm: React.FC = () => {
                 </button>
               </div>
               <div className="flex flex-wrap gap-2">
-                {cart.items.slice(0, 5).map((item, idx) => (
+                {cart.items.slice(0, 5).map((item) => (
                   <span key={item.id} className="text-xs bg-white px-2 py-1 rounded border border-earth-200 text-gray-600">
-                    {item.quantity}x {item.scent} {item.color}
+                    {item.quantity}x {item.scent} ({item.color})
                   </span>
                 ))}
                 {cart.items.length > 5 && (
