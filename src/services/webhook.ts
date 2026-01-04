@@ -43,7 +43,7 @@ export async function submitCartToWebhook(
     }))
   };
 
-  console.log('curl -X POST "https://connect.pabbly.com/workflow/sendwebhookdata/***REMOVED***" -H "Content-Type: application/json" -d ' + JSON.stringify(payload, null, 2).replace(/"/g, '\\"'));
+  console.log('[Webhook] Submitting order:', JSON.stringify(payload, null, 2));
 
   let lastError: Error | null = null;
 
