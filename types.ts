@@ -4,6 +4,9 @@ export enum SoapScent {
   CLOVE = 'Clove',
   CINNAMON = 'Cinnamon',
   LEMONGRASS = 'Lemongrass',
+  ALOE_VERA = 'Aloe Vera',
+  COCONUT = 'Coconut',
+  TURMERIC = 'Turmeric',
   CUSTOM = 'Custom'
 }
 
