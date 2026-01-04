@@ -16,10 +16,13 @@ const INITIAL_STATE: OrderFormState = {
 
 const SCENT_OPTIONS = [
   SoapScent.LAVENDER,
+  SoapScent.ALOE_VERA,
+  SoapScent.COCONUT,
   SoapScent.COFFEE,
   SoapScent.CLOVE,
   SoapScent.CINNAMON,
   SoapScent.LEMONGRASS,
+  SoapScent.TURMERIC,
   SoapScent.CUSTOM
 ];
 
@@ -122,13 +125,16 @@ export const SoapForm: React.FC = () => {
               type="button"
               onClick={() => handleScentChange(option)}
               className={`
-                p-4 rounded-xl border-2 text-left transition-all duration-200 flex justify-between items-center
+                p-4 rounded-xl border-2 text-left transition-all duration-200 flex flex-col justify-between
                 ${formData.scent === option 
                   ? 'border-earth-500 bg-earth-50 text-earth-800 font-semibold shadow-inner' 
                   : 'border-gray-100 hover:border-earth-300 text-gray-600 hover:bg-gray-50'}
               `}
             >
-              {option}
+              <span>{option}</span>
+              {(option === SoapScent.LAVENDER || option === SoapScent.ALOE_VERA || option === SoapScent.COCONUT) && (
+                <span className="text-xs text-earth-600 font-medium">recommended</span>
+              )}
               {formData.scent === option && <Check className="w-5 h-5 text-earth-600" />}
             </button>
           ))}
