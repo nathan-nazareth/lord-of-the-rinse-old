@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { SoapScent, SoapColor, OrderFormState } from '../../types';
+import { SoapScent, SoapColor, OrderFormState, SOAP_OPTIONS } from '../../types';
 import { useCart } from '../hooks/useCart';
 import { useFormRateLimit } from '../hooks/useFormRateLimit';
 import { Cart, CartBadge } from './Cart';
@@ -25,18 +25,6 @@ const SCENT_INFO: Record<string, { description: string; tip: string }> = {
   'Turmeric': { description: 'Anti-inflammatory', tip: 'Traditional beauty secret' },
   'Honey': { description: 'Sweet & nourishing', tip: 'Naturally antibacterial' }
 };
-
-const SCENT_OPTIONS = [
-  SoapScent.LAVENDER,
-  SoapScent.ALOE_VERA,
-  SoapScent.COCONUT,
-  SoapScent.COFFEE,
-  SoapScent.CLOVE,
-  SoapScent.CINNAMON,
-  SoapScent.LEMONGRASS,
-  SoapScent.TURMERIC,
-  SoapScent.HONEY
-];
 
 const COLOR_OPTIONS = [
   { label: SoapColor.WHITE, class: 'bg-slate-50 border-slate-200', hex: '#f8fafc' },
@@ -107,11 +95,17 @@ export const SoapForm: React.FC = () => {
       : 'Add to Cart';
   const remainingCount = rateLimit.remainingSubmissions;
 
+  const getPriceForScent = (scent: SoapScent): number => {
+    const option = SOAP_OPTIONS.find(o => o.scent === scent);
+    return option?.price || 0;
+  };
+
   const handleAddToCart = () => {
     if (!isFormValid || !rateLimit.isAllowed) return;
 
     const success = rateLimit.recordSubmission() && addItem(
       formData.scent!,
+      getPriceForScent(formData.scent!),
       formData.color!,
       formData.quantity
     );
@@ -123,7 +117,6 @@ export const SoapForm: React.FC = () => {
       setFormData(prev => ({
         ...prev,
         scent: null,
-        customScent: '',
         color: null,
         quantity: ''
       }));
@@ -244,22 +237,22 @@ export const SoapForm: React.FC = () => {
           </span>
           <div>
             <div>Choose Your Scent</div>
-            <p className="text-sm font-normal text-earth-500">10 natural options to explore</p>
+            <p className="text-sm font-normal text-earth-500">9 options • 35g (40ml) per soap</p>
           </div>
         </h2>
         
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-6">
-          {SCENT_OPTIONS.map((option) => {
-            const info = SCENT_INFO[option];
-            const isSelected = formData.scent === option;
-            const isRecommended = [SoapScent.LAVENDER, SoapScent.ALOE_VERA, SoapScent.COCONUT, SoapScent.HONEY].includes(option);
+          {SOAP_OPTIONS.map((option) => {
+            const info = SCENT_INFO[option.scent];
+            const isSelected = formData.scent === option.scent;
+            const isRecommended = [SoapScent.LAVENDER, SoapScent.ALOE_VERA, SoapScent.COCONUT, SoapScent.HONEY].includes(option.scent);
             
             return (
               <button
-                key={option}
+                key={option.scent}
                 type="button"
-                onClick={() => handleScentChange(option)}
-                onMouseEnter={() => setShowScentInfo(option)}
+                onClick={() => handleScentChange(option.scent)}
+                onMouseEnter={() => setShowScentInfo(option.scent)}
                 onMouseLeave={() => setShowScentInfo(null)}
                 className={`
                   p-4 rounded-xl border-2 text-left transition-all duration-200 relative group
@@ -275,11 +268,14 @@ export const SoapForm: React.FC = () => {
                 )}
                 <div className="flex items-center justify-between">
                   <span className={`font-medium ${isSelected ? 'text-earth-800' : 'text-gray-700'}`}>
-                    {option}
+                    {option.scent}
                   </span>
                   {isSelected && <Check className="w-5 h-5 text-earth-600" />}
                 </div>
-                <p className="text-xs text-earth-500 mt-1">{info.description}</p>
+                <div className="flex items-center justify-between mt-1">
+                  <p className="text-xs text-earth-500">{info.description}</p>
+                  <span className="text-sm font-bold text-earth-700">Rs. {option.price}</span>
+                </div>
               </button>
             );
           })}
@@ -303,8 +299,8 @@ export const SoapForm: React.FC = () => {
             <Palette className="w-5 h-5" />
           </span>
           <div>
-            <div>Choose a Natural Color</div>
-            <p className="text-sm font-normal text-earth-500">All colors come from plants & minerals</p>
+            <div>Choose a Color</div>
+            <p className="text-sm font-normal text-earth-500">9 color options available</p>
           </div>
         </h2>
         
@@ -312,10 +308,10 @@ export const SoapForm: React.FC = () => {
           <div className="mt-4 p-4 bg-amber-50 rounded-xl border border-amber-200 flex items-start gap-3">
             <Droplets className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="font-medium text-amber-800">Natural color from the scent itself</p>
+              <p className="font-medium text-amber-800">Color comes from the scent</p>
               <p className="text-sm text-amber-700 mt-1">
                 {formData.scent === SoapScent.COFFEE 
-                  ? 'Coffee creates a rich brown color naturally.'
+                  ? 'Coffee creates a rich brown color.'
                   : 'Turmeric gives a beautiful golden-orange hue.'}
               </p>
             </div>
@@ -513,7 +509,7 @@ export const SoapForm: React.FC = () => {
                     key={item.id} 
                     className="flex-shrink-0 text-xs bg-earth-50 px-3 py-1.5 rounded-full border border-earth-200 text-earth-700"
                   >
-                    {item.quantity}x {item.scent} {item.color !== 'White' && `(${item.color})`}
+                    {item.quantity}x {item.scent} {item.color !== 'White' && `(${item.color})`} • Rs. {item.price * item.quantity}
                   </span>
                 ))}
                 {cart.items.length > 4 && (

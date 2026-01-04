@@ -305,21 +305,21 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
                             <span className="font-medium text-earth-800">{item.scent}</span>
-                            {item.customScent && (
-                              <span className="text-xs text-gray-500">({item.customScent})</span>
-                            )}
                           </div>
                           <div className="text-sm text-gray-600">
-                            {item.color} color • {item.quantity} soap{item.quantity > 1 ? 's' : ''}
+                            {item.color} • {item.quantity} soap{item.quantity > 1 ? 's' : ''} • Rs. {item.price} each
                           </div>
                         </div>
-                        <button
-                          onClick={() => onRemoveItem(item.id)}
-                          className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors"
-                          aria-label="Remove item"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        <div className="text-right">
+                          <div className="font-bold text-earth-800">Rs. {item.price * item.quantity}</div>
+                          <button
+                            onClick={() => onRemoveItem(item.id)}
+                            className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                            aria-label="Remove item"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </>
@@ -339,6 +339,12 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
             <div className="flex items-center justify-between mb-3">
               <span className="text-gray-600">Total soaps:</span>
               <span className="font-bold text-earth-800">{cart.totalQuantity} soap{cart.totalQuantity > 1 ? 's' : ''}</span>
+            </div>
+            <div className="flex items-center justify-between mb-3 pt-3 border-t border-earth-200">
+              <span className="text-lg font-bold text-earth-800">Total:</span>
+              <span className="text-lg font-bold text-earth-800">
+                Rs. {cart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)}
+              </span>
             </div>
             <button
               onClick={() => setShowCheckout(true)}
