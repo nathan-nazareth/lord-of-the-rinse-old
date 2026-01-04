@@ -37,7 +37,6 @@ export async function submitCartToWebhook(
     items: items.map(item => ({
       id: item.id,
       scent: item.scent,
-      customScent: item.customScent || '',
       color: item.color,
       quantity: item.quantity
     }))

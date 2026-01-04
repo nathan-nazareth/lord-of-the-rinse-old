@@ -7,7 +7,6 @@ export interface Customer {
 export interface OrderItem {
   id: string;
   scent: string;
-  customScent?: string;
   color: string;
   quantity: number;
 }

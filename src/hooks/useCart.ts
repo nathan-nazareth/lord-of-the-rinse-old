@@ -4,7 +4,7 @@ import { saveCart, loadCart, removeItem, clearCart, createCartItem, calculateTot
 
 interface UseCartReturn {
   cart: Cart;
-  addItem: (scent: string, customScent: string, color: string, quantity: string) => boolean;
+  addItem: (scent: string, color: string, quantity: string) => boolean;
   removeItem: (itemId: string) => void;
   clearCart: () => void;
   isCartOpen: boolean;
@@ -32,7 +32,6 @@ export function useCart(): UseCartReturn {
 
   const addItem = useCallback((
     scent: string,
-    customScent: string,
     color: string,
     quantity: string
   ): boolean => {
@@ -41,7 +40,7 @@ export function useCart(): UseCartReturn {
       return false;
     }
 
-    const newItem = createCartItem(scent, customScent, color, quantity);
+    const newItem = createCartItem(scent, color, quantity);
     const newItems = [...cart.items, newItem];
     
     setCart({
