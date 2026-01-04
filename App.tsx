@@ -1,6 +1,6 @@
 import React from 'react';
 import { Header } from './components/Header';
-import { SoapForm } from './components/SoapForm';
+import { SoapForm } from './src/components/SoapForm';
 
 function App() {
   return (
