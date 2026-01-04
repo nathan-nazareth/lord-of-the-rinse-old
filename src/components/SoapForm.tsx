@@ -42,7 +42,11 @@ export const SoapForm: React.FC = () => {
   const { cart, addItem, removeItem, clearCart, isCartOpen, setIsCartOpen } = useCart();
 
   const handleScentChange = (scent: SoapScent) => {
-    setFormData(prev => ({ ...prev, scent }));
+    setFormData(prev => ({ 
+      ...prev, 
+      scent,
+      color: (scent === SoapScent.COFFEE || scent === SoapScent.TURMERIC) ? SoapColor.WHITE : prev.color
+    }));
   };
 
   const handleColorChange = (color: SoapColor) => {
@@ -164,6 +168,12 @@ export const SoapForm: React.FC = () => {
           Pick a subtle hue
         </h2>
         <p className="text-gray-500 mb-6 ml-11 text-sm italic">All colors are natural and subtle.</p>
+        
+        {(formData.scent === SoapScent.COFFEE || formData.scent === SoapScent.TURMERIC) && (
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-6 ml-11 text-sm text-amber-800">
+            These scents have their own natural colors — we recommend White.
+          </div>
+        )}
 
         <div className="flex flex-wrap gap-4 justify-center md:justify-start">
           {COLOR_OPTIONS.map((option) => (
