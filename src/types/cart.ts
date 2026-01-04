@@ -1,6 +1,7 @@
 export interface CartItem {
   id: string;
   scent: string;
+  price: number;
   color: string;
   quantity: number;
   addedAt: string;

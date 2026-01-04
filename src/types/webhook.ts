@@ -7,6 +7,7 @@ export interface Customer {
 export interface OrderItem {
   id: string;
   scent: string;
+  price: number;
   color: string;
   quantity: number;
 }

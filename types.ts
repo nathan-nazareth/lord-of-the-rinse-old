@@ -10,6 +10,23 @@ export enum SoapScent {
   HONEY = 'Honey'
 }
 
+export interface SoapOption {
+  scent: SoapScent;
+  price: number;
+}
+
+export const SOAP_OPTIONS: SoapOption[] = [
+  { scent: SoapScent.LAVENDER, price: 30 },
+  { scent: SoapScent.ALOE_VERA, price: 28 },
+  { scent: SoapScent.COCONUT, price: 25 },
+  { scent: SoapScent.COFFEE, price: 28 },
+  { scent: SoapScent.CLOVE, price: 30 },
+  { scent: SoapScent.CINNAMON, price: 29 },
+  { scent: SoapScent.LEMONGRASS, price: 30 },
+  { scent: SoapScent.TURMERIC, price: 27 },
+  { scent: SoapScent.HONEY, price: 30 }
+];
+
 export enum SoapColor {
   WHITE = 'White',
   RED = 'Red',
