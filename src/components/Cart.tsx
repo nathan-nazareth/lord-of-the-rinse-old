@@ -291,10 +291,15 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
                   <div className="text-center py-12">
                     <ShoppingCart className="w-12 h-12 text-earth-200 mx-auto mb-3" />
                     <p className="text-gray-500">Your cart is empty</p>
-                    <p className="text-sm text-gray-400 mt-1">Choose your soaps above to get started!</p>
+                    <p className="text-sm text-gray-400 mt-1">Create your first soap combination above!</p>
                   </div>
                 ) : (
                   <>
+                    <div className="bg-earth-50 rounded-lg p-3 border border-earth-200 mb-4">
+                      <p className="text-sm text-earth-700">
+                        <span className="font-semibold">Multiple items:</span> You can add as many different soap combinations as you like, then submit one order for everything.
+                      </p>
+                    </div>
                     {cart.items.map((item) => (
                       <div key={item.id} className="flex items-start gap-3 p-3 bg-white rounded-lg border border-earth-100 shadow-sm">
                         <div className="flex-1">
@@ -328,7 +333,11 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
         {!showConfirmation && !showCheckout && cart.items.length > 0 && (
           <div className="p-4 border-t border-earth-100 bg-earth-50">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-gray-600">Total in your order:</span>
+              <span className="text-gray-600">Total unique types:</span>
+              <span className="font-bold text-earth-800">{cart.items.length}</span>
+            </div>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-gray-600">Total soaps:</span>
               <span className="font-bold text-earth-800">{cart.totalQuantity} soap{cart.totalQuantity > 1 ? 's' : ''}</span>
             </div>
             <button
@@ -336,7 +345,7 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
               className="w-full py-3 bg-earth-600 text-white rounded-full font-bold hover:bg-earth-700 transition-colors flex items-center justify-center gap-2"
             >
               <Send className="w-5 h-5" />
-              Place Order
+              Submit Order ({cart.items.length} item{cart.items.length > 1 ? 's' : ''})
             </button>
           </div>
         )}

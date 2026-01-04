@@ -168,14 +168,33 @@ export const SoapForm: React.FC = () => {
       )}
 
       {cart.items.length === 0 && (
-        <div className="bg-gradient-to-br from-earth-50 to-white rounded-2xl p-6 border border-earth-200 shadow-sm">
-          <div className="flex items-start gap-4">
-            <div className="bg-earth-100 p-3 rounded-full">
-              <Sparkles className="w-6 h-6 text-earth-600" />
+        <div className="space-y-4">
+          <div className="bg-gradient-to-br from-earth-50 to-white rounded-2xl p-6 border border-earth-200 shadow-sm">
+            <div className="flex items-start gap-4">
+              <div className="bg-earth-100 p-3 rounded-full">
+                <Sparkles className="w-6 h-6 text-earth-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-earth-800 mb-1">Build Your Custom Soaps</h3>
+                <p className="text-earth-600 text-sm">Create as many different soap combinations as you want — add them all to your cart, then submit one order for everything.</p>
+              </div>
             </div>
-            <div>
-              <h3 className="font-semibold text-earth-800 mb-1">Create Your Custom Soap</h3>
-              <p className="text-earth-600 text-sm">Choose a natural scent, pick a color from plants, and tell us how many you want. It's that easy!</p>
+          </div>
+
+          <div className="bg-white rounded-xl p-4 border border-earth-200 flex items-center gap-4">
+            <div className="flex -space-x-2">
+              <div className="w-10 h-10 rounded-full bg-earth-200 border-2 border-white flex items-center justify-center">
+                <span className="text-earth-700 text-sm font-bold">1</span>
+              </div>
+              <div className="w-10 h-10 rounded-full bg-earth-100 border-2 border-white flex items-center justify-center">
+                <span className="text-earth-600 text-sm font-bold">2</span>
+              </div>
+              <div className="w-10 h-10 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center">
+                <span className="text-gray-500 text-sm font-bold">3</span>
+              </div>
+            </div>
+            <div className="text-sm text-earth-700">
+              <strong>Mix & Match:</strong> Try different scents, colors, and quantities — add as many as you'd like!
             </div>
           </div>
         </div>
@@ -428,6 +447,19 @@ export const SoapForm: React.FC = () => {
 
       <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-earth-200 p-4 z-40 shadow-[0_-4px_20px_-5px_rgba(0,0,0,0.15)]">
         <div className="max-w-3xl mx-auto">
+          {cart.items.length > 0 && (
+            <div className="mb-4 p-3 bg-earth-50 rounded-xl border border-earth-200">
+              <div className="flex items-center gap-2 text-earth-700 text-sm font-medium mb-2">
+                <Check className="w-4 h-4 text-green-600" />
+                Multiple items in cart — add more or checkout!
+              </div>
+              <div className="flex items-center gap-2 text-xs text-earth-500">
+                <ShoppingCart className="w-3 h-3" />
+                {cart.totalQuantity} soap{cart.totalQuantity > 1 ? 's' : ''} • {cart.items.length} unique combination{cart.items.length > 1 ? 's' : ''}
+              </div>
+            </div>
+          )}
+          
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="hidden md:block text-sm text-earth-600">
               {isFormValid ? (
@@ -487,30 +519,34 @@ export const SoapForm: React.FC = () => {
 
           {cart.items.length > 0 && (
             <div className="mt-4 pt-4 border-t border-earth-100">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 overflow-x-auto pb-1">
-                  {cart.items.slice(0, 4).map((item) => (
-                    <span 
-                      key={item.id} 
-                      className="flex-shrink-0 text-xs bg-earth-50 px-3 py-1.5 rounded-full border border-earth-200 text-earth-700"
-                    >
-                      {item.quantity}x {item.scent}
-                    </span>
-                  ))}
-                  {cart.items.length > 4 && (
-                    <span className="flex-shrink-0 text-xs text-earth-500 py-1.5">
-                      +{cart.items.length - 4} more
-                    </span>
-                  )}
-                </div>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-medium text-earth-700 flex items-center gap-2">
+                  <ShoppingCart className="w-4 h-4" />
+                  Your soaps ({cart.items.length} type{cart.items.length > 1 ? 's' : ''})
+                </span>
                 <button
                   type="button"
                   onClick={() => setIsCartOpen(true)}
-                  className="flex-shrink-0 text-sm text-earth-600 hover:underline flex items-center gap-1"
+                  className="text-sm text-earth-600 hover:underline flex items-center gap-1"
                 >
-                  View all
+                  Review all
                   <ArrowRight className="w-4 h-4" />
                 </button>
+              </div>
+              <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                {cart.items.slice(0, 4).map((item) => (
+                  <span 
+                    key={item.id} 
+                    className="flex-shrink-0 text-xs bg-earth-50 px-3 py-1.5 rounded-full border border-earth-200 text-earth-700"
+                  >
+                    {item.quantity}x {item.scent} {item.color !== 'White' && `(${item.color})`}
+                  </span>
+                ))}
+                {cart.items.length > 4 && (
+                  <span className="flex-shrink-0 text-xs text-earth-500 py-1.5">
+                    +{cart.items.length - 4} more types
+                  </span>
+                )}
               </div>
             </div>
           )}
