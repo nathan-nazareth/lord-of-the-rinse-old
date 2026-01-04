@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { SoapScent, SoapColor, OrderFormState } from '../types';
-import { useCart } from '../src/hooks/useCart';
-import { Cart, CartBadge } from '../src/components/Cart';
+import { SoapScent, SoapColor, OrderFormState } from '../../types';
+import { useCart } from '../hooks/useCart';
+import { Cart, CartBadge } from './Cart';
 import { ShoppingCart, Check, AlertCircle, Copy, Plus, X } from 'lucide-react';
 
 const INITIAL_STATE: OrderFormState = {
