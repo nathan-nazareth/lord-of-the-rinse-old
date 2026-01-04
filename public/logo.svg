@@ -1,125 +1,32 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <defs>
-    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#e8f5e9"/>
-      <stop offset="100%" style="stop-color:#c8e6c9"/>
-    </linearGradient>
-    <linearGradient id="soapGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#fff8e1"/>
-      <stop offset="50%" style="stop-color:#ffecb3"/>
-      <stop offset="100%" style="stop-color:#ffe082"/>
-    </linearGradient>
-    <linearGradient id="lavenderGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#ce93d8"/>
-      <stop offset="100%" style="stop-color:#ba68c8"/>
-    </linearGradient>
-    <linearGradient id="greenGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#a5d6a7"/>
-      <stop offset="100%" style="stop-color:#81c784"/>
-    </linearGradient>
-    <linearGradient id="coconutGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#ffe0b2"/>
-      <stop offset="100%" style="stop-color:#ffb74d"/>
-    </linearGradient>
-    <linearGradient id="honeyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#ffcc80"/>
-      <stop offset="100%" style="stop-color:#ffa726"/>
-    </linearGradient>
-  </defs>
+  <!-- Background circle - deep green -->
+  <circle cx="256" cy="256" r="256" fill="#2e7d32"/>
   
-  <!-- Background circle -->
-  <circle cx="256" cy="256" r="250" fill="url(#bgGradient)"/>
+  <!-- Inner circle - lighter green -->
+  <circle cx="256" cy="256" r="220" fill="#4caf50"/>
   
-  <!-- Decorative outer ring -->
-  <circle cx="256" cy="256" r="240" fill="none" stroke="#81c784" stroke-width="2" stroke-dasharray="20 10" opacity="0.5"/>
+  <!-- Soap bar - cream/white -->
+  <rect x="136" y="186" width="240" height="140" rx="20" ry="20" fill="#fff8e1"/>
   
-  <!-- Main soap bar - oval shape -->
-  <ellipse cx="256" cy="280" rx="140" ry="100" fill="url(#soapGradient)" stroke="#ffd54f" stroke-width="4"/>
+  <!-- Leaf on top of soap - green -->
+  <path d="M256,106 C256,106 220,150 190,170 C160,190 150,200 150,200 L256,160 L362,200 C362,200 352,190 322,170 C292,150 256,106 256,106 Z" fill="#1b5e20"/>
   
-  <!-- Soap bar top highlight -->
-  <ellipse cx="256" cy="230" rx="110" ry="45" fill="#ffffff" opacity="0.7"/>
+  <!-- Leaf vein - lighter -->
+  <path d="M256,130 L256,175" stroke="#4caf50" stroke-width="4" stroke-linecap="round"/>
+  <path d="M256,145 L220,160" stroke="#4caf50" stroke-width="3" stroke-linecap="round"/>
+  <path d="M256,145 L290,160" stroke="#4caf50" stroke-width="3" stroke-linecap="round"/>
+  <path d="M256,160 L230,172" stroke="#4caf50" stroke-width="3" stroke-linecap="round"/>
+  <path d="M256,160 L280,172" stroke="#4caf50" stroke-width="3" stroke-linecap="round"/>
   
-  <!-- Lavender sprig - left side -->
-  <g transform="translate(80, 180) rotate(-20)">
-    <ellipse cx="0" cy="0" rx="8" ry="25" fill="url(#lavenderGradient)"/>
-    <ellipse cx="15" cy="10" rx="7" ry="22" fill="url(#lavenderGradient)"/>
-    <ellipse cx="-15" cy="10" rx="7" ry="22" fill="url(#lavenderGradient)"/>
-    <ellipse cx="0" cy="25" rx="5" ry="18" fill="url(#lavenderGradient)"/>
-    <rect x="-3" y="40" width="6" height="60" fill="#66bb6a" rx="2"/>
-    <ellipse cx="0" cy="-30" rx="6" ry="15" fill="#ba68c8"/>
-  </g>
+  <!-- Small bubbles - white with transparency -->
+  <circle cx="176" cy="280" r="12" fill="#ffffff" opacity="0.8"/>
+  <circle cx="336" cy="275" r="10" fill="#ffffff" opacity="0.7"/>
+  <circle cx="196" cy="305" r="6" fill="#ffffff" opacity="0.6"/>
+  <circle cx="316" cy="300" r="5" fill="#ffffff" opacity="0.5"/>
   
-  <!-- Green leaf - right side -->
-  <g transform="translate(430, 200) rotate(25)">
-    <path d="M0,0 Q30,-20 40,0 Q30,20 0,0" fill="url(#greenGradient)" stroke="#66bb6a" stroke-width="2"/>
-    <path d="M0,0 Q20,-5 40,0" stroke="#2e7d32" stroke-width="2" fill="none"/>
-    <rect x="-4" y="0" width="8" height="70" fill="#66bb6a" rx="2"/>
-  </g>
+  <!-- Text "SOAP" - white -->
+  <text x="256" y="380" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#ffffff" text-anchor="middle" letter-spacing="8">SOAP</text>
   
-  <!-- Flower - top right -->
-  <g transform="translate(380, 100) rotate(15)">
-    <circle cx="0" cy="0" r="8" fill="#fff176"/>
-    <ellipse cx="0" cy="-20" rx="8" ry="12" fill="#ff8a65"/>
-    <ellipse cx="18" cy="-10" rx="8" ry="12" fill="#ff8a65" transform="rotate(72)"/>
-    <ellipse cx="15" cy="15" rx="8" ry="12" fill="#ff8a65" transform="rotate(144)"/>
-    <ellipse cx="-15" cy="15" rx="8" ry="12" fill="#ff8a65" transform="rotate(216)"/>
-    <ellipse cx="-18" cy="-10" rx="8" ry="12" fill="#ff8a65" transform="rotate(288)"/>
-  </g>
-  
-  <!-- Coconut piece - bottom left -->
-  <g transform="translate(120, 380) rotate(-30)">
-    <ellipse cx="0" cy="0" rx="30" ry="20" fill="url(#coconutGradient)" stroke="#ff9800" stroke-width="2"/>
-    <circle cx="-10" cy="-5" r="4" fill="#ffe0b2" opacity="0.6"/>
-    <circle cx="8" cy="3" r="3" fill="#ffe0b2" opacity="0.6"/>
-  </g>
-  
-  <!-- Honey drip - bottom right -->
-  <g transform="translate(390, 370) rotate(20)">
-    <path d="M0,-30 Q10,-20 10,0 Q12,20 5,35 Q0,40 -5,35 Q-12,20 -10,0 Q-10,-20 0,-30" fill="url(#honeyGradient)" stroke="#ff9800" stroke-width="1"/>
-    <ellipse cx="0" cy="-30" rx="8" ry="5" fill="#ffcc80"/>
-  </g>
-  
-  <!-- Bubbles - scattered around -->
-  <circle cx="150" cy="150" r="15" fill="#b3e5fc" stroke="#4fc3f7" stroke-width="2" opacity="0.8"/>
-  <circle cx="145" cy="145" r="5" fill="#ffffff" opacity="0.8"/>
-  
-  <circle cx="360" cy="280" r="12" fill="#b3e5fc" stroke="#4fc3f7" stroke-width="2" opacity="0.7"/>
-  <circle cx="356" cy="276" r="4" fill="#ffffff" opacity="0.8"/>
-  
-  <circle cx="200" cy="420" r="10" fill="#b3e5fc" stroke="#4fc3f7" stroke-width="2" opacity="0.6"/>
-  <circle cx="197" cy="417" r="3" fill="#ffffff" opacity="0.8"/>
-  
-  <circle cx="320" cy="130" r="8" fill="#b3e5fc" stroke="#4fc3f7" stroke-width="1.5" opacity="0.5"/>
-  
-  <!-- Sparkles - indicating organic/natural -->
-  <g transform="translate(280, 120)">
-    <path d="M0,-12 L2,-2 L12,0 L2,2 L0,12 L-2,2 L-12,0 L-2,-2 Z" fill="#ffd700" opacity="0.9"/>
-  </g>
-  <g transform="translate(130, 280) scale(0.7)">
-    <path d="M0,-12 L2,-2 L12,0 L2,2 L0,12 L-2,2 L-12,0 L-2,-2 Z" fill="#ffd700" opacity="0.7"/>
-  </g>
-  
-  <!-- Water droplets -->
-  <path d="M420,320 Q425,330 420,340 Q415,330 420,320" fill="#4fc3f7" opacity="0.8"/>
-  <path d="M100,300 Q105,310 100,320 Q95,310 100,300" fill="#4fc3f7" opacity="0.6"/>
-  
-  <!-- Text "ORGANIC" curved at top -->
-  <defs>
-    <path id="textCurve" d="M 100,256 A 156,156 0 0,1 412,256" fill="none"/>
-  </defs>
-  <text font-family="Georgia, serif" font-size="24" font-weight="bold" fill="#5d4037">
-    <textPath href="#textCurve" startOffset="50%" text-anchor="middle">
-      ORGANIC
-    </textPath>
-  </text>
-  
-  <!-- Text "SOAP" curved at bottom -->
-  <defs>
-    <path id="textCurve2" d="M 120,256 A 136,136 0 0,0 392,256" fill="none"/>
-  </defs>
-  <text font-family="Georgia, serif" font-size="26" font-weight="bold" fill="#5d4037">
-    <textPath href="#textCurve2" startOffset="50%" text-anchor="middle">
-      SOAP
-    </textPath>
-  </text>
+  <!-- Decorative line under text -->
+  <rect x="186" y="400" width="140" height="4" rx="2" fill="#fff8e1"/>
 </svg>
