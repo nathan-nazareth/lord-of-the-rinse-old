@@ -3,7 +3,7 @@ import { SoapScent, SoapColor, OrderFormState, SOAP_OPTIONS } from '../../types'
 import { useCart } from '../hooks/useCart';
 import { useFormRateLimit } from '../hooks/useFormRateLimit';
 import { Cart, CartBadge } from './Cart';
-import { ShoppingCart, Check, Sparkles, Palette, Layers, ArrowRight, Leaf, Droplets, Plus } from 'lucide-react';
+import { ShoppingCart, Check, Sparkles, Palette, Layers, ArrowRight, ArrowLeft, Leaf, Droplets, Plus } from 'lucide-react';
 
 const INITIAL_STATE: OrderFormState = {
   scent: null,
@@ -237,196 +237,220 @@ export const SoapForm: React.FC = () => {
         </div>
       </div>
 
-      <section className={`bg-white rounded-2xl p-8 shadow-sm border border-earth-100 transition-all hover:shadow-md ${
-        currentStep === 'scent' ? 'ring-2 ring-earth-300' : ''
-      }`}>
-        <h2 className="text-xl font-serif font-bold mb-2 text-earth-800 flex items-center gap-3">
-          <span className="bg-earth-100 w-10 h-10 rounded-full flex items-center justify-center text-earth-700">
-            <Sparkles className="w-5 h-5" />
-          </span>
-          <div>
-            <div>Choose Your Scent</div>
-            <p className="text-sm font-normal text-earth-500">9 options • 35g (40ml) per soap</p>
-          </div>
-        </h2>
-        
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-6">
-          {SOAP_OPTIONS.map((option) => {
-            const info = SCENT_INFO[option.scent];
-            const isSelected = formData.scent === option.scent;
-            const isRecommended = [SoapScent.LAVENDER, SoapScent.ALOE_VERA, SoapScent.COCONUT, SoapScent.HONEY].includes(option.scent);
+      {currentStep === 'scent' && (
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <button
+            type="button"
+            onClick={() => {}}
+            className="w-full bg-white rounded-2xl p-8 shadow-sm border border-earth-100 hover:shadow-md transition-all"
+          >
+            <h2 className="text-xl font-serif font-bold mb-2 text-earth-800 flex items-center gap-3">
+              <span className="bg-earth-100 w-10 h-10 rounded-full flex items-center justify-center text-earth-700">
+                <Sparkles className="w-5 h-5" />
+              </span>
+              <div>
+                <div>Choose Your Scent</div>
+                <p className="text-sm font-normal text-earth-500">9 options • 35g (40ml) per soap</p>
+              </div>
+            </h2>
             
-            return (
-              <button
-                key={option.scent}
-                type="button"
-                onClick={() => handleScentChange(option.scent)}
-                onMouseEnter={() => setShowScentInfo(option.scent)}
-                onMouseLeave={() => setShowScentInfo(null)}
-                className={`
-                  p-4 rounded-xl border-2 text-left transition-all duration-200 relative group
-                  ${isSelected 
-                    ? 'border-earth-500 bg-earth-50 shadow-inner' 
-                    : 'border-gray-100 hover:border-earth-300 hover:bg-gray-50'}
-                `}
-              >
-                {isRecommended && (
-                  <span className="absolute -top-2 left-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
-                    Popular
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-6">
+              {SOAP_OPTIONS.map((option) => {
+                const info = SCENT_INFO[option.scent];
+                const isSelected = formData.scent === option.scent;
+                const isRecommended = [SoapScent.LAVENDER, SoapScent.ALOE_VERA, SoapScent.COCONUT, SoapScent.HONEY].includes(option.scent);
+                
+                return (
+                  <button
+                    key={option.scent}
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); handleScentChange(option.scent); }}
+                    onMouseEnter={() => setShowScentInfo(option.scent)}
+                    onMouseLeave={() => setShowScentInfo(null)}
+                    className={`
+                      p-4 rounded-xl border-2 text-left transition-all duration-200 relative group
+                      ${isSelected 
+                        ? 'border-earth-500 bg-earth-50 shadow-inner' 
+                        : 'border-gray-100 hover:border-earth-300 hover:bg-gray-50'}
+                    `}
+                  >
+                    {isRecommended && (
+                      <span className="absolute -top-2 left-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
+                        Popular
+                      </span>
+                    )}
+                    <div className="flex items-center justify-between">
+                      <span className={`font-medium ${isSelected ? 'text-earth-800' : 'text-gray-700'}`}>
+                        {option.scent}
+                      </span>
+                      {isSelected && <Check className="w-5 h-5 text-earth-600" />}
+                    </div>
+                    <div className="flex items-center justify-between mt-1">
+                      <p className="text-xs text-earth-500">{info.description}</p>
+                      <span className="text-sm font-bold text-earth-700">Rs. {option.price}</span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+              {showScentInfo && (
+                <div className="mt-4 p-3 bg-earth-50 rounded-lg border border-earth-200 flex items-center gap-2 animate-in fade-in">
+                  <Leaf className="w-4 h-4 text-earth-600 flex-shrink-0" />
+                  <span className="text-sm text-earth-700">
+                    <strong>Tip:</strong> {SCENT_INFO[showScentInfo]?.tip}
                   </span>
-                )}
-                <div className="flex items-center justify-between">
-                  <span className={`font-medium ${isSelected ? 'text-earth-800' : 'text-gray-700'}`}>
-                    {option.scent}
-                  </span>
-                  {isSelected && <Check className="w-5 h-5 text-earth-600" />}
                 </div>
-                <div className="flex items-center justify-between mt-1">
-                  <p className="text-xs text-earth-500">{info.description}</p>
-                  <span className="text-sm font-bold text-earth-700">Rs. {option.price}</span>
-                </div>
-              </button>
-            );
-          })}
+              )}
+          </button>
         </div>
+      )}
 
-          {showScentInfo && (
-            <div className="mt-4 p-3 bg-earth-50 rounded-lg border border-earth-200 flex items-center gap-2 animate-in fade-in">
-              <Leaf className="w-4 h-4 text-earth-600 flex-shrink-0" />
-              <span className="text-sm text-earth-700">
-                <strong>Tip:</strong> {SCENT_INFO[showScentInfo]?.tip}
+      {currentStep === 'color' && formData.scent && (
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <div className="bg-white rounded-2xl p-8 shadow-sm border border-earth-100">
+            <button
+              type="button"
+              onClick={() => setCurrentStep('scent')}
+              className="flex items-center gap-2 text-earth-600 hover:text-earth-800 mb-4 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span className="text-sm font-medium">Back to scents</span>
+            </button>
+            
+            <h2 className="text-xl font-serif font-bold mb-2 text-earth-800 flex items-center gap-3">
+              <span className="bg-earth-100 w-10 h-10 rounded-full flex items-center justify-center text-earth-700">
+                <Palette className="w-5 h-5" />
               </span>
-            </div>
-          )}
-      </section>
+              <div>
+                <div>Choose a Color for {formData.scent}</div>
+                <p className="text-sm font-normal text-earth-500">9 color options available</p>
+              </div>
+            </h2>
+            
+            {(formData.scent === SoapScent.COFFEE || formData.scent === SoapScent.TURMERIC) && (
+              <div className="mt-4 p-4 bg-amber-50 rounded-xl border border-amber-200 flex items-start gap-3">
+                <Droplets className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-medium text-amber-800">Color comes from the scent</p>
+                  <p className="text-sm text-amber-700 mt-1">
+                    {formData.scent === SoapScent.COFFEE 
+                      ? 'Coffee creates a rich brown color.'
+                      : 'Turmeric gives a beautiful golden-orange hue.'}
+                  </p>
+                </div>
+              </div>
+            )}
 
-      {formData.scent ? (
-      <section className={`bg-white rounded-2xl p-8 shadow-sm border border-earth-100 transition-all hover:shadow-md ${
-        currentStep === 'color' ? 'ring-2 ring-earth-300' : ''
-      }`}>
-        <h2 className="text-xl font-serif font-bold mb-2 text-earth-800 flex items-center gap-3">
-          <span className="bg-earth-100 w-10 h-10 rounded-full flex items-center justify-center text-earth-700">
-            <Palette className="w-5 h-5" />
-          </span>
-          <div>
-            <div>Choose a Color</div>
-            <p className="text-sm font-normal text-earth-500">9 color options available</p>
-          </div>
-        </h2>
-        
-        {(formData.scent === SoapScent.COFFEE || formData.scent === SoapScent.TURMERIC) && (
-          <div className="mt-4 p-4 bg-amber-50 rounded-xl border border-amber-200 flex items-start gap-3">
-            <Droplets className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="font-medium text-amber-800">Color comes from the scent</p>
-              <p className="text-sm text-amber-700 mt-1">
-                {formData.scent === SoapScent.COFFEE 
-                  ? 'Coffee creates a rich brown color.'
-                  : 'Turmeric gives a beautiful golden-orange hue.'}
-              </p>
-            </div>
-          </div>
-        )}
+            <div className="flex flex-wrap gap-4 justify-center md:justify-start mt-6">
+              {COLOR_OPTIONS.map((option) => {
+                const isSelected = formData.color === option.label;
+                const isDisabled = formData.scent === SoapScent.COFFEE || formData.scent === SoapScent.TURMERIC;
+                const isRecommended = isDisabled && option.label === SoapColor.WHITE;
 
-        <div className="flex flex-wrap gap-4 justify-center md:justify-start mt-6">
-          {COLOR_OPTIONS.map((option) => {
-            const isSelected = formData.color === option.label;
-            const isDisabled = formData.scent === SoapScent.COFFEE || formData.scent === SoapScent.TURMERIC;
-            const isRecommended = isDisabled && option.label === SoapColor.WHITE;
-
-            return (
-              <button
-                key={option.label}
-                type="button"
-                onClick={() => !isDisabled && handleColorChange(option.label)}
-                disabled={isDisabled}
-                className={`
-                  group relative flex flex-col items-center gap-2 p-3 rounded-xl transition-all duration-200
-                  ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}
-                  ${isSelected ? 'ring-2 ring-earth-400 bg-gray-50' : ''}
-                `}
-              >
-                <div 
-                  className={`
-                    w-20 h-20 rounded-full shadow-sm border-2 transition-all duration-300
-                    ${option.class}
-                    ${isSelected ? 'border-earth-400 scale-105 ring-2 ring-earth-200' : 'border-transparent'}
-                    ${isRecommended ? 'ring-2 ring-amber-300' : ''}
-                  `}
-                  style={{ backgroundColor: option.hex }}
-                >
-                  {isSelected && (
-                    <span className="absolute inset-0 flex items-center justify-center">
-                      <Check className="w-8 h-8 text-black/30" />
+                return (
+                  <button
+                    key={option.label}
+                    type="button"
+                    onClick={() => !isDisabled && handleColorChange(option.label)}
+                    disabled={isDisabled}
+                    className={`
+                      group relative flex flex-col items-center gap-2 p-3 rounded-xl transition-all duration-200
+                      ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}
+                      ${isSelected ? 'ring-2 ring-earth-400 bg-gray-50' : ''}
+                    `}
+                  >
+                    <div 
+                      className={`
+                        w-20 h-20 rounded-full shadow-sm border-2 transition-all duration-300
+                        ${option.class}
+                        ${isSelected ? 'border-earth-400 scale-105 ring-2 ring-earth-200' : 'border-transparent'}
+                        ${isRecommended ? 'ring-2 ring-amber-300' : ''}
+                      `}
+                      style={{ backgroundColor: option.hex }}
+                    >
+                      {isSelected && (
+                        <span className="absolute inset-0 flex items-center justify-center">
+                          <Check className="w-8 h-8 text-black/30" />
+                        </span>
+                      )}
+                    </div>
+                    <span className={`text-sm font-medium ${isSelected ? 'text-earth-800' : 'text-gray-500'}`}>
+                      {option.label}
                     </span>
-                  )}
-                </div>
-                <span className={`text-sm font-medium ${isSelected ? 'text-earth-800' : 'text-gray-500'}`}>
-                  {option.label}
-                </span>
-                {isRecommended && (
-                  <span className="absolute -top-2 text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">
-                    Recommended
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </section>
-      ) : null}
-
-      {formData.scent && formData.color ? (
-      <section className={`bg-white rounded-2xl p-8 shadow-sm border border-earth-100 transition-all hover:shadow-md ${
-        currentStep === 'quantity' ? 'ring-2 ring-earth-300' : ''
-      }`}>
-        <h2 className="text-xl font-serif font-bold mb-2 text-earth-800 flex items-center gap-3">
-          <span className="bg-earth-100 w-10 h-10 rounded-full flex items-center justify-center text-earth-700">
-            <Layers className="w-5 h-5" />
-          </span>
-          <div>
-            <div>How Many Soaps?</div>
-            <p className="text-sm font-normal text-earth-500">Minimum order: 1 soap</p>
-          </div>
-        </h2>
-        
-        <div className="mt-6">
-          <div className="flex items-center gap-4 max-w-xs ml-0 md:ml-12">
-            <div className="relative w-full">
-              <input
-                type="text"
-                inputMode="numeric"
-                value={formData.quantity}
-                onChange={handleQuantityChange}
-                placeholder="0"
-                className="w-full p-5 pr-24 text-3xl font-bold text-center rounded-xl border-2 border-gray-200 focus:border-earth-500 focus:ring-2 focus:ring-earth-200 outline-none transition-all"
-                autoFocus
-              />
-              <span className="absolute right-6 top-1/2 -translate-y-1/2 text-earth-600 font-medium pointer-events-none">
-                soaps
-              </span>
+                    {isRecommended && (
+                      <span className="absolute -top-2 text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">
+                        Recommended
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
+        </div>
+      )}
 
-          <div className="flex gap-2 mt-4 justify-center md:justify-start md:ml-12">
-            {[1, 3, 5, 10].map((num) => (
-              <button
-                key={num}
-                type="button"
-                onClick={() => setFormData(prev => ({ ...prev, quantity: String(num) }))}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                  formData.quantity === String(num)
-                    ? 'bg-earth-600 text-white'
-                    : 'bg-earth-100 text-earth-700 hover:bg-earth-200'
-                }`}
-              >
-                {num}
-              </button>
-            ))}
+      {currentStep === 'quantity' && formData.scent && formData.color && (
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <div className="bg-white rounded-2xl p-8 shadow-sm border border-earth-100">
+            <button
+              type="button"
+              onClick={() => setCurrentStep('color')}
+              className="flex items-center gap-2 text-earth-600 hover:text-earth-800 mb-4 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span className="text-sm font-medium">Back to colors</span>
+            </button>
+            
+            <h2 className="text-xl font-serif font-bold mb-2 text-earth-800 flex items-center gap-3">
+              <span className="bg-earth-100 w-10 h-10 rounded-full flex items-center justify-center text-earth-700">
+                <Layers className="w-5 h-5" />
+              </span>
+              <div>
+                <div>How Many {formData.scent} Soaps?</div>
+                <p className="text-sm font-normal text-earth-500">35g (40ml) per soap • Minimum: 1</p>
+              </div>
+            </h2>
+            
+            <div className="mt-6">
+              <div className="flex items-center gap-4 max-w-xs ml-0 md:ml-12">
+                <div className="relative w-full">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={formData.quantity}
+                    onChange={handleQuantityChange}
+                    placeholder="0"
+                    className="w-full p-5 pr-24 text-3xl font-bold text-center rounded-xl border-2 border-gray-200 focus:border-earth-500 focus:ring-2 focus:ring-earth-200 outline-none transition-all"
+                    autoFocus
+                  />
+                  <span className="absolute right-6 top-1/2 -translate-y-1/2 text-earth-600 font-medium pointer-events-none">
+                    soaps
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex gap-2 mt-4 justify-center md:justify-start md:ml-12">
+                {[1, 3, 5, 10].map((num) => (
+                  <button
+                    key={num}
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, quantity: String(num) }))}
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                      formData.quantity === String(num)
+                        ? 'bg-earth-600 text-white'
+                        : 'bg-earth-100 text-earth-700 hover:bg-earth-200'
+                    }`}
+                  >
+                    {num}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
-      </section>
-      ) : null}
+      )}
 
       <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-earth-200 p-4 z-40 shadow-[0_-4px_20px_-5px_rgba(0,0,0,0.15)]">
         <div className="max-w-3xl mx-auto">
