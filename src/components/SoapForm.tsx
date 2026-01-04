@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { SoapScent, SoapColor, OrderFormState } from '../../types';
 import { useCart } from '../hooks/useCart';
+import { useFormRateLimit } from '../hooks/useFormRateLimit';
 import { Cart, CartBadge } from './Cart';
-import { ShoppingCart, Check, AlertCircle, Copy, Plus, X } from 'lucide-react';
+import { ShoppingCart, Check, Copy, Plus, X } from 'lucide-react';
 
 const INITIAL_STATE: OrderFormState = {
   scent: null,
@@ -41,6 +42,7 @@ export const SoapForm: React.FC = () => {
   const [formData, setFormData] = useState<OrderFormState>(INITIAL_STATE);
   const [showAddedToast, setShowAddedToast] = useState(false);
   const { cart, addItem, removeItem, clearCart, isCartOpen, setIsCartOpen } = useCart();
+  const rateLimit = useFormRateLimit({ maxSubmissions: 10, windowMs: 60000, cooldownMs: 30000 });
 
   const handleScentChange = (scent: SoapScent) => {
     setFormData(prev => ({ 
@@ -65,10 +67,18 @@ export const SoapForm: React.FC = () => {
     formData.color &&
     formData.quantity.length > 0;
 
-  const handleAddToCart = () => {
-    if (!isFormValid) return;
+  const isButtonDisabled = !isFormValid || !rateLimit.isAllowed;
+  const buttonText = rateLimit.cooldownRemaining !== null
+    ? `Wait ${rateLimit.cooldownRemaining}s`
+    : cart.totalQuantity > 0
+      ? 'Add More Soaps'
+      : 'Add to Cart';
+  const remainingCount = rateLimit.remainingSubmissions;
 
-    const success = addItem(
+  const handleAddToCart = () => {
+    if (!isFormValid || !rateLimit.isAllowed) return;
+
+    const success = rateLimit.recordSubmission() && addItem(
       formData.scent!,
       formData.customScent,
       formData.color!,
@@ -251,32 +261,32 @@ export const SoapForm: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleAddToCart}
-                  disabled={!isFormValid}
+                  disabled={isButtonDisabled}
                   className={`
                     flex-1 md:flex-none px-6 py-4 rounded-full font-bold text-lg flex items-center justify-center gap-2 transition-all
-                    ${isFormValid 
+                    ${!isButtonDisabled
                       ? 'bg-earth-600 text-white hover:bg-earth-700 shadow-lg' 
                       : 'bg-gray-200 text-gray-400 cursor-not-allowed'}
                   `}
                 >
                   <Plus className="w-5 h-5" />
-                  Add More Soaps
+                  {buttonText}
                 </button>
               </div>
             ) : (
               <button
                 type="button"
                 onClick={handleAddToCart}
-                disabled={!isFormValid}
+                disabled={isButtonDisabled}
                 className={`
                   w-full md:w-auto px-10 py-4 rounded-full font-bold text-lg flex items-center justify-center gap-3 transition-all
-                  ${isFormValid 
+                  ${!isButtonDisabled
                     ? 'bg-earth-600 text-white hover:bg-earth-700 hover:scale-105 shadow-lg hover:shadow-xl cursor-pointer' 
                     : 'bg-gray-200 text-gray-400 cursor-not-allowed pointer-events-none'}
                 `}
               >
                 <Plus className="w-5 h-5" />
-                Add to Cart
+                {buttonText}
               </button>
             )}
           </div>
@@ -305,9 +315,15 @@ export const SoapForm: React.FC = () => {
                   </span>
                 )}
               </div>
+              </div>
+            )}
+
+            <div className="text-xs text-gray-400 text-center">
+              {rateLimit.cooldownRemaining !== null
+                ? `Rate limit reached. Try again in ${rateLimit.cooldownRemaining} seconds.`
+                : `Rate limit: ${remainingCount}/10 submissions per minute`}
             </div>
-          )}
-        </div>
+          </div>
       </div>
 
     </div>
