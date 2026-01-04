@@ -58,14 +58,12 @@ export function calculateTotal(items: CartItem[]): number {
 
 export function createCartItem(
   scent: string,
-  customScent: string,
   color: string,
   quantity: string
 ): CartItem {
   return {
     id: crypto.randomUUID(),
     scent,
-    customScent: customScent || undefined,
     color,
     quantity: parseInt(quantity, 10),
     addedAt: new Date().toISOString()

@@ -7,7 +7,6 @@ import { ShoppingCart, Check, Sparkles, Palette, Layers, ArrowRight, Leaf, Dropl
 
 const INITIAL_STATE: OrderFormState = {
   scent: null,
-  customScent: '',
   color: null,
   quantity: '',
   customerName: '',
@@ -24,8 +23,7 @@ const SCENT_INFO: Record<string, { description: string; tip: string }> = {
   'Cinnamon': { description: 'Cozy & warming', tip: 'Like a sweet treat' },
   'Lemongrass': { description: 'Fresh & uplifting', tip: 'Invigorating citrus scent' },
   'Turmeric': { description: 'Anti-inflammatory', tip: 'Traditional beauty secret' },
-  'Honey': { description: 'Sweet & nourishing', tip: 'Naturally antibacterial' },
-  'Custom': { description: 'Your unique blend', tip: 'Tell us your favorite ingredients' }
+  'Honey': { description: 'Sweet & nourishing', tip: 'Naturally antibacterial' }
 };
 
 const SCENT_OPTIONS = [
@@ -37,8 +35,7 @@ const SCENT_OPTIONS = [
   SoapScent.CINNAMON,
   SoapScent.LEMONGRASS,
   SoapScent.TURMERIC,
-  SoapScent.HONEY,
-  SoapScent.CUSTOM
+  SoapScent.HONEY
 ];
 
 const COLOR_OPTIONS = [
@@ -99,7 +96,6 @@ export const SoapForm: React.FC = () => {
 
   const isFormValid = 
     formData.scent && 
-    (formData.scent !== SoapScent.CUSTOM || formData.customScent.trim().length > 0) &&
     formData.color &&
     formData.quantity.length > 0;
 
@@ -116,7 +112,6 @@ export const SoapForm: React.FC = () => {
 
     const success = rateLimit.recordSubmission() && addItem(
       formData.scent!,
-      formData.customScent,
       formData.color!,
       formData.quantity
     );
@@ -290,35 +285,14 @@ export const SoapForm: React.FC = () => {
           })}
         </div>
 
-        {formData.scent === SoapScent.CUSTOM && (
-          <div className="mt-6 p-4 bg-earth-50 rounded-xl border border-earth-200 animate-in fade-in slide-in-from-top-2">
-            <label htmlFor="custom-scent" className="block text-sm font-medium text-earth-800 mb-2">
-              <Sparkles className="w-4 h-4 inline mr-1" />
-              Tell us your favorite ingredients
-            </label>
-            <input
-              type="text"
-              id="custom-scent"
-              value={formData.customScent}
-              onChange={(e) => setFormData(prev => ({ ...prev, customScent: e.target.value }))}
-              placeholder="For example: Lavender & Honey, or Vanilla Bean"
-              className="w-full p-4 rounded-lg border border-earth-300 focus:border-earth-500 focus:ring-2 focus:ring-earth-200 outline-none transition-all"
-              autoFocus
-            />
-            <p className="text-xs text-earth-500 mt-2">
-              We'll do our best to create your custom scent using natural ingredients.
-            </p>
-          </div>
-        )}
-
-        {showScentInfo && formData.scent !== SoapScent.CUSTOM && (
-          <div className="mt-4 p-3 bg-earth-50 rounded-lg border border-earth-200 flex items-center gap-2 animate-in fade-in">
-            <Leaf className="w-4 h-4 text-earth-600 flex-shrink-0" />
-            <span className="text-sm text-earth-700">
-              <strong>Tip:</strong> {SCENT_INFO[showScentInfo]?.tip}
-            </span>
-          </div>
-        )}
+          {showScentInfo && (
+            <div className="mt-4 p-3 bg-earth-50 rounded-lg border border-earth-200 flex items-center gap-2 animate-in fade-in">
+              <Leaf className="w-4 h-4 text-earth-600 flex-shrink-0" />
+              <span className="text-sm text-earth-700">
+                <strong>Tip:</strong> {SCENT_INFO[showScentInfo]?.tip}
+              </span>
+            </div>
+          )}
       </section>
 
       <section className={`bg-white rounded-2xl p-8 shadow-sm border border-earth-100 transition-all hover:shadow-md ${

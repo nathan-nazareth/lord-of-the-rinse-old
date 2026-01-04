@@ -7,8 +7,7 @@ export enum SoapScent {
   ALOE_VERA = 'Aloe Vera',
   COCONUT = 'Coconut',
   TURMERIC = 'Turmeric',
-  HONEY = 'Honey',
-  CUSTOM = 'Custom'
+  HONEY = 'Honey'
 }
 
 export enum SoapColor {
@@ -24,14 +23,12 @@ export enum SoapColor {
 export interface OrderItem {
   id: string;
   scent: SoapScent;
-  customScent: string;
   color: SoapColor;
   quantity: string;
 }
 
 export interface OrderFormState {
   scent: SoapScent | null;
-  customScent: string;
   color: SoapColor | null;
   quantity: string;
   customerName: string;
