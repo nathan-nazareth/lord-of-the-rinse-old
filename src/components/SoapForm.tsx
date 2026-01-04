@@ -171,7 +171,7 @@ export const SoapForm: React.FC = () => {
         
         {(formData.scent === SoapScent.COFFEE || formData.scent === SoapScent.TURMERIC) && (
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-6 ml-11 text-sm text-amber-800">
-            These scents have their own natural colors — we recommend White.
+            This scent has its own natural color — we recommend White.
           </div>
         )}
 
