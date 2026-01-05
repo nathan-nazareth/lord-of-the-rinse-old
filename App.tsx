@@ -1,11 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Header } from './components/Header';
 import { SoapForm } from './src/components/SoapForm';
-import { WelcomeModal } from './src/components/WelcomeModal';
 
 function App() {
-  const [showWelcome, setShowWelcome] = useState(false);
-
   return (
     <div className="min-h-screen bg-stone-50 selection:bg-earth-200 selection:text-earth-900">
       <div className="bg-[url('https://www.transparenttextures.com/patterns/cream-paper.png')] min-h-screen">
@@ -16,7 +13,6 @@ function App() {
           </main>
         </div>
       </div>
-      <WelcomeModal onClose={() => setShowWelcome(false)} />
     </div>
   );
 }
