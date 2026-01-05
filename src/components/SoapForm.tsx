@@ -89,6 +89,12 @@ export const SoapForm: React.FC = () => {
     }, 150);
   };
 
+  useEffect(() => {
+    if (cart.items.length > 0) {
+      setCurrentStep('scent');
+    }
+  }, [cart.items.length]);
+
   const handleMouseLeaveScent = () => {
     if (scentTooltipTimerRef.current) {
       clearTimeout(scentTooltipTimerRef.current);
