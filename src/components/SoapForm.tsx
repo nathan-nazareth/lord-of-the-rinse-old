@@ -52,10 +52,10 @@ export const SoapForm: React.FC = () => {
   const sizeInputRef = useRef<HTMLInputElement>(null);
   const scentTooltipTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const steps: { key: FormStep; label: string; icon: React.ReactNode }[] = [
-    { key: 'scent', label: 'Scent & Size', icon: <Sparkles className="w-4 h-4" /> },
-    { key: 'color', label: 'Color', icon: <Palette className="w-4 h-4" /> },
-    { key: 'quantity', label: 'Quantity', icon: <Layers className="w-4 h-4" /> },
+  const steps: { key: FormStep; label: string }[] = [
+    { key: 'scent', label: 'Scent & Size' },
+    { key: 'color', label: 'Color' },
+    { key: 'quantity', label: 'Quantity' },
   ];
 
   const completedSteps = [
@@ -353,35 +353,64 @@ export const SoapForm: React.FC = () => {
         </div>
       )}
 
-      <div className="flex items-center justify-between">
-        <button
-          type="button"
-          onClick={() => setCurrentStep('landing')}
-          className="flex items-center gap-1 text-sm text-earth-600 hover:text-earth-800"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back
-        </button>
-        
-        <div className="flex items-center gap-1">
-          {steps.map((step, index) => (
-            <React.Fragment key={step.key}>
-              {index > 0 && <div className="w-4 h-px bg-earth-200" />}
-              <div className={`px-2 py-1 rounded-full text-xs font-medium transition-all ${
-                completedSteps.includes(step.key)
-                  ? 'bg-earth-200 text-earth-800'
-                  : currentStep === step.key
-                    ? 'bg-earth-500 text-white'
-                    : 'bg-gray-100 text-gray-400'
-              }`}>
-                {completedSteps.includes(step.key) ? (
-                  <Check className="w-3 h-3" />
-                ) : (
-                  step.icon
-                )}
-              </div>
-            </React.Fragment>
-          ))}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => setCurrentStep('landing')}
+            className="flex items-center gap-1 text-sm text-earth-600 hover:text-earth-800"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back
+          </button>
+          
+          <div className="flex items-center gap-2">
+            {steps.map((step, index) => (
+              <React.Fragment key={step.key}>
+                {index > 0 && <div className="w-6 h-px bg-earth-200" />}
+                <div className={`flex flex-col items-center min-w-[60px] ${
+                  completedSteps.includes(step.key)
+                    ? 'text-earth-600'
+                    : currentStep === step.key
+                      ? 'text-earth-600'
+                      : 'text-gray-300'
+                }`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
+                    completedSteps.includes(step.key)
+                      ? 'bg-earth-100'
+                      : currentStep === step.key
+                        ? 'bg-earth-500 text-white'
+                        : 'bg-gray-100'
+                  }`}>
+                    {completedSteps.includes(step.key) ? (
+                      <Check className="w-4 h-4" />
+                    ) : (
+                      <span className={`text-xs font-medium ${currentStep === step.key ? 'text-white' : ''}`}>
+                        {index + 1}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[10px] mt-1 font-medium text-center leading-tight max-w-[70px]">
+                    {step.label}
+                  </span>
+                </div>
+              </React.Fragment>
+            ))}
+          </div>
+          
+          <div className="w-16" />
+        </div>
+
+        <div className="flex items-center gap-2 bg-earth-50 px-3 py-2 rounded-lg">
+          <div className="w-4 h-4 rounded-full bg-earth-200 flex items-center justify-center">
+            <Check className="w-2.5 h-2.5 text-earth-700" />
+          </div>
+          <span className="text-xs text-earth-700">
+            <strong>{completedSteps.length} of {steps.length} steps complete</strong>
+            {completedSteps.length < steps.length && (
+              <> • Next: <strong>{steps.find(s => !completedSteps.includes(s.key))?.label}</strong></>
+            )}
+          </span>
         </div>
       </div>
 
