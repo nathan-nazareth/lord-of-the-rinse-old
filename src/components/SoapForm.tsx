@@ -49,6 +49,7 @@ export const SoapForm: React.FC = () => {
   const { cart, addItem, removeItem, clearCart, isCartOpen, setIsCartOpen } = useCart();
   const rateLimit = useFormRateLimit({ maxSubmissions: 10, windowMs: 60000, cooldownMs: 30000 });
   const sizeInputRef = useRef<HTMLInputElement>(null);
+  const scentTooltipTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const steps: { key: FormStep; label: string; icon: React.ReactNode }[] = [
     { key: 'scent', label: 'Scent & Size', icon: <Sparkles className="w-4 h-4" /> },
@@ -77,6 +78,24 @@ export const SoapForm: React.FC = () => {
 
   const handleSizeChange = (size: number) => {
     setFormData(prev => ({ ...prev, size }));
+  };
+
+  const handleMouseEnterScent = (scent: string) => {
+    if (scentTooltipTimerRef.current) {
+      clearTimeout(scentTooltipTimerRef.current);
+    }
+    scentTooltipTimerRef.current = setTimeout(() => {
+      setShowScentInfo(scent);
+    }, 150);
+  };
+
+  const handleMouseLeaveScent = () => {
+    if (scentTooltipTimerRef.current) {
+      clearTimeout(scentTooltipTimerRef.current);
+    }
+    scentTooltipTimerRef.current = setTimeout(() => {
+      setShowScentInfo(null);
+    }, 100);
   };
 
   const handleContinueFromLanding = () => {
@@ -165,6 +184,14 @@ export const SoapForm: React.FC = () => {
       return () => clearTimeout(timer);
     }
   }, [showScentInfo]);
+
+  useEffect(() => {
+    return () => {
+      if (scentTooltipTimerRef.current) {
+        clearTimeout(scentTooltipTimerRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (currentStep === 'scent' && sizeInputRef.current) {
@@ -371,8 +398,8 @@ export const SoapForm: React.FC = () => {
                     key={option.scent}
                     type="button"
                     onClick={() => handleScentChange(option.scent)}
-                    onMouseEnter={() => setShowScentInfo(option.scent)}
-                    onMouseLeave={() => setShowScentInfo(null)}
+                    onMouseEnter={() => handleMouseEnterScent(option.scent)}
+                    onMouseLeave={handleMouseLeaveScent}
                     className={`
                       p-3 rounded-lg border-2 text-left transition-all
                       ${isSelected 
