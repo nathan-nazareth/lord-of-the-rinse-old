@@ -58,15 +58,7 @@ export const SoapForm: React.FC = () => {
     { key: 'quantity', label: 'Quantity' },
   ];
 
-  const completedSteps = [
-    formData.scent ? 'scent' : null,
-    formData.color ? 'color' : null,
-    formData.quantity ? 'quantity' : null
-  ].filter(Boolean) as FormStep[];
-
-  const getStepProgress = () => {
-    return (completedSteps.length / steps.length) * 100;
-  };
+  const completedStepCount = Math.max(0, steps.findIndex(s => s.key === currentStep));
 
   const handleScentChange = (scent: SoapScent) => {
     setFormData(prev => ({ 
@@ -369,26 +361,22 @@ export const SoapForm: React.FC = () => {
               <React.Fragment key={step.key}>
                 {index > 0 && <div className="w-6 h-px bg-earth-200" />}
                 <div className={`flex flex-col items-center min-w-[60px] ${
-                  completedSteps.includes(step.key)
+                  currentStep === step.key
                     ? 'text-earth-600'
-                    : currentStep === step.key
-                      ? 'text-earth-600'
+                    : index < steps.findIndex(s => s.key === currentStep)
+                      ? 'text-earth-400'
                       : 'text-gray-300'
                 }`}>
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
-                    completedSteps.includes(step.key)
-                      ? 'bg-earth-100'
+                    index < steps.findIndex(s => s.key === currentStep)
+                      ? 'bg-earth-500 text-white'
                       : currentStep === step.key
-                        ? 'bg-earth-500 text-white'
+                        ? 'bg-earth-100 border-2 border-earth-500'
                         : 'bg-gray-100'
                   }`}>
-                    {completedSteps.includes(step.key) ? (
-                      <Check className="w-4 h-4" />
-                    ) : (
-                      <span className={`text-xs font-medium ${currentStep === step.key ? 'text-white' : ''}`}>
-                        {index + 1}
-                      </span>
-                    )}
+                    <span className={`text-xs font-medium ${currentStep === step.key ? 'text-earth-700' : ''}`}>
+                      {index + 1}
+                    </span>
                   </div>
                   <span className="text-[10px] mt-1 font-medium text-center leading-tight max-w-[70px]">
                     {step.label}
@@ -402,23 +390,10 @@ export const SoapForm: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2 bg-earth-50 px-3 py-2 rounded-lg">
-          <div className="w-4 h-4 rounded-full bg-earth-200 flex items-center justify-center">
-            <Check className="w-2.5 h-2.5 text-earth-700" />
-          </div>
           <span className="text-xs text-earth-700">
-            <strong>{completedSteps.length} of {steps.length} steps complete</strong>
-            {completedSteps.length < steps.length && (
-              <> • Next: <strong>{steps.find(s => !completedSteps.includes(s.key))?.label}</strong></>
-            )}
+            Step <strong>{steps.findIndex(s => s.key === currentStep) + 1}</strong> of <strong>{steps.length}</strong> • Complete each step to add soaps
           </span>
         </div>
-      </div>
-
-      <div className="h-1 bg-earth-100 rounded-full overflow-hidden">
-        <div 
-          className="h-full bg-earth-500 transition-all duration-300"
-          style={{ width: `${getStepProgress()}%` }}
-        />
       </div>
 
       {currentStep === 'scent' && (
@@ -510,21 +485,21 @@ export const SoapForm: React.FC = () => {
                 onClick={() => setFormData(prev => ({ ...prev, hasLavenderPieces: !prev.hasLavenderPieces }))}
                 className={`w-full p-3 rounded-lg border-2 flex items-center justify-between transition-all ${
                   formData.hasLavenderPieces
-                    ? 'border-purple-400 bg-purple-50'
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
+                    ? 'border-earth-400 bg-earth-50'
+                    : 'border-gray-200 hover:border-earth-300'}
+                `}
               >
                 <div className="flex items-center gap-3">
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                    formData.hasLavenderPieces ? 'bg-purple-500' : 'bg-gray-200'
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 ${
+                    formData.hasLavenderPieces ? 'border-earth-500 bg-earth-500' : 'border-gray-300'
                   }`}>
                     {formData.hasLavenderPieces && <Check className="w-4 h-4 text-white" />}
                   </div>
-                  <span className={`font-medium ${formData.hasLavenderPieces ? 'text-purple-800' : 'text-gray-700'}`}>
+                  <span className={`font-medium ${formData.hasLavenderPieces ? 'text-earth-800' : 'text-gray-700'}`}>
                     Add Lavender Pieces
                   </span>
                 </div>
-                <span className={`font-bold ${formData.hasLavenderPieces ? 'text-purple-700' : 'text-gray-500'}`}>
+                <span className={`font-bold ${formData.hasLavenderPieces ? 'text-earth-700' : 'text-gray-500'}`}>
                   +Rs. {LAVENDER_PIECES_PRICE}
                 </span>
               </button>
