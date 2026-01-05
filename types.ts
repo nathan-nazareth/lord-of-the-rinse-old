@@ -30,6 +30,7 @@ export const SOAP_OPTIONS: SoapOption[] = [
 export const DEFAULT_SIZE = 100;
 export const MAX_SIZE = 100;
 export const BASE_SIZE = 100;
+export const LAVENDER_PIECES_PRICE = 5;
 
 export enum SoapColor {
   WHITE = 'White',
@@ -47,6 +48,7 @@ export interface OrderItem {
   color: SoapColor;
   quantity: string;
   size: number;
+  hasLavenderPieces: boolean;
 }
 
 export interface OrderFormState {
@@ -54,6 +56,7 @@ export interface OrderFormState {
   color: SoapColor | null;
   quantity: string;
   size: number;
+  hasLavenderPieces: boolean;
   customerName: string;
   customerEmail: string;
   customerPhone: string;

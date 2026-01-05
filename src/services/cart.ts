@@ -61,7 +61,8 @@ export function createCartItem(
   price: number,
   color: string,
   quantity: string,
-  size: number
+  size: number,
+  hasLavenderPieces: boolean
 ): CartItem {
   return {
     id: crypto.randomUUID(),
@@ -70,6 +71,7 @@ export function createCartItem(
     color,
     quantity: parseInt(quantity, 10),
     size,
+    hasLavenderPieces,
     addedAt: new Date().toISOString()
   };
 }
