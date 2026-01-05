@@ -260,10 +260,11 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
             {!showConfirmation && (
             <button
               onClick={onClose}
-              className="p-2 hover:bg-earth-50 rounded-full transition-colors"
+              className="px-3 py-1.5 hover:bg-earth-50 rounded-full transition-colors text-sm text-earth-600 font-medium flex items-center gap-1"
               aria-label="Go back"
             >
-              <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              Close
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
@@ -306,7 +307,7 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
                           <div className="flex items-center gap-2">
                             <span className="font-medium text-earth-800">{item.scent}</span>
                             {item.hasLavenderPieces && (
-                              <span className="text-[10px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">
+                              <span className="text-[10px] bg-earth-200 text-earth-700 px-2 py-0.5 rounded-full">
                                 + Lavender Pieces
                               </span>
                             )}
@@ -351,13 +352,21 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
                 Rs. {cart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)}
               </span>
             </div>
-            <button
-              onClick={() => setShowCheckout(true)}
-              className="w-full py-3 bg-earth-600 text-white rounded-full font-bold hover:bg-earth-700 transition-colors flex items-center justify-center gap-2"
-            >
-              <Send className="w-5 h-5" />
-              Submit Order ({cart.items.length} item{cart.items.length > 1 ? 's' : ''})
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={onClearCart}
+                className="flex-1 py-3 border-2 border-earth-200 text-earth-700 rounded-full font-bold hover:bg-earth-100 transition-colors"
+              >
+                Clear Cart
+              </button>
+              <button
+                onClick={() => setShowCheckout(true)}
+                className="flex-[2] py-3 bg-earth-600 text-white rounded-full font-bold hover:bg-earth-700 transition-colors flex items-center justify-center gap-2"
+              >
+                <Send className="w-5 h-5" />
+                Submit Order ({cart.items.length} item{cart.items.length > 1 ? 's' : ''})
+              </button>
+            </div>
           </div>
         )}
       </div>

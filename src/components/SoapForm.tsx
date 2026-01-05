@@ -227,7 +227,7 @@ export const SoapForm: React.FC = () => {
         />
 
         {cart.totalQuantity > 0 && (
-          <div className="fixed bottom-28 right-4 z-40">
+          <div className="fixed bottom-28 right-4 z-50">
             <CartBadge count={cart.totalQuantity} onClick={() => setIsCartOpen(true)} />
           </div>
         )}
@@ -340,7 +340,7 @@ export const SoapForm: React.FC = () => {
       />
 
       {cart.totalQuantity > 0 && (
-        <div className="fixed bottom-28 right-4 z-40">
+        <div className="fixed bottom-28 right-4 z-50">
           <CartBadge count={cart.totalQuantity} onClick={() => setIsCartOpen(true)} />
         </div>
       )}
