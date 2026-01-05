@@ -539,8 +539,9 @@ export const SoapForm: React.FC = () => {
           <div className="flex flex-wrap gap-3 justify-center">
             {COLOR_OPTIONS.map((option) => {
               const isSelected = formData.color === option.label;
-              const isDisabled = formData.scent === SoapScent.COFFEE || formData.scent === SoapScent.TURMERIC;
-              const isRecommended = isDisabled && option.label === SoapColor.WHITE;
+              const isNaturalColorScent = formData.scent === SoapScent.COFFEE || formData.scent === SoapScent.TURMERIC;
+              const isRecommended = isNaturalColorScent && option.label === SoapColor.WHITE;
+              const isDisabled = isNaturalColorScent && option.label !== SoapColor.WHITE;
 
               return (
                 <button
@@ -550,7 +551,7 @@ export const SoapForm: React.FC = () => {
                   disabled={isDisabled}
                   className={`
                     relative flex flex-col items-center gap-2 p-3 rounded-xl transition-all
-                    ${isDisabled ? 'opacity-40 cursor-not-allowed' : 'hover:scale-105'}
+                    ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}
                     ${isSelected ? 'ring-2 ring-earth-400 bg-gray-50' : ''}
                   `}
                 >
