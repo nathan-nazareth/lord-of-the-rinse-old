@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { SoapScent, SoapColor, OrderFormState, SOAP_OPTIONS, DEFAULT_SIZE, MAX_SIZE } from '../../types';
 import { useCart } from '../hooks/useCart';
 import { useFormRateLimit } from '../hooks/useFormRateLimit';
 import { Cart, CartBadge } from './Cart';
-import { ShoppingCart, Check, Sparkles, Palette, Layers, ArrowRight, ArrowLeft, Leaf, Droplets, Plus, Scale } from 'lucide-react';
+import { ShoppingCart, Check, Sparkles, Palette, Layers, ArrowRight, ArrowLeft, Leaf, Droplets, Plus, Scale, Info } from 'lucide-react';
+
+const SIZE_OPTIONS = [50, 75, 100];
 
 const INITIAL_STATE: OrderFormState = {
   scent: null,
@@ -37,17 +39,16 @@ const COLOR_OPTIONS = [
   { label: SoapColor.PURPLE, class: 'bg-purple-100 border-purple-200', hex: '#f3e8ff' },
 ];
 
-const SIZE_OPTIONS = [25, 50, 75, 100];
-
-type FormStep = 'scent' | 'color' | 'quantity' | 'complete';
+type FormStep = 'landing' | 'scent' | 'color' | 'quantity' | 'complete';
 
 export const SoapForm: React.FC = () => {
   const [formData, setFormData] = useState<OrderFormState>(INITIAL_STATE);
   const [showAddedToast, setShowAddedToast] = useState(false);
-  const [currentStep, setCurrentStep] = useState<FormStep>('scent');
+  const [currentStep, setCurrentStep] = useState<FormStep>('landing');
   const [showScentInfo, setShowScentInfo] = useState<string | null>(null);
   const { cart, addItem, removeItem, clearCart, isCartOpen, setIsCartOpen } = useCart();
   const rateLimit = useFormRateLimit({ maxSubmissions: 10, windowMs: 60000, cooldownMs: 30000 });
+  const sizeInputRef = useRef<HTMLInputElement>(null);
 
   const steps: { key: FormStep; label: string; icon: React.ReactNode }[] = [
     { key: 'scent', label: 'Scent & Size', icon: <Sparkles className="w-4 h-4" /> },
@@ -78,6 +79,10 @@ export const SoapForm: React.FC = () => {
     setFormData(prev => ({ ...prev, size }));
   };
 
+  const handleContinueFromLanding = () => {
+    setCurrentStep('scent');
+  };
+
   const handleContinueFromScent = () => {
     if (formData.scent && formData.size > 0) {
       setCurrentStep('color');
@@ -92,9 +97,6 @@ export const SoapForm: React.FC = () => {
   useEffect(() => {
     if (currentStep === 'quantity' && (!formData.scent || !formData.color)) {
       setCurrentStep(formData.scent ? 'color' : 'scent');
-    }
-    if (currentStep === 'color' && !formData.scent) {
-      setCurrentStep('scent');
     }
   }, [currentStep, formData.scent, formData.color]);
 
@@ -153,7 +155,7 @@ export const SoapForm: React.FC = () => {
         quantity: '',
         size: DEFAULT_SIZE
       }));
-      setCurrentStep('scent');
+      setCurrentStep('landing');
     }
   };
 
@@ -164,7 +166,126 @@ export const SoapForm: React.FC = () => {
     }
   }, [showScentInfo]);
 
+  useEffect(() => {
+    if (currentStep === 'scent' && sizeInputRef.current) {
+      sizeInputRef.current.focus();
+    }
+  }, [currentStep, formData.scent]);
+
   const currentPrice = formData.scent ? getPriceForScent(formData.scent, formData.size) : 0;
+
+  if (currentStep === 'landing') {
+    return (
+      <div className="w-full max-w-2xl mx-auto pb-32">
+        {showAddedToast && (
+          <div className="fixed top-4 right-4 z-50 bg-green-600 text-white px-4 py-2 rounded-full shadow-lg animate-in fade-in slide-in-from-top-4 flex items-center gap-2">
+            <Check className="w-5 h-5" />
+            Added to cart!
+          </div>
+        )}
+
+        <Cart
+          cart={cart}
+          isOpen={isCartOpen}
+          onClose={() => setIsCartOpen(false)}
+          onRemoveItem={removeItem}
+          onClearCart={clearCart}
+        />
+
+        {cart.totalQuantity > 0 && (
+          <div className="fixed bottom-28 right-4 z-40">
+            <CartBadge count={cart.totalQuantity} onClick={() => setIsCartOpen(true)} />
+          </div>
+        )}
+
+        <div className="bg-white rounded-2xl shadow-lg border border-earth-100 overflow-hidden">
+          <div className="bg-gradient-to-br from-earth-200 to-earth-100 p-8 text-center">
+            <div className="bg-white w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <Sparkles className="w-10 h-10 text-earth-600" />
+            </div>
+            <h1 className="text-3xl font-serif font-bold text-earth-800 mb-2">
+              Organic Soap Builder
+            </h1>
+            <p className="text-earth-600">
+              Create your custom handmade soaps
+            </p>
+          </div>
+
+          <div className="p-6 space-y-6">
+            <div>
+              <h2 className="text-lg font-bold text-earth-800 mb-4 flex items-center gap-2">
+                <Info className="w-5 h-5" />
+                How It Works
+              </h2>
+              
+              <div className="space-y-4">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-full bg-earth-100 flex items-center justify-center flex-shrink-0">
+                    <span className="text-earth-700 font-bold">1</span>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-earth-800">Choose Scent & Size</h3>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Pick from 9 natural scents. Select your preferred size between 50-100g/ml. 
+                      Lavender and honey cost slightly more.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-full bg-earth-100 flex items-center justify-center flex-shrink-0">
+                    <span className="text-earth-700 font-bold">2</span>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-earth-800">Pick a Color</h3>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Select from 7 beautiful colors. Some scents (Coffee, Turmeric) have natural 
+                      colors — in those cases, white is recommended.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-full bg-earth-100 flex items-center justify-center flex-shrink-0">
+                    <span className="text-earth-700 font-bold">3</span>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-earth-800">Set Quantity</h3>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Enter how many soaps you want. You can add different combinations to your 
+                      cart and submit one order for everything.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-earth-50 rounded-xl p-4 border border-earth-200">
+              <div className="flex items-center gap-2 text-earth-700 text-sm">
+                <Check className="w-4 h-4 text-green-600" />
+                <span>100% natural coconut soap base</span>
+              </div>
+              <div className="flex items-center gap-2 text-earth-700 text-sm mt-2">
+                <Check className="w-4 h-4 text-green-600" />
+                <span>Handmade with love</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-6 bg-gray-50 border-t border-gray-100">
+            <button
+              type="button"
+              onClick={handleContinueFromLanding}
+              className="w-full py-4 rounded-xl font-bold text-lg bg-earth-600 text-white hover:bg-earth-700 transition-all hover:scale-[1.02] shadow-lg flex items-center justify-center gap-2"
+            >
+              Start Building Soaps
+              <ArrowRight className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-3xl mx-auto space-y-4 pb-32">
@@ -190,26 +311,21 @@ export const SoapForm: React.FC = () => {
         </div>
       )}
 
-      {cart.items.length === 0 && (
-        <div className="bg-gradient-to-br from-earth-50 to-white rounded-xl p-4 border border-earth-200 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="bg-earth-100 p-2 rounded-full">
-              <Sparkles className="w-5 h-5 text-earth-600" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-earth-800">Build Your Custom Soaps</p>
-              <p className="text-xs text-earth-600">Select scent, size, color, and quantity</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="bg-white rounded-xl p-4 shadow-sm border border-earth-100">
-        <div className="flex items-center gap-2 mb-3">
+      <div className="flex items-center justify-between">
+        <button
+          type="button"
+          onClick={() => setCurrentStep('landing')}
+          className="flex items-center gap-1 text-sm text-earth-600 hover:text-earth-800"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back
+        </button>
+        
+        <div className="flex items-center gap-1">
           {steps.map((step, index) => (
             <React.Fragment key={step.key}>
-              {index > 0 && <div className="w-6 h-px bg-earth-200" />}
-              <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+              {index > 0 && <div className="w-4 h-px bg-earth-200" />}
+              <div className={`px-2 py-1 rounded-full text-xs font-medium transition-all ${
                 completedSteps.includes(step.key)
                   ? 'bg-earth-200 text-earth-800'
                   : currentStep === step.key
@@ -221,17 +337,17 @@ export const SoapForm: React.FC = () => {
                 ) : (
                   step.icon
                 )}
-                {step.label}
               </div>
             </React.Fragment>
           ))}
         </div>
-        <div className="h-1.5 bg-earth-100 rounded-full overflow-hidden">
-          <div 
-            className="h-full bg-earth-500 transition-all duration-300"
-            style={{ width: `${getStepProgress()}%` }}
-          />
-        </div>
+      </div>
+
+      <div className="h-1 bg-earth-100 rounded-full overflow-hidden">
+        <div 
+          className="h-full bg-earth-500 transition-all duration-300"
+          style={{ width: `${getStepProgress()}%` }}
+        />
       </div>
 
       {currentStep === 'scent' && (
@@ -280,6 +396,22 @@ export const SoapForm: React.FC = () => {
           {formData.scent && (
             <div className="border-t border-gray-100 pt-4 mt-4">
               <p className="text-sm text-gray-600 mb-3">Pick a size (g/ml):</p>
+              
+              <input
+                ref={sizeInputRef}
+                type="number"
+                min="50"
+                max={MAX_SIZE}
+                value={formData.size || ''}
+                onChange={(e) => {
+                  let value = parseInt(e.target.value) || 0;
+                  if (value > MAX_SIZE) value = MAX_SIZE;
+                  if (value < 50) value = 50;
+                  handleSizeChange(value);
+                }}
+                className="w-full mb-3 p-3 text-center text-xl font-bold rounded-lg border-2 border-earth-300 focus:border-earth-500 outline-none bg-earth-50"
+              />
+              
               <div className="flex gap-2">
                 {SIZE_OPTIONS.map((size) => (
                   <button
@@ -297,20 +429,6 @@ export const SoapForm: React.FC = () => {
                   </button>
                 ))}
               </div>
-              <input
-                type="number"
-                min="1"
-                max={MAX_SIZE}
-                value={formData.size || ''}
-                onChange={(e) => {
-                  let value = parseInt(e.target.value) || 0;
-                  if (value > MAX_SIZE) value = MAX_SIZE;
-                  if (value < 1) value = 1;
-                  handleSizeChange(value);
-                }}
-                placeholder="Custom size"
-                className="w-full mt-2 p-3 text-center rounded-lg border-2 border-gray-200 focus:border-earth-500 outline-none"
-              />
             </div>
           )}
 
