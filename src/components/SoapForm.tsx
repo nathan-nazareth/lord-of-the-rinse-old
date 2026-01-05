@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { SoapScent, SoapColor, OrderFormState, SOAP_OPTIONS, DEFAULT_SIZE, MAX_SIZE } from '../../types';
+import { SoapScent, SoapColor, OrderFormState, SOAP_OPTIONS, DEFAULT_SIZE, MAX_SIZE, LAVENDER_PIECES_PRICE } from '../../types';
 import { useCart } from '../hooks/useCart';
 import { useFormRateLimit } from '../hooks/useFormRateLimit';
 import { Cart, CartBadge } from './Cart';
@@ -12,6 +12,7 @@ const INITIAL_STATE: OrderFormState = {
   color: null,
   quantity: '',
   size: DEFAULT_SIZE,
+  hasLavenderPieces: false,
   customerName: '',
   customerEmail: '',
   customerPhone: ''
@@ -153,20 +154,27 @@ export const SoapForm: React.FC = () => {
   const getPriceForScent = (scent: SoapScent, size: number): number => {
     const basePrice = getBasePriceForScent(scent);
     const ratio = size / 100;
-    const rawPrice = basePrice * ratio;
-    return Math.round(rawPrice);
+    const basePriceWithSize = Math.round(basePrice * ratio);
+    return basePriceWithSize;
+  };
+
+  const getTotalPrice = (): number => {
+    if (!formData.scent) return 0;
+    const scentPrice = getPriceForScent(formData.scent, formData.size);
+    return formData.hasLavenderPieces ? scentPrice + LAVENDER_PIECES_PRICE : scentPrice;
   };
 
   const handleAddToCart = () => {
     if (!isFormValid || !rateLimit.isAllowed) return;
 
-    const price = getPriceForScent(formData.scent!, formData.size);
+    const price = getTotalPrice();
     const success = rateLimit.recordSubmission() && addItem(
       formData.scent!,
       price,
       formData.color!,
       formData.quantity,
-      formData.size
+      formData.size,
+      formData.hasLavenderPieces
     );
 
     if (success) {
@@ -178,7 +186,8 @@ export const SoapForm: React.FC = () => {
         scent: null,
         color: null,
         quantity: '',
-        size: DEFAULT_SIZE
+        size: DEFAULT_SIZE,
+        hasLavenderPieces: false
       }));
       setCurrentStep('landing');
     }
@@ -205,7 +214,7 @@ export const SoapForm: React.FC = () => {
     }
   }, [currentStep, formData.scent]);
 
-  const currentPrice = formData.scent ? getPriceForScent(formData.scent, formData.size) : 0;
+  const currentPrice = formData.scent ? getTotalPrice() : 0;
 
   if (currentStep === 'landing') {
     return (
@@ -467,12 +476,41 @@ export const SoapForm: React.FC = () => {
 
           {formData.scent && (
             <div className="mt-4 pt-4 border-t border-gray-100">
+              <button
+                type="button"
+                onClick={() => setFormData(prev => ({ ...prev, hasLavenderPieces: !prev.hasLavenderPieces }))}
+                className={`w-full p-3 rounded-lg border-2 flex items-center justify-between transition-all ${
+                  formData.hasLavenderPieces
+                    ? 'border-purple-400 bg-purple-50'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                    formData.hasLavenderPieces ? 'bg-purple-500' : 'bg-gray-200'
+                  }`}>
+                    {formData.hasLavenderPieces && <Check className="w-4 h-4 text-white" />}
+                  </div>
+                  <span className={`font-medium ${formData.hasLavenderPieces ? 'text-purple-800' : 'text-gray-700'}`}>
+                    Add Lavender Pieces
+                  </span>
+                </div>
+                <span className={`font-bold ${formData.hasLavenderPieces ? 'text-purple-700' : 'text-gray-500'}`}>
+                  +Rs. {LAVENDER_PIECES_PRICE}
+                </span>
+              </button>
+            </div>
+          )}
+
+          {formData.scent && (
+            <div className="mt-4 pt-4 border-t border-gray-100">
               <div className="flex items-center justify-between bg-earth-50 p-3 rounded-lg">
                 <span className="text-sm text-earth-700">
                   {formData.size}g/{formData.size}ml {formData.scent}
+                  {formData.hasLavenderPieces && <span className="text-purple-600 ml-1">+ Lavender Pieces</span>}
                 </span>
                 <span className="text-lg font-bold text-earth-800">
-                  Rs. {currentPrice}
+                  Rs. {getTotalPrice()}
                 </span>
               </div>
             </div>

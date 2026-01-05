@@ -305,6 +305,11 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
                             <span className="font-medium text-earth-800">{item.scent}</span>
+                            {item.hasLavenderPieces && (
+                              <span className="text-[10px] bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">
+                                + Lavender Pieces
+                              </span>
+                            )}
                           </div>
                           <div className="text-sm text-gray-600">
                             {item.color} • {item.size}g/{item.size}ml • {item.quantity} soap{item.quantity > 1 ? 's' : ''} • Rs. {item.price} each
