@@ -307,7 +307,7 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
                             <span className="font-medium text-earth-800">{item.scent}</span>
                           </div>
                           <div className="text-sm text-gray-600">
-                            {item.color} • {item.quantity} soap{item.quantity > 1 ? 's' : ''} • Rs. {item.price} each
+                            {item.color} • {item.size}g/{item.size}ml • {item.quantity} soap{item.quantity > 1 ? 's' : ''} • Rs. {item.price} each
                           </div>
                         </div>
                         <div className="text-right">

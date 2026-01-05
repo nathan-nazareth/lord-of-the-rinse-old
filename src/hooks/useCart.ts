@@ -4,7 +4,7 @@ import { saveCart, loadCart, removeItem, clearCart, createCartItem, calculateTot
 
 interface UseCartReturn {
   cart: Cart;
-  addItem: (scent: string, price: number, color: string, quantity: string) => boolean;
+  addItem: (scent: string, price: number, color: string, quantity: string, size: number) => boolean;
   removeItem: (itemId: string) => void;
   clearCart: () => void;
   isCartOpen: boolean;
@@ -34,14 +34,15 @@ export function useCart(): UseCartReturn {
     scent: string,
     price: number,
     color: string,
-    quantity: string
+    quantity: string,
+    size: number
   ): boolean => {
     if (!canAddToCart(cart.items)) {
       console.warn('[Cart] Cannot add item - cart limit reached');
       return false;
     }
 
-    const newItem = createCartItem(scent, price, color, quantity);
+    const newItem = createCartItem(scent, price, color, quantity, size);
     const newItems = [...cart.items, newItem];
     
     setCart({

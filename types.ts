@@ -16,16 +16,20 @@ export interface SoapOption {
 }
 
 export const SOAP_OPTIONS: SoapOption[] = [
-  { scent: SoapScent.LAVENDER, price: 30 },
-  { scent: SoapScent.ALOE_VERA, price: 28 },
-  { scent: SoapScent.COCONUT, price: 25 },
-  { scent: SoapScent.COFFEE, price: 28 },
-  { scent: SoapScent.CLOVE, price: 30 },
-  { scent: SoapScent.CINNAMON, price: 29 },
-  { scent: SoapScent.LEMONGRASS, price: 30 },
-  { scent: SoapScent.TURMERIC, price: 27 },
-  { scent: SoapScent.HONEY, price: 30 }
+  { scent: SoapScent.LAVENDER, price: 110 },
+  { scent: SoapScent.ALOE_VERA, price: 100 },
+  { scent: SoapScent.COCONUT, price: 100 },
+  { scent: SoapScent.COFFEE, price: 100 },
+  { scent: SoapScent.CLOVE, price: 100 },
+  { scent: SoapScent.CINNAMON, price: 100 },
+  { scent: SoapScent.LEMONGRASS, price: 100 },
+  { scent: SoapScent.TURMERIC, price: 100 },
+  { scent: SoapScent.HONEY, price: 110 }
 ];
+
+export const DEFAULT_SIZE = 100;
+export const MAX_SIZE = 100;
+export const BASE_SIZE = 100;
 
 export enum SoapColor {
   WHITE = 'White',
@@ -42,12 +46,14 @@ export interface OrderItem {
   scent: SoapScent;
   color: SoapColor;
   quantity: string;
+  size: number;
 }
 
 export interface OrderFormState {
   scent: SoapScent | null;
   color: SoapColor | null;
   quantity: string;
+  size: number;
   customerName: string;
   customerEmail: string;
   customerPhone: string;
