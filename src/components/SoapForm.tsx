@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { SoapScent, SoapColor, OrderFormState, SOAP_OPTIONS } from '../../types';
+import { SoapScent, SoapColor, OrderFormState, SOAP_OPTIONS, DEFAULT_SIZE, MAX_SIZE } from '../../types';
 import { useCart } from '../hooks/useCart';
 import { useFormRateLimit } from '../hooks/useFormRateLimit';
 import { Cart, CartBadge } from './Cart';
-import { ShoppingCart, Check, Sparkles, Palette, Layers, ArrowRight, ArrowLeft, Leaf, Droplets, Plus } from 'lucide-react';
+import { ShoppingCart, Check, Sparkles, Palette, Layers, ArrowRight, ArrowLeft, Leaf, Droplets, Plus, Scale } from 'lucide-react';
 
 const INITIAL_STATE: OrderFormState = {
   scent: null,
   color: null,
   quantity: '',
+  size: DEFAULT_SIZE,
   customerName: '',
   customerEmail: '',
   customerPhone: ''
@@ -36,7 +37,7 @@ const COLOR_OPTIONS = [
   { label: SoapColor.PURPLE, class: 'bg-purple-100 border-purple-200', hex: '#f3e8ff' },
 ];
 
-type FormStep = 'scent' | 'color' | 'quantity' | 'complete';
+type FormStep = 'scent' | 'color' | 'size' | 'quantity' | 'complete';
 
 export const SoapForm: React.FC = () => {
   const [formData, setFormData] = useState<OrderFormState>(INITIAL_STATE);
@@ -49,12 +50,14 @@ export const SoapForm: React.FC = () => {
   const steps: { key: FormStep; label: string; icon: React.ReactNode }[] = [
     { key: 'scent', label: 'Choose Scent', icon: <Sparkles className="w-4 h-4" /> },
     { key: 'color', label: 'Pick Color', icon: <Palette className="w-4 h-4" /> },
+    { key: 'size', label: 'Set Size', icon: <Scale className="w-4 h-4" /> },
     { key: 'quantity', label: 'Set Quantity', icon: <Layers className="w-4 h-4" /> },
   ];
 
   const completedSteps = [
     formData.scent ? 'scent' : null,
     formData.color ? 'color' : null,
+    formData.size ? 'size' : null,
     formData.quantity ? 'quantity' : null
   ].filter(Boolean) as FormStep[];
 
@@ -74,17 +77,33 @@ export const SoapForm: React.FC = () => {
 
   const handleColorChange = (color: SoapColor) => {
     setFormData(prev => ({ ...prev, color }));
-    setCurrentStep('quantity');
+    setCurrentStep('size');
   };
 
   useEffect(() => {
-    if (currentStep === 'quantity' && (!formData.scent || !formData.color)) {
+    if (currentStep === 'size' && (!formData.scent || !formData.color)) {
       setCurrentStep(formData.scent ? 'color' : 'scent');
     }
     if (currentStep === 'color' && !formData.scent) {
       setCurrentStep('scent');
     }
-  }, [currentStep, formData.scent, formData.color]);
+    if (currentStep === 'quantity' && (!formData.scent || !formData.color || !formData.size)) {
+      setCurrentStep(formData.scent && formData.color ? 'size' : formData.scent ? 'color' : 'scent');
+    }
+  }, [currentStep, formData.scent, formData.color, formData.size]);
+
+  const handleSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/[^0-9]/g, '');
+    if (value === '') {
+      setFormData(prev => ({ ...prev, size: 0 }));
+      return;
+    }
+    const numValue = parseInt(value, 10);
+    if (numValue > MAX_SIZE) {
+      value = String(MAX_SIZE);
+    }
+    setFormData(prev => ({ ...prev, size: parseInt(value, 10) || 0 }));
+  };
 
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/[^0-9]/g, '');
@@ -94,6 +113,7 @@ export const SoapForm: React.FC = () => {
   const isFormValid = 
     formData.scent && 
     formData.color &&
+    formData.size > 0 &&
     formData.quantity.length > 0;
 
   const isButtonDisabled = !isFormValid || !rateLimit.isAllowed;
@@ -104,19 +124,28 @@ export const SoapForm: React.FC = () => {
       : 'Add to Cart';
   const remainingCount = rateLimit.remainingSubmissions;
 
-  const getPriceForScent = (scent: SoapScent): number => {
+  const getBasePriceForScent = (scent: SoapScent): number => {
     const option = SOAP_OPTIONS.find(o => o.scent === scent);
     return option?.price || 0;
+  };
+
+  const getPriceForScent = (scent: SoapScent, size: number): number => {
+    const basePrice = getBasePriceForScent(scent);
+    const ratio = size / 100;
+    const rawPrice = basePrice * ratio;
+    return Math.round(rawPrice);
   };
 
   const handleAddToCart = () => {
     if (!isFormValid || !rateLimit.isAllowed) return;
 
+    const price = getPriceForScent(formData.scent!, formData.size);
     const success = rateLimit.recordSubmission() && addItem(
       formData.scent!,
-      getPriceForScent(formData.scent!),
+      price,
       formData.color!,
-      formData.quantity
+      formData.quantity,
+      formData.size
     );
 
     if (success) {
@@ -127,7 +156,8 @@ export const SoapForm: React.FC = () => {
         ...prev,
         scent: null,
         color: null,
-        quantity: ''
+        quantity: '',
+        size: DEFAULT_SIZE
       }));
       setCurrentStep('scent');
     }
@@ -139,6 +169,9 @@ export const SoapForm: React.FC = () => {
       return () => clearTimeout(timer);
     }
   }, [showScentInfo]);
+
+  const currentPrice = formData.scent ? getPriceForScent(formData.scent, formData.size) : 0;
+  const basePrice = formData.scent ? getBasePriceForScent(formData.scent) : 0;
 
   return (
     <div className="w-full max-w-3xl mx-auto space-y-4 pb-32">
@@ -186,12 +219,15 @@ export const SoapForm: React.FC = () => {
               <div className="w-8 h-8 rounded-full bg-earth-100 border-2 border-white flex items-center justify-center">
                 <span className="text-earth-600 text-xs font-bold">2</span>
               </div>
+              <div className="w-8 h-8 rounded-full bg-earth-100 border-2 border-white flex items-center justify-center">
+                <span className="text-earth-600 text-xs font-bold">3</span>
+              </div>
               <div className="w-8 h-8 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center">
-                <span className="text-gray-500 text-xs font-bold">3</span>
+                <span className="text-gray-500 text-xs font-bold">4</span>
               </div>
             </div>
             <div className="text-xs text-earth-700">
-              <strong>Mix & Match:</strong> Different scents, colors, quantities
+              <strong>Mix & Match:</strong> Different scents, colors, sizes, quantities
             </div>
           </div>
         </div>
@@ -250,7 +286,7 @@ export const SoapForm: React.FC = () => {
               </span>
               <div>
                 <div>Choose Your Scent</div>
-                <p className="text-xs font-normal text-earth-500">9 options • 35g (40ml) per soap</p>
+                <p className="text-xs font-normal text-earth-500">9 options • Up to 100g/100ml</p>
               </div>
             </h2>
             
@@ -391,7 +427,7 @@ export const SoapForm: React.FC = () => {
         </div>
       )}
 
-      {currentStep === 'quantity' && formData.scent && formData.color && (
+      {currentStep === 'size' && formData.scent && formData.color && (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
           <div className="bg-white rounded-xl p-5 shadow-sm border border-earth-100">
             <button
@@ -405,11 +441,89 @@ export const SoapForm: React.FC = () => {
             
             <h2 className="text-lg font-serif font-bold mb-3 text-earth-800 flex items-center gap-3">
               <span className="bg-earth-100 w-8 h-8 rounded-full flex items-center justify-center text-earth-700">
+                <Scale className="w-4 h-4" />
+              </span>
+              <div>
+                <div>What Size for {formData.scent}?</div>
+                <p className="text-xs font-normal text-earth-500">g and ml are the same value</p>
+              </div>
+            </h2>
+            
+            <div className="mt-4">
+              <div className="flex items-center gap-3 max-w-xs ml-0 md:ml-10">
+                <div className="relative w-full">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={formData.size || ''}
+                    onChange={handleSizeChange}
+                    placeholder="0"
+                    max={MAX_SIZE}
+                    className="w-full p-4 pr-24 text-2xl font-bold text-center rounded-xl border-2 border-gray-200 focus:border-earth-500 focus:ring-2 focus:ring-earth-200 outline-none transition-all"
+                    autoFocus
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-earth-600 font-medium pointer-events-none">
+                    g/ml
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex gap-2 mt-3 justify-center md:justify-start md:ml-10">
+                {[25, 50, 75, 100].map((num) => (
+                  <button
+                    key={num}
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, size: num }))}
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                      formData.size === num
+                        ? 'bg-earth-600 text-white'
+                        : 'bg-earth-100 text-earth-700 hover:bg-earth-200'
+                    }`}
+                  >
+                    {num}
+                  </button>
+                ))}
+              </div>
+
+              {formData.size > 0 && (
+                <div className="mt-4 p-3 bg-earth-50 rounded-lg border border-earth-200">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-earth-700">
+                      Price for {formData.size}g/{formData.size}ml:
+                    </span>
+                    <span className="text-lg font-bold text-earth-800">
+                      Rs. {currentPrice}
+                    </span>
+                  </div>
+                  <p className="text-xs text-earth-500 mt-1">
+                    Base: Rs. {basePrice} for 100g/100ml • Ratio: {(formData.size / 100).toFixed(2)}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {currentStep === 'quantity' && formData.scent && formData.color && formData.size > 0 && (
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <div className="bg-white rounded-xl p-5 shadow-sm border border-earth-100">
+            <button
+              type="button"
+              onClick={() => setCurrentStep('size')}
+              className="flex items-center gap-2 text-earth-600 hover:text-earth-800 mb-3 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span className="text-sm font-medium">Back to size</span>
+            </button>
+            
+            <h2 className="text-lg font-serif font-bold mb-3 text-earth-800 flex items-center gap-3">
+              <span className="bg-earth-100 w-8 h-8 rounded-full flex items-center justify-center text-earth-700">
                 <Layers className="w-4 h-4" />
               </span>
               <div>
                 <div>How Many {formData.scent} Soaps?</div>
-                <p className="text-xs font-normal text-earth-500">35g (40ml) per soap • Minimum: 1</p>
+                <p className="text-xs font-normal text-earth-500">{formData.size}g/{formData.size}ml each • Rs. {currentPrice} each</p>
               </div>
             </h2>
             
@@ -447,6 +561,19 @@ export const SoapForm: React.FC = () => {
                   </button>
                 ))}
               </div>
+
+              {formData.quantity && parseInt(formData.quantity, 10) > 0 && (
+                <div className="mt-4 p-3 bg-earth-50 rounded-lg border border-earth-200">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-earth-700">
+                      Total:
+                    </span>
+                    <span className="text-lg font-bold text-earth-800">
+                      Rs. {currentPrice * parseInt(formData.quantity, 10)}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -528,7 +655,7 @@ export const SoapForm: React.FC = () => {
                     key={item.id} 
                     className="flex-shrink-0 text-xs bg-earth-50 px-2 py-1 rounded-full border border-earth-200 text-earth-700"
                   >
-                    {item.quantity}x {item.scent}
+                    {item.quantity}x {item.scent} {item.size !== 100 && `(${item.size}g)`}
                   </span>
                 ))}
                 {cart.items.length > 3 && (

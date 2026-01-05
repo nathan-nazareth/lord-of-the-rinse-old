@@ -60,7 +60,8 @@ export function createCartItem(
   scent: string,
   price: number,
   color: string,
-  quantity: string
+  quantity: string,
+  size: number
 ): CartItem {
   return {
     id: crypto.randomUUID(),
@@ -68,6 +69,7 @@ export function createCartItem(
     price,
     color,
     quantity: parseInt(quantity, 10),
+    size,
     addedAt: new Date().toISOString()
   };
 }
