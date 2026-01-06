@@ -511,7 +511,7 @@ export const SoapForm: React.FC = () => {
               <div className="flex items-center justify-between bg-earth-50 p-3 rounded-lg">
                 <span className="text-sm text-earth-700">
                   {formData.size}g/{formData.size}ml {formData.scent}
-                  {formData.hasLavenderPieces && <span className="text-purple-600 ml-1">+ Lavender Pieces</span>}
+                  {formData.hasLavenderPieces && <span className="text-earth-600 ml-1">+ Lavender Pieces</span>}
                 </span>
                 <span className="text-lg font-bold text-earth-800">
                   Rs. {getTotalPrice()}
