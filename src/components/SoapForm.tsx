@@ -5,7 +5,11 @@ import { useFormRateLimit } from '../hooks/useFormRateLimit';
 import { Cart, CartBadge } from './Cart';
 import { ShoppingCart, Check, Sparkles, Palette, Layers, ArrowRight, ArrowLeft, Leaf, Droplets, Plus, Scale, Info } from 'lucide-react';
 
-const SIZE_OPTIONS = [50, 75, 100];
+const SIZE_OPTIONS = [
+  { label: 'S', weight: 50 },
+  { label: 'M', weight: 75 },
+  { label: 'L', weight: 100 },
+];
 
 const INITIAL_STATE: OrderFormState = {
   scent: null,
@@ -49,7 +53,6 @@ export const SoapForm: React.FC = () => {
   const [showScentInfo, setShowScentInfo] = useState<string | null>(null);
   const { cart, addItem, removeItem, clearCart, isCartOpen, setIsCartOpen } = useCart();
   const rateLimit = useFormRateLimit({ maxSubmissions: 10, windowMs: 60000, cooldownMs: 30000 });
-  const sizeInputRef = useRef<HTMLInputElement>(null);
   const scentTooltipTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const steps: { key: FormStep; label: string }[] = [
@@ -201,8 +204,9 @@ export const SoapForm: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (currentStep === 'scent' && sizeInputRef.current) {
-      sizeInputRef.current.focus();
+    if (currentStep === 'scent' && !formData.scent) {
+      const firstScentBtn = document.querySelector('button:has-text("Lavender")');
+      (firstScentBtn as HTMLElement)?.focus();
     }
   }, [currentStep, formData.scent]);
 
@@ -441,37 +445,22 @@ export const SoapForm: React.FC = () => {
 
           {formData.scent && (
             <div className="border-t border-gray-100 pt-4 mt-4">
-              <p className="text-sm text-gray-600 mb-3">Pick a size (g/ml):</p>
-              
-              <input
-                ref={sizeInputRef}
-                type="number"
-                min="50"
-                max={MAX_SIZE}
-                value={formData.size || ''}
-                onChange={(e) => {
-                  let value = parseInt(e.target.value) || 0;
-                  if (value > MAX_SIZE) value = MAX_SIZE;
-                  if (value < 50) value = 50;
-                  handleSizeChange(value);
-                }}
-                className="w-full mb-3 p-3 text-center text-xl font-bold rounded-lg border-2 border-earth-300 focus:border-earth-500 outline-none bg-earth-50"
-              />
+              <p className="text-sm text-gray-600 mb-3">Pick a size:</p>
               
               <div className="flex gap-2">
-                {SIZE_OPTIONS.map((size) => (
+                {SIZE_OPTIONS.map((option) => (
                   <button
-                    key={size}
+                    key={option.label}
                     type="button"
-                    onClick={() => handleSizeChange(size)}
+                    onClick={() => handleSizeChange(option.weight)}
                     className={`
                       flex-1 py-3 rounded-lg font-bold transition-all border-2
-                      ${formData.size === size
+                      ${formData.size === option.weight
                         ? 'bg-earth-600 text-white border-earth-600'
                         : 'bg-white text-earth-700 border-earth-200 hover:border-earth-400'}
                     `}
                   >
-                    {size}
+                    {option.label} ({option.weight}g)
                   </button>
                 ))}
               </div>
