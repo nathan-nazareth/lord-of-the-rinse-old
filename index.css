@@ -1,3 +1,15 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Playfair Display", serif;
+  --font-sans: "Lato", sans-serif;
+  
+  --color-earth-50: #f9f8f6;
+  --color-earth-100: #efece6;
+  --color-earth-200: #e0dacf;
+  --color-earth-300: #c8bfab;
+  --color-earth-400: #b0a083;
+  --color-earth-500: #9b8a66;
+  --color-earth-600: #7d6d50;
+  --color-earth-800: #4d4436;
+}
