@@ -15,6 +15,11 @@ export interface OrderItem {
 export interface WebhookPayload {
   customer: Customer;
   items: OrderItem[];
+  totalQuantity: number;
+  subtotal: number;
+  discountPercentage: number;
+  discountAmount: number;
+  finalTotal: number;
 }
 
 export type WebhookStatus = 'idle' | 'pending' | 'submitting' | 'submitted' | 'failed';

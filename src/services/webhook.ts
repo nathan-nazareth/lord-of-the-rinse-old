@@ -32,6 +32,12 @@ export async function submitCartToWebhook(
 ): Promise<{ success: boolean; orderId: string }> {
   const orderId = generateOrderId();
   
+  const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
+  const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const discountPercentage = totalQuantity >= 4 ? 15 : totalQuantity >= 2 ? 10 : 0;
+  const discountAmount = Math.round(subtotal * (discountPercentage / 100));
+  const finalTotal = subtotal - discountAmount;
+
   const payload: WebhookPayload = {
     customer,
     items: items.map(item => ({
@@ -40,7 +46,12 @@ export async function submitCartToWebhook(
       price: item.price,
       color: item.color,
       quantity: item.quantity
-    }))
+    })),
+    totalQuantity,
+    subtotal,
+    discountPercentage,
+    discountAmount,
+    finalTotal
   };
 
   console.log('[Webhook] Submitting order:', JSON.stringify(payload, null, 2));
