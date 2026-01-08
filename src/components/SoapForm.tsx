@@ -205,7 +205,7 @@ export const SoapForm: React.FC = () => {
 
   useEffect(() => {
     if (currentStep === 'scent' && !formData.scent) {
-      const firstScentBtn = document.querySelector('button:has-text("Lavender")');
+      const firstScentBtn = document.querySelector('.grid.grid-cols-3 button');
       (firstScentBtn as HTMLElement)?.focus();
     }
   }, [currentStep, formData.scent]);
