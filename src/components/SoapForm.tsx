@@ -3,7 +3,7 @@ import { SoapScent, SoapColor, OrderFormState, SOAP_OPTIONS, DEFAULT_SIZE, MAX_S
 import { useCart } from '../hooks/useCart';
 import { useFormRateLimit } from '../hooks/useFormRateLimit';
 import { Cart, CartBadge } from './Cart';
-import { ShoppingCart, Check, Sparkles, Palette, Layers, ArrowRight, ArrowLeft, Leaf, Droplets, Plus, Scale, Info } from 'lucide-react';
+import { ShoppingCart, Check, Sparkles, Palette, Layers, ArrowRight, ArrowLeft, Leaf, Droplets, Plus, Scale, Info, Tag } from 'lucide-react';
 
 const SIZE_OPTIONS = [
   { label: 'S', weight: 50 },
@@ -230,7 +230,7 @@ export const SoapForm: React.FC = () => {
           onClearCart={clearCart}
         />
 
-        {cart.totalQuantity > 0 && (
+        {cart.totalQuantity > 0 && !isCartOpen && (
           <div className="fixed bottom-28 right-4 z-50">
             <CartBadge count={cart.totalQuantity} onClick={() => setIsCartOpen(true)} />
           </div>
@@ -340,14 +340,14 @@ export const SoapForm: React.FC = () => {
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
         onRemoveItem={removeItem}
-        onClearCart={clearCart}
-      />
+          onClearCart={clearCart}
+        />
 
-      {cart.totalQuantity > 0 && (
-        <div className="fixed bottom-28 right-4 z-50">
-          <CartBadge count={cart.totalQuantity} onClick={() => setIsCartOpen(true)} />
-        </div>
-      )}
+        {cart.totalQuantity > 0 && !isCartOpen && (
+          <div className="fixed bottom-28 right-4 z-50">
+            <CartBadge count={cart.totalQuantity} onClick={() => setIsCartOpen(true)} />
+          </div>
+        )}
 
       <div className="space-y-2">
         <div className="flex items-center justify-between">
@@ -673,11 +673,14 @@ export const SoapForm: React.FC = () => {
           
           <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-3 mb-4">
             <div className="flex items-center gap-2 text-green-800">
-              <Sparkles className="w-4 h-4" />
-              <span className="text-sm font-medium">Bulk Discount:</span>
+              <Tag className="w-4 h-4" />
+              <span className="text-sm font-medium">Bulk Discount on Total Order:</span>
             </div>
             <div className="mt-1 text-xs text-green-700 ml-6">
-              Buy 2-3 soaps <span className="font-semibold">10% off</span> • Buy 4+ soaps <span className="font-semibold">15% off</span>
+              Order 2-3 soaps <span className="font-semibold">10% OFF</span> • Order 4+ soaps <span className="font-semibold">15% OFF</span>
+            </div>
+            <div className="mt-1 text-[10px] text-green-600 ml-6">
+              Mix & match different scents — discount applies to your entire order!
             </div>
           </div>
           
