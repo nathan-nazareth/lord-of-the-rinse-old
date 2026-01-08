@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShoppingCart, Trash2, Send, User, Phone, Mail as MailIcon, Loader2, Check } from 'lucide-react';
+import { ShoppingCart, Trash2, Send, User, Phone, Mail as MailIcon, Loader2, Check, Tag } from 'lucide-react';
 import { CartItem as CartItemType } from '../types/cart';
 import { Customer } from '../types/webhook';
 import { submitCartToWebhook } from '../services/webhook';
@@ -190,6 +190,11 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [orderItemCount, setOrderItemCount] = useState(0);
 
+  const subtotal = cart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const discountPercentage = cart.totalQuantity >= 4 ? 15 : cart.totalQuantity >= 2 ? 10 : 0;
+  const discountAmount = Math.round(subtotal * (discountPercentage / 100));
+  const total = subtotal - discountAmount;
+
   const handleCheckout = async (customer: Customer) => {
     setIsSubmitting(true);
     
@@ -338,6 +343,17 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
         {/* Footer */}
         {!showConfirmation && !showCheckout && cart.items.length > 0 && (
           <div className="p-4 border-t border-earth-100 bg-earth-50">
+            {discountPercentage > 0 && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
+                <div className="flex items-center gap-2 text-green-800">
+                  <Check className="w-4 h-4" />
+                  <span className="font-semibold text-sm">Bulk Discount Applied!</span>
+                </div>
+                <p className="text-xs text-green-700 mt-1 ml-6">
+                  {cart.totalQuantity >= 4 ? '15% off' : '10% off'} on your total order ({cart.totalQuantity} soaps)
+                </p>
+              </div>
+            )}
             <div className="flex items-center justify-between mb-3">
               <span className="text-gray-600">Total unique types:</span>
               <span className="font-bold text-earth-800">{cart.items.length}</span>
@@ -346,11 +362,20 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
               <span className="text-gray-600">Total soaps:</span>
               <span className="font-bold text-earth-800">{cart.totalQuantity} soap{cart.totalQuantity > 1 ? 's' : ''}</span>
             </div>
+            {discountPercentage > 0 && (
+              <div className="flex items-center justify-between mb-2 text-green-700">
+                <span className="text-sm">Discount ({discountPercentage}%):</span>
+                <span className="font-bold text-sm">- Rs. {discountAmount}</span>
+              </div>
+            )}
             <div className="flex items-center justify-between mb-3 pt-3 border-t border-earth-200">
               <span className="text-lg font-bold text-earth-800">Total:</span>
-              <span className="text-lg font-bold text-earth-800">
-                Rs. {cart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)}
-              </span>
+              <div className="text-right">
+                {discountPercentage > 0 && (
+                  <span className="text-sm text-gray-400 line-through mr-2">Rs. {subtotal}</span>
+                )}
+                <span className="text-lg font-bold text-earth-800">Rs. {total}</span>
+              </div>
             </div>
             <div className="flex gap-3">
               <button
