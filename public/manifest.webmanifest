@@ -1,0 +1,19 @@
+{
+  "name": "Organic Soap Builder",
+  "short_name": "Soap Builder",
+  "description": "Build your custom organic soaps",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f9f8f6",
+  "theme_color": "#efece6",
+  "lang": "en",
+  "scope": "/",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

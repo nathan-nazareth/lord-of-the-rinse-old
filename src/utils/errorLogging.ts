@@ -32,19 +32,22 @@ export const logError = (error: Error, type: 'render' | 'runtime' = 'render', in
 
 export const logResourceError = (event: Event): void => {
   const target = event.target as HTMLElement;
+  let src = 'unknown';
+  
+  if (target instanceof HTMLScriptElement) {
+    src = target.src;
+  } else if (target instanceof HTMLLinkElement) {
+    src = target.href;
+  } else if (target instanceof HTMLImageElement) {
+    src = target.src;
+  }
+  
   const error: StructuredError = {
-    message: `Failed to load resource: ${(target as HTMLScriptElement | HTMLLinkElement | HTMLImageElement).src || 'unknown'}`,
+    message: `Failed to load resource: ${src}`,
     timestamp: new Date().toISOString(),
     type: 'resource',
+    filename: src !== 'unknown' ? src : undefined,
   };
-
-  if (target instanceof HTMLScriptElement) {
-    error.filename = target.src;
-  } else if (target instanceof HTMLLinkElement) {
-    error.filename = target.href;
-  } else if (target instanceof HTMLImageElement) {
-    error.filename = target.src;
-  }
 
   console.error('[Resource Error]', JSON.stringify(error, null, 2));
 };
