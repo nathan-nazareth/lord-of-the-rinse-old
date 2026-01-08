@@ -671,6 +671,16 @@ export const SoapForm: React.FC = () => {
             ))}
           </div>
           
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-3 mb-4">
+            <div className="flex items-center gap-2 text-green-800">
+              <Sparkles className="w-4 h-4" />
+              <span className="text-sm font-medium">Bulk Discount:</span>
+            </div>
+            <div className="mt-1 text-xs text-green-700 ml-6">
+              Buy 2-3 soaps <span className="font-semibold">10% off</span> • Buy 4+ soaps <span className="font-semibold">15% off</span>
+            </div>
+          </div>
+          
           {formData.quantity && parseInt(formData.quantity, 10) > 0 && (
             <div className="bg-earth-100 p-4 rounded-lg flex items-center justify-between">
               <span className="text-sm text-earth-700">Total for {formData.quantity} soap{parseInt(formData.quantity, 10) > 1 ? 's' : ''}:</span>
