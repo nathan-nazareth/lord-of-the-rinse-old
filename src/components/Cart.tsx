@@ -69,15 +69,16 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, isSubmi
   return (
     <div className="p-4">
       <h3 className="text-lg font-serif font-bold text-earth-800 mb-4">Your Contact Details</h3>
-      
-      <form onSubmit={handleSubmit} className="space-y-4">
+       
+      <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         {/* Name Field */}
         <div>
-          <label className="flex items-center gap-2 text-sm text-gray-600 mb-1">
+          <label htmlFor="name" className="flex items-center gap-2 text-sm text-gray-600 mb-1">
             <User className="w-4 h-4" />
             Your Name
           </label>
           <input
+            id="name"
             type="text"
             value={formData.name}
             onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
@@ -85,17 +86,26 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, isSubmi
             placeholder="Your full name"
             className={`w-full p-3 rounded-lg border ${errors.name ? 'border-red-300' : 'border-gray-300'} focus:border-earth-500 focus:ring-2 focus:ring-earth-200 outline-none transition-all`}
             disabled={isSubmitting}
+            aria-describedby={errors.name ? 'name-error' : undefined}
+            aria-invalid={!!errors.name}
+            autoComplete="name"
+            required
           />
-          {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
+          {errors.name && (
+            <p id="name-error" className="text-red-500 text-xs mt-1" role="alert" aria-live="polite">
+              {errors.name}
+            </p>
+          )}
         </div>
 
         {/* Email Field */}
         <div>
-          <label className="flex items-center gap-2 text-sm text-gray-600 mb-1">
+          <label htmlFor="email" className="flex items-center gap-2 text-sm text-gray-600 mb-1">
             <MailIcon className="w-4 h-4" />
             Email Address
           </label>
           <input
+            id="email"
             type="email"
             value={formData.email}
             onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
@@ -103,17 +113,26 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, isSubmi
             placeholder="you@example.com"
             className={`w-full p-3 rounded-lg border ${errors.email ? 'border-red-300' : 'border-gray-300'} focus:border-earth-500 focus:ring-2 focus:ring-earth-200 outline-none transition-all`}
             disabled={isSubmitting}
+            aria-describedby={errors.email ? 'email-error' : undefined}
+            aria-invalid={!!errors.email}
+            autoComplete="email"
+            required
           />
-          {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+          {errors.email && (
+            <p id="email-error" className="text-red-500 text-xs mt-1" role="alert" aria-live="polite">
+              {errors.email}
+            </p>
+          )}
         </div>
 
         {/* Phone Field */}
         <div>
-          <label className="flex items-center gap-2 text-sm text-gray-600 mb-1">
+          <label htmlFor="phone" className="flex items-center gap-2 text-sm text-gray-600 mb-1">
             <Phone className="w-4 h-4" />
             Your Phone Number
           </label>
           <input
+            id="phone"
             type="tel"
             value={formData.phone}
             onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
@@ -121,8 +140,16 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, isSubmi
             placeholder="(555) 123-4567"
             className={`w-full p-3 rounded-lg border ${errors.phone ? 'border-red-300' : 'border-gray-300'} focus:border-earth-500 focus:ring-2 focus:ring-earth-200 outline-none transition-all`}
             disabled={isSubmitting}
+            aria-describedby={errors.phone ? 'phone-error' : undefined}
+            aria-invalid={!!errors.phone}
+            autoComplete="tel"
+            required
           />
-          {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
+          {errors.phone && (
+            <p id="phone-error" className="text-red-500 text-xs mt-1" role="alert" aria-live="polite">
+              {errors.phone}
+            </p>
+          )}
         </div>
 
         {/* Buttons */}
@@ -189,11 +216,47 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [orderItemCount, setOrderItemCount] = useState(0);
+  const [showClearCartConfirm, setShowClearCartConfirm] = useState(false);
+  const sidebarRef = React.useRef<HTMLDivElement>(null);
+  const closeButtonRef = React.useRef<HTMLButtonElement>(null);
+
+  // Focus management when cart opens
+  React.useEffect(() => {
+    if (isOpen && !showConfirmation && !showCheckout) {
+      // Move focus to close button when cart opens
+      setTimeout(() => {
+        closeButtonRef.current?.focus();
+      }, 100);
+    }
+  }, [isOpen, showConfirmation, showCheckout]);
+
+  // Trap focus within sidebar when open
+  React.useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   const subtotal = cart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const discountPercentage = cart.totalQuantity >= 4 ? 15 : cart.totalQuantity >= 2 ? 10 : 0;
   const discountAmount = Math.round(subtotal * (discountPercentage / 100));
   const total = subtotal - discountAmount;
+
+  const handleClearCart = () => {
+    if (showClearCartConfirm) {
+      onClearCart();
+      setShowClearCartConfirm(false);
+    } else {
+      setShowClearCartConfirm(true);
+    }
+  };
 
   const handleCheckout = async (customer: Customer) => {
     setIsSubmitting(true);
@@ -264,13 +327,14 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
           </div>
             {!showConfirmation && (
             <button
+              ref={closeButtonRef}
               onClick={onClose}
               className="px-3 py-1.5 hover:bg-earth-50 rounded-full transition-colors text-sm text-earth-600 font-medium flex items-center gap-1"
-              aria-label="Go back"
+              aria-label="Close cart"
             >
               Close
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           )}
@@ -344,13 +408,16 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
         {!showConfirmation && !showCheckout && cart.items.length > 0 && (
           <div className="p-4 border-t border-earth-100 bg-earth-50">
             {discountPercentage > 0 && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
+              <div className="bg-green-100 border-2 border-green-300 rounded-xl p-4 mb-4 animate-pulse" role="alert" aria-live="polite">
                 <div className="flex items-center gap-2 text-green-800">
-                  <Check className="w-4 h-4" />
-                  <span className="font-semibold text-sm">Bulk Discount Applied!</span>
+                  <Check className="w-5 h-5" />
+                  <span className="font-bold text-lg">Bulk Discount Applied!</span>
                 </div>
-                <p className="text-xs text-green-700 mt-1 ml-6">
-                  {cart.totalQuantity >= 4 ? '15% off' : '10% off'} on your total order ({cart.totalQuantity} soaps)
+                <p className="text-green-800 mt-1 ml-7">
+                  <span className="font-bold">{discountPercentage}% OFF</span> on your total order ({cart.totalQuantity} soaps)
+                </p>
+                <p className="text-green-700 text-sm mt-1 ml-7">
+                  💰 Mix & match — discount applies to all items!
                 </p>
               </div>
             )}
@@ -363,26 +430,30 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
               <span className="font-bold text-earth-800">{cart.totalQuantity} soap{cart.totalQuantity > 1 ? 's' : ''}</span>
             </div>
             {discountPercentage > 0 && (
-              <div className="flex items-center justify-between mb-2 text-green-700">
-                <span className="text-sm">Discount ({discountPercentage}%):</span>
-                <span className="font-bold text-sm">- Rs. {discountAmount}</span>
+              <div className="flex items-center justify-between mb-2 text-green-700 bg-green-50 p-2 rounded-lg">
+                <span className="font-semibold">Discount ({discountPercentage}%):</span>
+                <span className="font-bold">- Rs. {discountAmount}</span>
               </div>
             )}
             <div className="flex items-center justify-between mb-3 pt-3 border-t border-earth-200">
-              <span className="text-lg font-bold text-earth-800">Total:</span>
+              <span className="text-xl font-bold text-earth-800">Total:</span>
               <div className="text-right">
                 {discountPercentage > 0 && (
-                  <span className="text-sm text-gray-400 line-through mr-2">Rs. {subtotal}</span>
+                  <span className="text-gray-400 line-through mr-2">Rs. {subtotal}</span>
                 )}
-                <span className="text-lg font-bold text-earth-800">Rs. {total}</span>
+                <span className="text-xl font-bold text-earth-800">Rs. {total}</span>
               </div>
             </div>
             <div className="flex gap-3">
               <button
-                onClick={onClearCart}
-                className="flex-1 py-3 border-2 border-earth-200 text-earth-700 rounded-full font-bold hover:bg-earth-100 transition-colors"
+                onClick={handleClearCart}
+                className={`flex-1 py-3 border-2 rounded-full font-bold transition-colors ${
+                  showClearCartConfirm 
+                    ? 'border-red-300 text-red-600 bg-red-50' 
+                    : 'border-earth-200 text-earth-700 hover:bg-earth-100'
+                }`}
               >
-                Clear Cart
+                {showClearCartConfirm ? 'Clear All?' : 'Clear Cart'}
               </button>
               <button
                 onClick={() => setShowCheckout(true)}
