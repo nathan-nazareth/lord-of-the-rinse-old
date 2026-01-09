@@ -4,34 +4,43 @@
   --font-serif: "Playfair Display", serif;
   --font-sans: "Lato", sans-serif;
   
-  /* Parchment and paper tones */
-  --color-parchment-50: #fdf9f0;
-  --color-parchment-100: #faf4e3;
-  --color-parchment-200: #f5e8c8;
-  --color-parchment-300: #e8d4a8;
-  --color-parchment-400: #d4bc7e;
+  /* Light parchment and paper tones - lighter for better visibility */
+  --color-parchment-50: #fffef9;
+  --color-parchment-100: #fff9ed;
+  --color-parchment-200: #faf0d8;
+  --color-parchment-300: #f5e4c0;
+  --color-parchment-400: #e8d4a8;
   
-  /* Deep jungle greens */
-  --color-jungle-50: #1a2f1a;
-  --color-jungle-100: #1e371e;
-  --color-jungle-200: #2d4a2d;
-  --color-jungle-300: #3d6b3d;
-  --color-jungle-400: #4a8a4a;
-  --color-jungle-500: #5aa85a;
-  --color-jungle-600: #7bc97b;
+  /* Light jungle greens - much lighter for visibility */
+  --color-jungle-50: #f0f7f0;
+  --color-jungle-100: #e3f0e3;
+  --color-jungle-200: #c5e5c5;
+  --color-jungle-300: #a3d6a3;
+  --color-jungle-400: #7bc97b;
+  --color-jungle-500: #5ab85a;
+  --color-jungle-600: #4aa34a;
+  --color-jungle-700: #3d8a3d;
   
-  /* Earthy browns */
-  --color-bark-50: #2c1810;
-  --color-bark-100: #3d2518;
-  --color-bark-200: #5c3d2e;
-  --color-bark-300: #8b6b4a;
+  /* Light earthy browns - much lighter */
+  --color-bark-50: #fdf6f0;
+  --color-bark-100: #faeadf;
+  --color-bark-200: #f5dcc8;
+  --color-bark-300: #e8c4a0;
+  --color-bark-400: #d4a86a;
+  --color-bark-500: #c49a5a;
+  --color-bark-600: #8b7350;
   
+  /* Very light green for backgrounds */
+  --color-foliage-50: #f5faf5;
+  --color-foliage-100: #eaf5ea;
+  --color-foliage-200: #d5ebd5;
+
   /* Flower colors */
   --color-flower-pink: #e8a4b8;
   --color-flower-purple: #b8a4e8;
   --color-flower-yellow: #e8d4a8;
   --color-flower-orange: #e8b88a;
-  
+
   --shadow-parchment: 0 4px 20px rgba(44, 24, 16, 0.3);
   --shadow-float: 0 10px 40px rgba(44, 24, 16, 0.4);
 }

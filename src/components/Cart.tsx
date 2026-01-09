@@ -68,7 +68,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, isSubmi
 
   return (
     <div className="p-4">
-      <h3 className="text-lg font-serif font-bold text-earth-800 mb-4">Your Contact Details</h3>
+      <h3 className="text-lg font-serif font-bold text-bark-800 mb-4">Your Contact Details</h3>
        
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         {/* Name Field */}
@@ -84,7 +84,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, isSubmi
             onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
             onFocus={() => setErrors(prev => ({ ...prev, name: undefined }))}
             placeholder="Your full name"
-            className={`w-full p-3 rounded-lg border ${errors.name ? 'border-red-300' : 'border-gray-300'} focus:border-earth-500 focus:ring-2 focus:ring-earth-200 outline-none transition-all`}
+            className={`w-full p-3 rounded-lg border ${errors.name ? 'border-red-300' : 'border-gray-300'} focus:border-bark-500 focus:ring-2 focus:ring-earth-200 outline-none transition-all`}
             disabled={isSubmitting}
             aria-describedby={errors.name ? 'name-error' : undefined}
             aria-invalid={!!errors.name}
@@ -111,7 +111,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, isSubmi
             onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
             onFocus={() => setErrors(prev => ({ ...prev, email: undefined }))}
             placeholder="you@example.com"
-            className={`w-full p-3 rounded-lg border ${errors.email ? 'border-red-300' : 'border-gray-300'} focus:border-earth-500 focus:ring-2 focus:ring-earth-200 outline-none transition-all`}
+            className={`w-full p-3 rounded-lg border ${errors.email ? 'border-red-300' : 'border-gray-300'} focus:border-bark-500 focus:ring-2 focus:ring-earth-200 outline-none transition-all`}
             disabled={isSubmitting}
             aria-describedby={errors.email ? 'email-error' : undefined}
             aria-invalid={!!errors.email}
@@ -138,7 +138,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, isSubmi
             onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
             onFocus={() => setErrors(prev => ({ ...prev, phone: undefined }))}
             placeholder="(555) 123-4567"
-            className={`w-full p-3 rounded-lg border ${errors.phone ? 'border-red-300' : 'border-gray-300'} focus:border-earth-500 focus:ring-2 focus:ring-earth-200 outline-none transition-all`}
+            className={`w-full p-3 rounded-lg border ${errors.phone ? 'border-red-300' : 'border-gray-300'} focus:border-bark-500 focus:ring-2 focus:ring-earth-200 outline-none transition-all`}
             disabled={isSubmitting}
             aria-describedby={errors.phone ? 'phone-error' : undefined}
             aria-invalid={!!errors.phone}
@@ -157,7 +157,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, isSubmi
           <button
             type="button"
             onClick={onCancel}
-            className="flex-1 py-3 rounded-full font-bold border-2 border-earth-200 text-earth-700 hover:bg-earth-50 transition-colors"
+            className="flex-1 py-3 rounded-full font-bold border-2 border-bark-200 text-bark-700 hover:bg-bark-50 transition-colors"
             disabled={isSubmitting}
           >
             Cancel
@@ -165,7 +165,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, isSubmi
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 py-3 rounded-full font-bold bg-earth-600 text-white hover:bg-earth-700 transition-colors flex items-center justify-center gap-2"
+              className="flex-1 py-3 rounded-full font-bold bg-bark-600 text-white hover:bg-bark-700 transition-colors flex items-center justify-center gap-2"
             >
               {isSubmitting ? (
                 <>
@@ -195,7 +195,7 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ itemCount, onCont
     <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
       <Check className="w-8 h-8 text-green-600" />
     </div>
-    <h3 className="text-xl font-serif font-bold text-earth-800 mb-2">Order Sent Successfully!</h3>
+    <h3 className="text-xl font-serif font-bold text-bark-800 mb-2">Order Sent Successfully!</h3>
     <p className="text-gray-600 mb-6">
       Thank you for your order! We'll be in touch with you shortly.
     </p>
@@ -204,7 +204,7 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ itemCount, onCont
     </p>
     <button
       onClick={onContinue}
-      className="w-full py-3 rounded-full font-bold bg-earth-600 text-white hover:bg-earth-700 transition-colors"
+      className="w-full py-3 rounded-full font-bold bg-bark-600 text-white hover:bg-bark-700 transition-colors"
     >
       Order More Soaps
     </button>
@@ -313,14 +313,14 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
       {/* Sidebar */}
       <div className="fixed right-0 top-0 bottom-0 w-full max-w-sm bg-white shadow-xl z-50 flex flex-col animate-in slide-in-from-right duration-300">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-earth-100">
+        <div className="flex items-center justify-between p-4 border-b border-bark-100">
           <div className="flex items-center gap-2">
-            <ShoppingCart className="w-5 h-5 text-earth-600" />
-            <h2 className="text-lg font-serif font-bold text-earth-800">
+            <ShoppingCart className="w-5 h-5 text-bark-600" />
+            <h2 className="text-lg font-serif font-bold text-bark-800">
               {showConfirmation ? 'Thank You!' : 'Your Cart'}
             </h2>
             {!showConfirmation && cart.totalQuantity > 0 && (
-              <span className="bg-earth-200 text-earth-800 text-xs px-2 py-0.5 rounded-full">
+              <span className="bg-bark-200 text-bark-800 text-xs px-2 py-0.5 rounded-full">
                 {cart.totalQuantity} soap{cart.totalQuantity > 1 ? 's' : ''}
               </span>
             )}
@@ -329,7 +329,7 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
             <button
               ref={closeButtonRef}
               onClick={onClose}
-              className="px-3 py-1.5 hover:bg-earth-50 rounded-full transition-colors text-sm text-earth-600 font-medium flex items-center gap-1"
+              className="px-3 py-1.5 hover:bg-bark-50 rounded-full transition-colors text-sm text-bark-600 font-medium flex items-center gap-1"
               aria-label="Close cart"
             >
               Close
@@ -359,24 +359,24 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
               <div className="p-4 space-y-3">
                 {cart.items.length === 0 ? (
                   <div className="text-center py-12">
-                    <ShoppingCart className="w-12 h-12 text-earth-200 mx-auto mb-3" />
+                    <ShoppingCart className="w-12 h-12 text-bark-200 mx-auto mb-3" />
                     <p className="text-gray-500">Your cart is empty</p>
                     <p className="text-sm text-gray-400 mt-1">Create your first soap combination above!</p>
                   </div>
                 ) : (
                   <>
-                    <div className="bg-earth-50 rounded-lg p-3 border border-earth-200 mb-4">
-                      <p className="text-sm text-earth-700">
+                    <div className="bg-bark-50 rounded-lg p-3 border border-bark-200 mb-4">
+                      <p className="text-sm text-bark-700">
                         <span className="font-semibold">Multiple items:</span> You can add as many different soap combinations as you like, then submit one order for everything.
                       </p>
                     </div>
                     {cart.items.map((item) => (
-                      <div key={item.id} className="flex items-start gap-3 p-3 bg-white rounded-lg border border-earth-100 shadow-sm">
+                      <div key={item.id} className="flex items-start gap-3 p-3 bg-white rounded-lg border border-bark-100 shadow-sm">
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
-                            <span className="font-medium text-earth-800">{item.scent}</span>
+                            <span className="font-medium text-bark-800">{item.scent}</span>
                             {item.hasLavenderPieces && (
-                              <span className="text-[10px] bg-earth-200 text-earth-700 px-2 py-0.5 rounded-full">
+                              <span className="text-[10px] bg-bark-200 text-bark-700 px-2 py-0.5 rounded-full">
                                 + Lavender Pieces
                               </span>
                             )}
@@ -386,7 +386,7 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="font-bold text-earth-800">Rs. {item.price * item.quantity}</div>
+                          <div className="font-bold text-bark-800">Rs. {item.price * item.quantity}</div>
                           <button
                             onClick={() => onRemoveItem(item.id)}
                             className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors"
@@ -406,7 +406,7 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
 
         {/* Footer */}
         {!showConfirmation && !showCheckout && cart.items.length > 0 && (
-          <div className="p-4 border-t border-earth-100 bg-earth-50">
+          <div className="p-4 border-t border-bark-100 bg-bark-50">
             {discountPercentage > 0 && (
               <div className="bg-green-100 border-2 border-green-300 rounded-xl p-4 mb-4 animate-pulse" role="alert" aria-live="polite">
                 <div className="flex items-center gap-2 text-green-800">
@@ -423,11 +423,11 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
             )}
             <div className="flex items-center justify-between mb-3">
               <span className="text-gray-600">Total unique types:</span>
-              <span className="font-bold text-earth-800">{cart.items.length}</span>
+              <span className="font-bold text-bark-800">{cart.items.length}</span>
             </div>
             <div className="flex items-center justify-between mb-3">
               <span className="text-gray-600">Total soaps:</span>
-              <span className="font-bold text-earth-800">{cart.totalQuantity} soap{cart.totalQuantity > 1 ? 's' : ''}</span>
+              <span className="font-bold text-bark-800">{cart.totalQuantity} soap{cart.totalQuantity > 1 ? 's' : ''}</span>
             </div>
             {discountPercentage > 0 && (
               <div className="flex items-center justify-between mb-2 text-green-700 bg-green-50 p-2 rounded-lg">
@@ -435,13 +435,13 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
                 <span className="font-bold">- Rs. {discountAmount}</span>
               </div>
             )}
-            <div className="flex items-center justify-between mb-3 pt-3 border-t border-earth-200">
-              <span className="text-xl font-bold text-earth-800">Total:</span>
+            <div className="flex items-center justify-between mb-3 pt-3 border-t border-bark-200">
+              <span className="text-xl font-bold text-bark-800">Total:</span>
               <div className="text-right">
                 {discountPercentage > 0 && (
                   <span className="text-gray-400 line-through mr-2">Rs. {subtotal}</span>
                 )}
-                <span className="text-xl font-bold text-earth-800">Rs. {total}</span>
+                <span className="text-xl font-bold text-bark-800">Rs. {total}</span>
               </div>
             </div>
             <div className="flex gap-3">
@@ -450,14 +450,14 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
                 className={`flex-1 py-3 border-2 rounded-full font-bold transition-colors ${
                   showClearCartConfirm 
                     ? 'border-red-300 text-red-600 bg-red-50' 
-                    : 'border-earth-200 text-earth-700 hover:bg-earth-100'
+                    : 'border-bark-200 text-bark-700 hover:bg-bark-100'
                 }`}
               >
                 {showClearCartConfirm ? 'Clear All?' : 'Clear Cart'}
               </button>
               <button
                 onClick={() => setShowCheckout(true)}
-                className="flex-[2] py-3 bg-earth-600 text-white rounded-full font-bold hover:bg-earth-700 transition-colors flex items-center justify-center gap-2"
+                className="flex-[2] py-3 bg-bark-600 text-white rounded-full font-bold hover:bg-bark-700 transition-colors flex items-center justify-center gap-2"
               >
                 <Send className="w-5 h-5" />
                 Submit Order ({cart.items.length} item{cart.items.length > 1 ? 's' : ''})
@@ -477,10 +477,10 @@ export const CartBadge: React.FC<{ count: number; onClick: () => void }> = ({ co
   return (
     <button
       onClick={onClick}
-      className="relative p-2 bg-earth-100 hover:bg-earth-200 rounded-full transition-colors"
+      className="relative p-2 bg-bark-100 hover:bg-bark-200 rounded-full transition-colors"
       aria-label="Open cart"
     >
-      <ShoppingCart className="w-5 h-5 text-earth-700" />
+      <ShoppingCart className="w-5 h-5 text-bark-700" />
       <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
         {count > 99 ? '99+' : count}
       </span>

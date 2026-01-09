@@ -4,10 +4,10 @@ import { SoapForm } from './src/components/SoapForm';
 
 function App() {
   return (
-    <div className="min-h-screen jungle-background selection:bg-jungle-300 selection:text-parchment-100">
+    <div className="min-h-screen jungle-background selection:bg-jungle-300 selection:text-white">
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-6 focus:py-3 focus:bg-jungle-500 focus:text-parchment-100 focus:rounded-full focus:font-semibold focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-jungle-300"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-6 focus:py-3 focus:bg-jungle-500 focus:text-white focus:rounded-full focus:font-semibold focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-jungle-300"
       >
         Skip to main content
       </a>
@@ -22,10 +22,10 @@ function App() {
             <div className="absolute top-6 right-8 text-2xl opacity-60">🌱</div>
             
             <div className="parchment-paper inline-block px-8 py-6 max-w-2xl">
-              <h1 className="text-3xl md:text-4xl font-serif font-bold text-jungle-800 mb-2 botanical-heading">
+              <h1 className="text-3xl md:text-4xl font-serif font-bold text-jungle-700 mb-2 botanical-heading">
                 Botanical Soap Workshop
               </h1>
-              <p className="text-bark-200 italic text-lg">
+              <p className="text-bark-500 italic text-lg">
                 Handcraft your own organic soaps with nature's finest ingredients
               </p>
             </div>
@@ -56,7 +56,7 @@ function App() {
           {/* Footer with botanical touch */}
           <footer className="mt-12 text-center relative">
             <div className="divider-leaf"></div>
-            <p className="font-serif italic text-jungle-300 text-lg">
+            <p className="font-serif italic text-jungle-600 text-lg">
               "Made with love and nature's botanicals"
             </p>
             <div className="flex justify-center gap-4 mt-4 text-2xl">
