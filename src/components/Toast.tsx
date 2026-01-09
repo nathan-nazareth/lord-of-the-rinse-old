@@ -31,7 +31,7 @@ export const Toast: React.FC<ToastProps> = ({
 
   if (!isVisible) return null;
 
-  const bgColor = type === 'success' ? 'bg-green-600' : type === 'error' ? 'bg-red-600' : 'bg-earth-600';
+  const bgColor = type === 'success' ? 'bg-green-600' : type === 'error' ? 'bg-red-600' : 'bg-bark-600';
   const icon = type === 'success' ? <Check className="w-5 h-5" /> : null;
 
   return (

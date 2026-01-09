@@ -6,10 +6,10 @@ interface LoadingSpinnerProps {
 
 const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ message = 'Loading...' }) => {
   return (
-    <div className="min-h-screen bg-earth-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-bark-50 flex items-center justify-center p-4">
       <div className="text-center">
-        <div className="mx-auto w-12 h-12 border-4 border-earth-200 border-t-earth-600 rounded-full animate-spin mb-4"></div>
-        <p className="text-earth-600 font-medium">{message}</p>
+        <div className="mx-auto w-12 h-12 border-4 border-bark-200 border-t-bark-600 rounded-full animate-spin mb-4"></div>
+        <p className="text-bark-600 font-medium">{message}</p>
       </div>
     </div>
   );
