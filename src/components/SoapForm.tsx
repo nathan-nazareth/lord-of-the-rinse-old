@@ -363,26 +363,30 @@ export const SoapForm: React.FC = () => {
           <div className="flex items-center gap-2">
             {steps.map((step, index) => (
               <React.Fragment key={step.key}>
-                {index > 0 && <div className="w-6 h-px bg-earth-200" />}
+                {index > 0 && <div className="w-6 h-px bg-parchment-400" />}
                 <div className={`flex flex-col items-center min-w-[60px] ${
                   currentStep === step.key
-                    ? 'text-earth-600'
+                    ? 'text-jungle-400'
                     : index < steps.findIndex(s => s.key === currentStep)
-                      ? 'text-earth-400'
-                      : 'text-gray-300'
+                      ? 'text-jungle-500'
+                      : 'text-parchment-400'
                 }`}>
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
                     index < steps.findIndex(s => s.key === currentStep)
-                      ? 'bg-earth-500 text-white'
+                      ? 'bg-jungle-500 text-parchment-100'
                       : currentStep === step.key
-                        ? 'bg-earth-100 border-2 border-earth-500'
-                        : 'bg-gray-100'
+                        ? 'bg-parchment-200 border-2 border-jungle-500'
+                        : 'bg-parchment-300'
                   }`}>
-                    <span className={`text-xs font-medium ${currentStep === step.key ? 'text-earth-700' : ''}`}>
-                      {index + 1}
-                    </span>
+                    {index < steps.findIndex(s => s.key === currentStep) ? (
+                      <Check className="w-5 h-5" />
+                    ) : (
+                      <span className={`text-sm font-bold ${currentStep === step.key ? 'text-jungle-700' : ''}`}>
+                        {index + 1}
+                      </span>
+                    )}
                   </div>
-                  <span className="text-[10px] mt-1 font-medium text-center leading-tight max-w-[70px]">
+                  <span className="text-xs mt-2 font-medium text-center leading-tight max-w-[70px] text-bark-200">
                     {step.label}
                   </span>
                 </div>
@@ -393,24 +397,26 @@ export const SoapForm: React.FC = () => {
           <div className="w-16" />
         </div>
 
-        <div className="flex items-center gap-2 bg-earth-50 px-3 py-2 rounded-lg">
-          <span className="text-xs text-earth-700">
-            Step <strong>{steps.findIndex(s => s.key === currentStep) + 1}</strong> of <strong>{steps.length}</strong> • Complete each step to add soaps
+        <div className="flex items-center gap-2 bg-parchment-200 px-4 py-3 rounded-lg border border-parchment-300">
+          <span className="text-sm text-bark-200">
+            Step <strong className="text-jungle-700">{steps.findIndex(s => s.key === currentStep) + 1}</strong> of <strong>{steps.length}</strong> • Complete each step to add soaps
           </span>
         </div>
       </div>
 
       {currentStep === 'scent' && (
-        <div className="card-organic p-6 md:p-8">
-          <h2 className="text-xl font-serif font-bold mb-6 text-earth-800 flex items-center gap-4">
-            <span className="bg-sage-100 w-12 h-12 rounded-full flex items-center justify-center">
-              <Sparkles className="w-6 h-6 text-sage-600" />
+        <div className="card-catalog p-6 md:p-8">
+          <h2 className="text-xl font-serif font-bold mb-6 text-jungle-800 flex items-center gap-4">
+            <span className="bg-jungle-200 w-12 h-12 rounded-full flex items-center justify-center">
+              <Sparkles className="w-6 h-6 text-jungle-600" />
             </span>
             Choose Your Scent & Size
           </h2>
           
           <div className="mb-6">
-            <p className="text-stone-600 mb-4 font-medium">Pick a scent:</p>
+            <p className="text-bark-200 mb-4 font-medium flex items-center gap-2">
+              <span className="text-lg">🌸</span> Pick a scent:
+            </p>
             <div className="grid grid-cols-3 gap-3">
               {SOAP_OPTIONS.map((option) => {
                 const info = SCENT_INFO[option.scent];
@@ -424,19 +430,21 @@ export const SoapForm: React.FC = () => {
                     onMouseEnter={() => handleMouseEnterScent(option.scent)}
                     onMouseLeave={handleMouseLeaveScent}
                     className={`
-                      p-4 rounded-2xl border-2 text-left transition-all
+                      p-4 rounded-xl border-2 text-left transition-all relative overflow-hidden
                       ${isSelected 
-                        ? 'border-sage-400 bg-sage-50 shadow-md' 
-                        : 'border-cream-300 hover:border-sage-300 hover:bg-cream-50'}
+                        ? 'border-jungle-400 bg-jungle-50 shadow-md' 
+                        : 'border-parchment-300 hover:border-jungle-300 hover:bg-parchment-100'}
                     `}
                   >
-                    <div className="flex items-center justify-between mb-1">
-                      <span className={`font-serif font-semibold text-lg ${isSelected ? 'text-earth-800' : 'text-stone-700'}`}>
+                    {isSelected && (
+                      <span className="absolute top-2 right-2 text-jungle-500">✓</span>
+                    )}
+                    <div className="flex items-center justify-between mb-2">
+                      <span className={`font-serif font-semibold text-lg ${isSelected ? 'text-jungle-800' : 'text-bark-200'}`}>
                         {option.scent}
                       </span>
-                      {isSelected && <Check className="w-5 h-5 text-sage-600" />}
                     </div>
-                    <p className="text-sm text-stone-500">{info.description}</p>
+                    <p className="text-sm text-bark-300 italic">{info.description}</p>
                   </button>
                 );
               })}
@@ -475,20 +483,20 @@ export const SoapForm: React.FC = () => {
                 className={`w-full p-4 rounded-2xl border-2 flex items-center justify-between transition-all ${
                   formData.hasLavenderPieces
                     ? 'border-sage-400 bg-sage-50 shadow-sm'
-                    : 'border-cream-300 hover:border-sage-300 hover:bg-cream-50'}
+                    : 'border-parchment-300 hover:border-jungle-300 hover:bg-parchment-100'}
                 `}
               >
                 <div className="flex items-center gap-4">
-                  <div className={`w-7 h-7 rounded-full flex items-center justify-center border-2 ${
-                    formData.hasLavenderPieces ? 'border-sage-500 bg-sage-500' : 'border-cream-400'
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${
+                    formData.hasLavenderPieces ? 'border-jungle-500 bg-jungle-500' : 'border-parchment-400'
                   }`}>
-                    {formData.hasLavenderPieces && <Check className="w-4 h-4 text-white" />}
+                    {formData.hasLavenderPieces && <Check className="w-5 h-5 text-parchment-100" />}
                   </div>
-                  <span className={`font-medium ${formData.hasLavenderPieces ? 'text-earth-800' : 'text-stone-700'}`}>
-                    Add Lavender Pieces
+                  <span className={`font-medium ${formData.hasLavenderPieces ? 'text-jungle-800' : 'text-bark-200'}`}>
+                    Add Lavender Pieces 🌿
                   </span>
                 </div>
-                <span className={`font-bold ${formData.hasLavenderPieces ? 'text-sage-700' : 'text-stone-400'}`}>
+                <span className={`font-bold ${formData.hasLavenderPieces ? 'text-jungle-600' : 'text-parchment-400'}`}>
                   +Rs. {LAVENDER_PIECES_PRICE}
                 </span>
               </button>
@@ -496,27 +504,27 @@ export const SoapForm: React.FC = () => {
           )}
 
           {formData.scent && (
-            <div className="mt-4 pt-4 border-t border-gray-100">
+            <div className="mt-6 pt-6 border-t border-parchment-300">
               <button
                 type="button"
                 onClick={() => setFormData(prev => ({ ...prev, hasLavenderPieces: !prev.hasLavenderPieces }))}
-                className={`w-full p-3 rounded-lg border-2 flex items-center justify-between transition-all ${
+                className={`w-full p-4 rounded-xl border-2 flex items-center justify-between transition-all ${
                   formData.hasLavenderPieces
-                    ? 'border-earth-400 bg-earth-50'
-                    : 'border-gray-200 hover:border-earth-300'}
+                    ? 'border-jungle-400 bg-jungle-50'
+                    : 'border-parchment-300 hover:border-jungle-300 hover:bg-parchment-100'}
                 `}
               >
                 <div className="flex items-center gap-3">
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 ${
-                    formData.hasLavenderPieces ? 'border-earth-500 bg-earth-500' : 'border-gray-300'
+                  <div className={`w-7 h-7 rounded-full flex items-center justify-center border-2 ${
+                    formData.hasLavenderPieces ? 'border-jungle-500 bg-jungle-500' : 'border-parchment-400'
                   }`}>
-                    {formData.hasLavenderPieces && <Check className="w-4 h-4 text-white" />}
+                    {formData.hasLavenderPieces && <Check className="w-4 h-4 text-parchment-100" />}
                   </div>
-                  <span className={`font-medium ${formData.hasLavenderPieces ? 'text-earth-800' : 'text-gray-700'}`}>
+                  <span className={`font-medium ${formData.hasLavenderPieces ? 'text-jungle-800' : 'text-bark-200'}`}>
                     Add Lavender Pieces
                   </span>
                 </div>
-                <span className={`font-bold ${formData.hasLavenderPieces ? 'text-earth-700' : 'text-gray-500'}`}>
+                <span className={`font-bold ${formData.hasLavenderPieces ? 'text-jungle-600' : 'text-parchment-400'}`}>
                   +Rs. {LAVENDER_PIECES_PRICE}
                 </span>
               </button>
@@ -524,15 +532,15 @@ export const SoapForm: React.FC = () => {
           )}
 
           {formData.scent && (
-            <div className="mt-6 pt-6 border-t border-cream-200">
-              <div className="flex items-center justify-between bg-cream-100 p-4 rounded-2xl">
+            <div className="mt-6 pt-6 border-t border-parchment-300">
+              <div className="flex items-center justify-between bg-parchment-200 p-4 rounded-xl">
                 <div>
-                  <span className="text-stone-600">
+                  <span className="text-bark-200">
                     {formData.size}g/{formData.size}ml {formData.scent}
-                    {formData.hasLavenderPieces && <span className="text-sage-600 ml-2">+ Lavender Pieces</span>}
+                    {formData.hasLavenderPieces && <span className="text-jungle-600 ml-2">+ Lavender Pieces 🌿</span>}
                   </span>
                 </div>
-                <span className="text-xl font-serif font-bold text-earth-800">
+                <span className="text-xl font-serif font-bold text-jungle-800">
                   Rs. {getTotalPrice()}
                 </span>
               </div>
@@ -546,8 +554,8 @@ export const SoapForm: React.FC = () => {
             className={`
               w-full mt-6 py-4 rounded-full font-bold flex items-center justify-center gap-2 transition-all shadow-md
               ${isScentStepValid
-                ? 'bg-sage-500 text-white hover:bg-sage-600 hover:shadow-lg'
-                : 'bg-stone-200 text-stone-400 cursor-not-allowed'}
+                ? 'bg-jungle-500 text-parchment-100 hover:bg-jungle-600 hover:shadow-lg'
+                : 'bg-parchment-300 text-parchment-400 cursor-not-allowed'}
             `}
           >
             Continue to Color
@@ -555,10 +563,10 @@ export const SoapForm: React.FC = () => {
           </button>
 
           {showScentInfo && (
-            <div className="mt-4 p-3 bg-cream-50 rounded-xl flex items-center gap-3">
-              <Leaf className="w-5 h-5 text-sage-600" />
-              <span className="text-sm text-stone-600">
-                <strong className="text-earth-700">Tip:</strong> {SCENT_INFO[showScentInfo]?.tip}
+            <div className="mt-4 p-3 bg-parchment-200 rounded-xl flex items-center gap-3">
+              <Leaf className="w-5 h-5 text-jungle-600" />
+              <span className="text-sm text-bark-200">
+                <strong className="text-jungle-700">Tip:</strong> {SCENT_INFO[showScentInfo]?.tip}
               </span>
             </div>
           )}
@@ -566,24 +574,24 @@ export const SoapForm: React.FC = () => {
       )}
 
       {currentStep === 'color' && formData.scent && (
-        <div className="card-organic p-6 md:p-8">
+        <div className="card-catalog p-6 md:p-8">
           <button
             type="button"
             onClick={() => setCurrentStep('scent')}
-            className="flex items-center gap-2 text-stone-500 hover:text-sage-600 mb-6 transition-colors"
+            className="flex items-center gap-2 text-bark-300 hover:text-jungle-600 mb-6 transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
             Back to scent & size
           </button>
           
-          <h2 className="text-xl font-serif font-bold mb-2 text-earth-800 flex items-center gap-4">
-            <span className="bg-sage-100 w-12 h-12 rounded-full flex items-center justify-center">
-              <Palette className="w-6 h-6 text-sage-600" />
+          <h2 className="text-xl font-serif font-bold mb-2 text-jungle-800 flex items-center gap-4">
+            <span className="bg-jungle-200 w-12 h-12 rounded-full flex items-center justify-center">
+              <Palette className="w-6 h-6 text-jungle-600" />
             </span>
             Choose Your Color
           </h2>
-          <p className="text-stone-500 mb-6">
-            For <span className="font-medium text-earth-700">{formData.scent}</span> • {formData.size}g/{formData.size}ml • Rs. {currentPrice}
+          <p className="text-bark-300 mb-6">
+            For <span className="font-medium text-jungle-700">{formData.scent}</span> • {formData.size}g/{formData.size}ml • Rs. {currentPrice}
           </p>
           
           {(formData.scent === SoapScent.COFFEE || formData.scent === SoapScent.TURMERIC) && (
@@ -688,10 +696,10 @@ export const SoapForm: React.FC = () => {
               value={formData.quantity}
               onChange={handleQuantityChange}
               placeholder="0"
-              className="flex-1 p-4 text-center text-3xl font-serif font-bold rounded-2xl border-2 border-cream-300 focus:border-sage-400 focus:ring-4 focus:ring-sage-100 outline-none bg-white"
+              className="flex-1 p-4 text-center text-3xl font-serif font-bold rounded-2xl border-2 border-parchment-300 focus:border-jungle-400 focus:ring-4 focus:ring-jungle-100 outline-none bg-parchment-50"
               autoFocus
             />
-            <span className="text-lg font-medium text-stone-500">soaps</span>
+            <span className="text-lg font-medium text-bark-300">soaps</span>
           </div>
           
           <div className="flex gap-3 mb-6">
@@ -702,8 +710,8 @@ export const SoapForm: React.FC = () => {
                 onClick={() => setFormData(prev => ({ ...prev, quantity: String(num) }))}
                 className={`flex-1 py-3 rounded-2xl font-semibold transition-all ${
                   formData.quantity === String(num)
-                    ? 'bg-sage-500 text-white shadow-md'
-                    : 'bg-cream-100 text-stone-600 hover:bg-sage-100 hover:text-sage-700'
+                    ? 'bg-jungle-500 text-parchment-100 shadow-md'
+                    : 'bg-parchment-200 text-bark-200 hover:bg-jungle-100 hover:text-jungle-700'
                 }`}
               >
                 {num}
@@ -711,28 +719,28 @@ export const SoapForm: React.FC = () => {
             ))}
           </div>
           
-          <div className="bg-gradient-to-r from-sage-100 to-sage-200 border-2 border-sage-300 rounded-2xl p-5 mb-6 animate-soft-pulse">
-            <div className="flex items-center gap-3 text-sage-800">
-            <Tag className="w-5 h-5" />
+          <div className="bg-gradient-to-r from-jungle-100 to-jungle-200 border-2 border-jungle-300 rounded-2xl p-5 mb-6 animate-soft-pulse">
+            <div className="flex items-center gap-3 text-jungle-800">
+              <Tag className="w-5 h-5" />
               <span className="text-base font-bold">Bulk Discount on Your Order:</span>
             </div>
-            <div className="mt-2 text-sm text-sage-800 ml-7">
-              <span className="inline-block bg-sage-200 px-3 py-1 rounded-xl font-bold text-lg">10% OFF</span>
+            <div className="mt-2 text-sm text-jungle-800 ml-7">
+              <span className="inline-block bg-jungle-300 px-3 py-1 rounded-xl font-bold text-lg">10% OFF</span>
               <span className="mx-3">for 2-3 soaps</span>
               <span className="mx-2">•</span>
-              <span className="inline-block bg-sage-300 px-3 py-1 rounded-xl font-bold text-lg">15% OFF</span>
+              <span className="inline-block bg-jungle-400 px-3 py-1 rounded-xl font-bold text-lg">15% OFF</span>
               <span className="mx-3">for 4+ soaps</span>
             </div>
-            <div className="mt-2 text-sm text-sage-700 ml-7 flex items-center gap-2">
+            <div className="mt-2 text-sm text-jungle-700 ml-7 flex items-center gap-2">
               <span className="text-lg">💰</span>
               <span className="font-semibold">Mix & match any scents — discount applies to your entire order!</span>
             </div>
           </div>
           
           {formData.quantity && parseInt(formData.quantity, 10) > 0 && (
-            <div className="bg-cream-100 p-4 rounded-2xl flex items-center justify-between">
-              <span className="text-stone-600">Total for {formData.quantity} soap{parseInt(formData.quantity, 10) > 1 ? 's' : ''}:</span>
-              <span className="text-xl font-serif font-bold text-earth-800">
+            <div className="bg-parchment-200 p-4 rounded-2xl flex items-center justify-between">
+              <span className="text-bark-200">Total for {formData.quantity} soap{parseInt(formData.quantity, 10) > 1 ? 's' : ''}:</span>
+              <span className="text-xl font-serif font-bold text-jungle-800">
                 Rs. {currentPrice * parseInt(formData.quantity, 10)}
               </span>
             </div>
@@ -740,12 +748,12 @@ export const SoapForm: React.FC = () => {
         </div>
       )}
 
-      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-cream-200 p-4 z-40 shadow-lg">
+      <div className="fixed bottom-0 left-0 right-0 bg-parchment-100/98 backdrop-blur-md border-t border-parchment-300 p-4 z-40 shadow-lg">
         <div className="max-w-3xl mx-auto">
           {cart.items.length > 0 && (
-            <div className="mb-3 p-3 bg-sage-50 rounded-xl text-center">
-              <span className="text-sm text-stone-600">
-                {cart.totalQuantity} soap{cart.totalQuantity > 1 ? 's' : ''} in cart • Tap cart to review
+            <div className="mb-3 p-3 bg-jungle-100 rounded-xl text-center">
+              <span className="text-sm text-bark-200">
+                {cart.totalQuantity} soap{cart.totalQuantity > 1 ? 's' : ''} in cart • Tap cart to review 🌿
               </span>
             </div>
           )}
@@ -755,7 +763,7 @@ export const SoapForm: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsCartOpen(true)}
-                className="px-5 py-3 rounded-full font-semibold text-sm flex items-center gap-2 bg-cream-200 text-stone-600 hover:bg-sage-200 hover:text-sage-800 transition-all"
+                className="px-5 py-3 rounded-full font-semibold text-sm flex items-center gap-2 bg-parchment-300 text-bark-200 hover:bg-jungle-200 hover:text-jungle-700 transition-all"
               >
                 <ShoppingCart className="w-5 h-5" />
                 Cart ({cart.totalQuantity})
@@ -769,8 +777,8 @@ export const SoapForm: React.FC = () => {
               className={`
                 flex-1 py-4 rounded-full font-bold text-base flex items-center justify-center gap-2 transition-all shadow-md
                 ${!isButtonDisabled
-                  ? 'bg-sage-500 text-white hover:bg-sage-600 hover:shadow-lg' 
-                  : 'bg-stone-200 text-stone-400 cursor-not-allowed'}
+                  ? 'bg-jungle-500 text-parchment-100 hover:bg-jungle-600 hover:shadow-lg' 
+                  : 'bg-parchment-300 text-parchment-400 cursor-not-allowed'}
               `}
             >
               <Plus className="w-5 h-5" />
@@ -779,7 +787,7 @@ export const SoapForm: React.FC = () => {
           </div>
           
           <div className="text-center mt-3">
-            <span className="text-xs text-stone-400">
+            <span className="text-xs text-parchment-400">
               {rateLimit.cooldownRemaining !== null
                 ? `Try again in ${rateLimit.cooldownRemaining}s`
                 : `${remainingCount}/10 submissions`}

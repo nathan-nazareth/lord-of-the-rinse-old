@@ -4,109 +4,425 @@
   --font-serif: "Playfair Display", serif;
   --font-sans: "Lato", sans-serif;
   
-  /* Organic, natural color palette */
-  --color-cream-50: #fefdfb;
-  --color-cream-100: #faf8f3;
-  --color-cream-200: #f5f0e6;
-  --color-cream-300: #ede4d3;
+  /* Parchment and paper tones */
+  --color-parchment-50: #fdf9f0;
+  --color-parchment-100: #faf4e3;
+  --color-parchment-200: #f5e8c8;
+  --color-parchment-300: #e8d4a8;
+  --color-parchment-400: #d4bc7e;
   
-  --color-sage-50: #f4f7f4;
-  --color-sage-100: #e8efe8;
-  --color-sage-200: #d4e0d4;
-  --color-sage-300: #b5cbb5;
-  --color-sage-400: #8fb38f;
-  --color-sage-500: #6b9b6b;
+  /* Deep jungle greens */
+  --color-jungle-50: #1a2f1a;
+  --color-jungle-100: #1e371e;
+  --color-jungle-200: #2d4a2d;
+  --color-jungle-300: #3d6b3d;
+  --color-jungle-400: #4a8a4a;
+  --color-jungle-500: #5aa85a;
+  --color-jungle-600: #7bc97b;
   
-  --color-terracotta-50: #fdf8f5;
-  --color-terracotta-100: #f9efe8;
-  --color-terracotta-200: #f2ddd0;
-  --color-terracotta-300: #e5c4ab;
+  /* Earthy browns */
+  --color-bark-50: #2c1810;
+  --color-bark-100: #3d2518;
+  --color-bark-200: #5c3d2e;
+  --color-bark-300: #8b6b4a;
   
-  --color-earth-50: #f9f8f6;
-  --color-earth-100: #efece6;
-  --color-earth-200: #e0dacf;
-  --color-earth-300: #c8bfab;
-  --color-earth-400: #b0a083;
-  --color-earth-500: #9b8a66;
-  --color-earth-600: #7d6d50;
-  --color-earth-800: #4d4436;
+  /* Flower colors */
+  --color-flower-pink: #e8a4b8;
+  --color-flower-purple: #b8a4e8;
+  --color-flower-yellow: #e8d4a8;
+  --color-flower-orange: #e8b88a;
   
-  --color-stone-50: #fafaf9;
-  --color-stone-100: #f5f5f4;
-  --color-stone-200: #e7e5e4;
-  --color-stone-300: #d6d3d1;
-  --color-stone-400: #a8a29e;
-  --color-stone-500: #78716c;
-  
-  /* Soft shadows for organic feel */
-  --shadow-soft: 0 2px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
-  --shadow-organic: 0 4px 20px -5px rgba(77, 68, 54, 0.1), 0 8px 30px -8px rgba(77, 68, 54, 0.05);
-  --shadow-float: 0 10px 40px -15px rgba(77, 68, 54, 0.15);
+  --shadow-parchment: 0 4px 20px rgba(44, 24, 16, 0.3);
+  --shadow-float: 0 10px 40px rgba(44, 24, 16, 0.4);
 }
 
-/* Smooth transitions for organic feel */
+/* Jungle background with rich foliage */
+.jungle-background {
+  background: 
+    /* Deep jungle gradient */
+    linear-gradient(180deg, 
+      #0d1f0d 0%,
+      #1a2f1a 20%,
+      #2d4a2d 40%,
+      #1e3a1e 60%,
+      #2d5a2d 80%,
+      #1a2f1a 100%
+    );
+  position: relative;
+  overflow: hidden;
+}
+
+/* Dense foliage pattern */
+.jungle-background::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.15' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.15'/%3E%3C/svg%3E");
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Leaf patterns */
+.jungle-background::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cpath d='M100 20 Q130 60 140 100 Q130 140 100 180 Q70 140 60 100 Q70 60 100 20' fill='%232d4a2d' opacity='0.08'/%3E%3Cpath d='M50 50 Q80 70 90 100 Q80 130 50 150 Q20 130 10 100 Q20 70 50 50' fill='%233d6b3d' opacity='0.06'/%3E%3Cpath d='M150 50 Q180 70 190 100 Q180 130 150 150 Q120 130 110 100 Q120 70 150 50' fill='%233d6b3d' opacity='0.06'/%3E%3C/svg%3E");
+  background-size: 300px 300px;
+  background-repeat: repeat;
+  pointer-events: none;
+}
+
+/* Parchment paper texture */
+.parchment-paper {
+  background: 
+    /* Base color */
+    linear-gradient(135deg, 
+      var(--color-parchment-100) 0%,
+      var(--color-parchment-200) 50%,
+      var(--color-parchment-100) 100%
+    );
+  position: relative;
+  box-shadow: var(--shadow-float);
+}
+
+/* Paper texture overlay */
+.parchment-paper::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='rough'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.04' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23rough)' opacity='0.08'/%3E%3C/svg%3E");
+  opacity: 0.5;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* Vintage paper edge effect */
+.parchment-paper {
+  border-radius: 4px;
+  position: relative;
+}
+
+.parchment-paper::after {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  border: 2px solid var(--color-parchment-300);
+  border-radius: 2px;
+  pointer-events: none;
+  opacity: 0.3;
+}
+
+/* Flower decorations */
+.flower-decoration {
+  position: relative;
+}
+
+.flower-decoration::before {
+  content: '🌸';
+  position: absolute;
+  font-size: 24px;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+.flower-decoration-small::before {
+  content: '🌸';
+  font-size: 16px;
+  top: -8px;
+}
+
+/* Vine/branch decorative element */
+.vine-border {
+  position: relative;
+}
+
+.vine-border::before {
+  content: '';
+  position: absolute;
+  top: 12px;
+  left: 20px;
+  right: 20px;
+  height: 3px;
+  background: linear-gradient(90deg, 
+    transparent 0%,
+    var(--color-jungle-400) 20%,
+    var(--color-jungle-500) 50%,
+    var(--color-jungle-400) 80%,
+    transparent 100%
+  );
+  border-radius: 2px;
+  opacity: 0.5;
+}
+
+/* Vintage label style */
+.vintage-label {
+  background: linear-gradient(135deg, var(--color-parchment-300) 0%, var(--color-parchment-200) 100%);
+  border: 2px solid var(--color-bark-300);
+  border-radius: 8px 8px 20px 8px;
+  padding: 8px 16px;
+  font-family: var(--font-serif);
+  position: relative;
+}
+
+.vintage-label::before {
+  content: '✦';
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-bark-300);
+}
+
+.vintage-label::after {
+  content: '✦';
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-bark-300);
+}
+
+/* Soft aged look */
+.aged {
+  position: relative;
+}
+
+.aged::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(139, 107, 74, 0.05) 100%);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* Botanical illustration style headings */
+.botanical-heading {
+  font-family: var(--font-serif);
+  position: relative;
+  padding-bottom: 16px;
+}
+
+.botanical-heading::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 2px;
+  background: linear-gradient(90deg, 
+    transparent 0%,
+    var(--color-jungle-400) 30%,
+    var(--color-jungle-500) 50%,
+    var(--color-jungle-400) 70%,
+    transparent 100%
+  );
+}
+
+.botanical-heading::before {
+  content: '🌿';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 16px;
+  background: var(--color-parchment-200);
+  padding: 0 8px;
+}
+
+/* Flower corner decorations */
+.flower-corner-tl::before {
+  content: '🌺';
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  font-size: 28px;
+  z-index: 10;
+}
+
+.flower-corner-tr::before {
+  content: '🌸';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 24px;
+  z-index: 10;
+}
+
+.flower-corner-bl::before {
+  content: '🌼';
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  font-size: 24px;
+  z-index: 10;
+}
+
+.flower-corner-br::before {
+  content: '🌻';
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  font-size: 28px;
+  z-index: 10;
+}
+
+/* Washi tape effect */
+.washi-tape {
+  position: relative;
+}
+
+.washi-tape::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 20px;
+  background: linear-gradient(90deg, 
+    var(--color-jungle-400) 0%,
+    var(--color-jungle-500) 50%,
+    var(--color-jungle-400) 100%
+  );
+  opacity: 0.8;
+  transform: translateX(-50%) rotate(-2deg);
+  border-radius: 2px;
+}
+
+/* Vintage button style */
+.btn-vintage {
+  background: linear-gradient(135deg, var(--color-jungle-500) 0%, var(--color-jungle-400) 100%);
+  border: 2px solid var(--color-jungle-300);
+  border-radius: 25px;
+  padding: 12px 24px;
+  font-family: var(--font-serif);
+  font-weight: 600;
+  color: var(--color-parchment-100);
+  position: relative;
+  box-shadow: 
+    0 2px 4px rgba(0,0,0,0.2),
+    inset 0 1px 0 rgba(255,255,255,0.2);
+  transition: all 0.3s ease;
+}
+
+.btn-vintage:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 4px 8px rgba(0,0,0,0.3),
+    inset 0 1px 0 rgba(255,255,255,0.2);
+  background: linear-gradient(135deg, var(--color-jungle-400) 0%, var(--color-jungle-300) 100%);
+}
+
+.btn-vintage:active {
+  transform: translateY(0);
+}
+
+/* Input field styled like a journal entry */
+.input-journal {
+  background: var(--color-parchment-50);
+  border: 1px solid var(--color-parchment-300);
+  border-radius: 4px 4px 8px 4px;
+  padding: 12px 16px;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  color: var(--color-bark-100);
+  transition: all 0.3s ease;
+}
+
+.input-journal:focus {
+  outline: none;
+  border-color: var(--color-jungle-400);
+  box-shadow: 0 0 0 3px rgba(74, 138, 74, 0.2);
+}
+
+/* Card styled like a card catalog entry */
+.card-catalog {
+  background: var(--color-parchment-100);
+  border: 1px solid var(--color-parchment-300);
+  border-radius: 4px;
+  padding: 16px;
+  position: relative;
+  box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+}
+
+.card-catalog::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 8px;
+  width: 1px;
+  background: var(--color-parchment-300);
+}
+
+/* Ink stamp effect */
+.ink-stamp {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-bark-200);
+  border: 4px double var(--color-bark-200);
+  border-radius: 8px;
+  padding: 8px 16px;
+  opacity: 0.8;
+  transform: rotate(-3deg);
+  display: inline-block;
+}
+
+/* Selection color */
+::selection {
+  background: var(--color-jungle-300);
+  color: var(--color-parchment-100);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-parchment-200);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-jungle-400);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-jungle-500);
+}
+
+/* Smooth transitions */
 * {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Soft, organic scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--color-cream-100);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--color-earth-300);
-  border-radius: 20px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-earth-400);
-}
-
-/* Smooth button interactions */
-button {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Soft focus states */
-*:focus-visible {
-  outline: 2px solid var(--color-sage-400);
-  outline-offset: 2px;
-}
-
-/* Organic card styling */
-.card-organic {
-  background: linear-gradient(135deg, var(--color-cream-50) 0%, var(--color-cream-100) 100%);
-  border-radius: 24px;
-  box-shadow: var(--shadow-organic);
-}
-
-/* Soft button base */
-.btn-organic {
-  border-radius: 50px;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-}
-
-/* Natural texture overlay */
-.natural-texture {
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.02'/%3E%3C/svg%3E");
-}
-
-/* Smooth page transitions */
-.page-enter {
-  animation: pageSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes pageSlideIn {
+/* Page transitions */
+@keyframes pageFadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -114,47 +430,32 @@ button {
   }
 }
 
-/* Soft pulse animation */
-@keyframes softPulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.85;
-  }
+.page-enter {
+  animation: pageFadeIn 0.5s ease-out;
 }
 
-.animate-soft-pulse {
-  animation: softPulse 3s ease-in-out infinite;
+/* Decorative dividers */
+.divider-leaf::before {
+  content: '🌿';
+  display: block;
+  text-align: center;
+  font-size: 20px;
+  margin: 16px 0;
+  opacity: 0.6;
 }
 
-/* Gradient text */
-.gradient-text {
-  background: linear-gradient(135deg, var(--color-earth-800) 0%, var(--color-terracotta-300) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+.divider-leaf::after {
+  content: '';
+  display: block;
+  height: 2px;
+  background: linear-gradient(90deg, 
+    transparent 0%,
+    var(--color-parchment-400) 20%,
+    var(--color-parchment-300) 50%,
+    var(--color-parchment-400) 80%,
+    transparent 100%
+  );
+  margin-top: 8px;
 }
 
-/* Organic border */
-.border-organic {
-  border-radius: 16px;
-  border: 1px solid var(--color-earth-200);
-}
-
-/* Soft input styling */
-input[type="text"],
-input[type="email"],
-input[type="tel"] {
-  border-radius: 16px;
-  border: 2px solid var(--color-cream-300);
-  transition: all 0.3s ease;
-}
-
-input[type="text"]:focus,
-input[type="email"]:focus,
-input[type="tel"]:focus {
-  border-color: var(--color-sage-400);
-  box-shadow: 0 0 0 4px rgba(139, 179, 143, 0.15);
-}
 
