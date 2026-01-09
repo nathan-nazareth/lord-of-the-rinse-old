@@ -401,17 +401,17 @@ export const SoapForm: React.FC = () => {
       </div>
 
       {currentStep === 'scent' && (
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-earth-100">
-          <h2 className="text-lg font-serif font-bold mb-4 text-earth-800 flex items-center gap-3">
-            <span className="bg-earth-100 w-10 h-10 rounded-full flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-earth-600" />
+        <div className="card-organic p-6 md:p-8">
+          <h2 className="text-xl font-serif font-bold mb-6 text-earth-800 flex items-center gap-4">
+            <span className="bg-sage-100 w-12 h-12 rounded-full flex items-center justify-center">
+              <Sparkles className="w-6 h-6 text-sage-600" />
             </span>
-            Choose Scent & Size
+            Choose Your Scent & Size
           </h2>
           
-          <div className="mb-4">
-            <p className="text-sm text-gray-600 mb-3">Pick a scent:</p>
-            <div className="grid grid-cols-3 gap-2">
+          <div className="mb-6">
+            <p className="text-stone-600 mb-4 font-medium">Pick a scent:</p>
+            <div className="grid grid-cols-3 gap-3">
               {SOAP_OPTIONS.map((option) => {
                 const info = SCENT_INFO[option.scent];
                 const isSelected = formData.scent === option.scent;
@@ -424,19 +424,19 @@ export const SoapForm: React.FC = () => {
                     onMouseEnter={() => handleMouseEnterScent(option.scent)}
                     onMouseLeave={handleMouseLeaveScent}
                     className={`
-                      p-3 rounded-lg border-2 text-left transition-all
+                      p-4 rounded-2xl border-2 text-left transition-all
                       ${isSelected 
-                        ? 'border-earth-500 bg-earth-50' 
-                        : 'border-gray-200 hover:border-earth-300'}
+                        ? 'border-sage-400 bg-sage-50 shadow-md' 
+                        : 'border-cream-300 hover:border-sage-300 hover:bg-cream-50'}
                     `}
                   >
-                    <div className="flex items-center justify-between">
-                      <span className={`font-medium ${isSelected ? 'text-earth-800' : 'text-gray-700'}`}>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className={`font-serif font-semibold text-lg ${isSelected ? 'text-earth-800' : 'text-stone-700'}`}>
                         {option.scent}
                       </span>
-                      {isSelected && <Check className="w-4 h-4 text-earth-600" />}
+                      {isSelected && <Check className="w-5 h-5 text-sage-600" />}
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">{info.description}</p>
+                    <p className="text-sm text-stone-500">{info.description}</p>
                   </button>
                 );
               })}
@@ -444,26 +444,54 @@ export const SoapForm: React.FC = () => {
           </div>
 
           {formData.scent && (
-            <div className="border-t border-gray-100 pt-4 mt-4">
-              <p className="text-sm text-gray-600 mb-3">Pick a size:</p>
+            <div className="border-t border-cream-200 pt-6 mt-6">
+              <p className="text-stone-600 mb-3 font-medium">Pick a size:</p>
               
-              <div className="flex gap-2">
+              <div className="flex gap-3">
                 {SIZE_OPTIONS.map((option) => (
                   <button
                     key={option.label}
                     type="button"
                     onClick={() => handleSizeChange(option.weight)}
                     className={`
-                      flex-1 py-3 rounded-lg font-bold transition-all border-2
+                      flex-1 py-4 rounded-2xl font-bold transition-all border-2
                       ${formData.size === option.weight
-                        ? 'bg-earth-600 text-white border-earth-600'
-                        : 'bg-white text-earth-700 border-earth-200 hover:border-earth-400'}
+                        ? 'bg-sage-500 text-white border-sage-500 shadow-md'
+                        : 'bg-white text-stone-600 border-cream-300 hover:border-sage-400 hover:bg-sage-50'}
                     `}
                   >
                     {option.label} ({option.weight}g)
                   </button>
                 ))}
               </div>
+            </div>
+          )}
+
+          {formData.scent && (
+            <div className="mt-6 pt-6 border-t border-cream-200">
+              <button
+                type="button"
+                onClick={() => setFormData(prev => ({ ...prev, hasLavenderPieces: !prev.hasLavenderPieces }))}
+                className={`w-full p-4 rounded-2xl border-2 flex items-center justify-between transition-all ${
+                  formData.hasLavenderPieces
+                    ? 'border-sage-400 bg-sage-50 shadow-sm'
+                    : 'border-cream-300 hover:border-sage-300 hover:bg-cream-50'}
+                `}
+              >
+                <div className="flex items-center gap-4">
+                  <div className={`w-7 h-7 rounded-full flex items-center justify-center border-2 ${
+                    formData.hasLavenderPieces ? 'border-sage-500 bg-sage-500' : 'border-cream-400'
+                  }`}>
+                    {formData.hasLavenderPieces && <Check className="w-4 h-4 text-white" />}
+                  </div>
+                  <span className={`font-medium ${formData.hasLavenderPieces ? 'text-earth-800' : 'text-stone-700'}`}>
+                    Add Lavender Pieces
+                  </span>
+                </div>
+                <span className={`font-bold ${formData.hasLavenderPieces ? 'text-sage-700' : 'text-stone-400'}`}>
+                  +Rs. {LAVENDER_PIECES_PRICE}
+                </span>
+              </button>
             </div>
           )}
 
@@ -496,13 +524,15 @@ export const SoapForm: React.FC = () => {
           )}
 
           {formData.scent && (
-            <div className="mt-4 pt-4 border-t border-gray-100">
-              <div className="flex items-center justify-between bg-earth-50 p-3 rounded-lg">
-                <span className="text-sm text-earth-700">
-                  {formData.size}g/{formData.size}ml {formData.scent}
-                  {formData.hasLavenderPieces && <span className="text-earth-600 ml-1">+ Lavender Pieces</span>}
-                </span>
-                <span className="text-lg font-bold text-earth-800">
+            <div className="mt-6 pt-6 border-t border-cream-200">
+              <div className="flex items-center justify-between bg-cream-100 p-4 rounded-2xl">
+                <div>
+                  <span className="text-stone-600">
+                    {formData.size}g/{formData.size}ml {formData.scent}
+                    {formData.hasLavenderPieces && <span className="text-sage-600 ml-2">+ Lavender Pieces</span>}
+                  </span>
+                </div>
+                <span className="text-xl font-serif font-bold text-earth-800">
                   Rs. {getTotalPrice()}
                 </span>
               </div>
@@ -514,21 +544,21 @@ export const SoapForm: React.FC = () => {
             onClick={handleContinueFromScent}
             disabled={!isScentStepValid}
             className={`
-              w-full mt-4 py-3 rounded-full font-bold flex items-center justify-center gap-2 transition-all
+              w-full mt-6 py-4 rounded-full font-bold flex items-center justify-center gap-2 transition-all shadow-md
               ${isScentStepValid
-                ? 'bg-earth-600 text-white hover:bg-earth-700'
-                : 'bg-gray-200 text-gray-400 cursor-not-allowed'}
+                ? 'bg-sage-500 text-white hover:bg-sage-600 hover:shadow-lg'
+                : 'bg-stone-200 text-stone-400 cursor-not-allowed'}
             `}
           >
             Continue to Color
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-5 h-5" />
           </button>
 
           {showScentInfo && (
-            <div className="mt-3 p-2 bg-earth-50 rounded-lg flex items-center gap-2">
-              <Leaf className="w-4 h-4 text-earth-600" />
-              <span className="text-xs text-earth-700">
-                <strong>Tip:</strong> {SCENT_INFO[showScentInfo]?.tip}
+            <div className="mt-4 p-3 bg-cream-50 rounded-xl flex items-center gap-3">
+              <Leaf className="w-5 h-5 text-sage-600" />
+              <span className="text-sm text-stone-600">
+                <strong className="text-earth-700">Tip:</strong> {SCENT_INFO[showScentInfo]?.tip}
               </span>
             </div>
           )}
@@ -536,43 +566,43 @@ export const SoapForm: React.FC = () => {
       )}
 
       {currentStep === 'color' && formData.scent && (
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-earth-100">
+        <div className="card-organic p-6 md:p-8">
           <button
             type="button"
             onClick={() => setCurrentStep('scent')}
-            className="flex items-center gap-2 text-earth-600 hover:text-earth-800 mb-4"
+            className="flex items-center gap-2 text-stone-500 hover:text-sage-600 mb-6 transition-colors"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-5 h-5" />
             Back to scent & size
           </button>
           
-          <h2 className="text-lg font-serif font-bold mb-2 text-earth-800 flex items-center gap-3">
-            <span className="bg-earth-100 w-10 h-10 rounded-full flex items-center justify-center">
-              <Palette className="w-5 h-5 text-earth-600" />
+          <h2 className="text-xl font-serif font-bold mb-2 text-earth-800 flex items-center gap-4">
+            <span className="bg-sage-100 w-12 h-12 rounded-full flex items-center justify-center">
+              <Palette className="w-6 h-6 text-sage-600" />
             </span>
-            Choose Color
+            Choose Your Color
           </h2>
-          <p className="text-sm text-gray-600 mb-4">
-            For {formData.scent} • {formData.size}g/{formData.size}ml • Rs. {currentPrice}
+          <p className="text-stone-500 mb-6">
+            For <span className="font-medium text-earth-700">{formData.scent}</span> • {formData.size}g/{formData.size}ml • Rs. {currentPrice}
           </p>
           
           {(formData.scent === SoapScent.COFFEE || formData.scent === SoapScent.TURMERIC) && (
-            <div className="mb-4 p-3 bg-amber-50 rounded-lg border border-amber-200 flex items-start gap-2">
-              <Droplets className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div className="mb-6 p-4 bg-terracotta-50 rounded-2xl border border-terracotta-200 flex items-start gap-3">
+              <Droplets className="w-6 h-6 text-terracotta-500 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm text-amber-800 font-medium">
+                <p className="text-terracotta-800 font-medium">
                   {formData.scent === SoapScent.COFFEE 
                     ? 'Coffee creates a natural brown color.' 
                     : 'Turmeric gives a natural golden color.'}
                 </p>
-                <p className="text-xs text-amber-700 mt-1">
+                <p className="text-terracotta-600 text-sm mt-1">
                   White is recommended, but you can choose any color you like.
                 </p>
               </div>
             </div>
           )}
 
-          <div className="flex flex-wrap gap-3 justify-center">
+          <div className="flex flex-wrap gap-4 justify-center">
             {COLOR_OPTIONS.map((option) => {
               const isSelected = formData.color === option.label;
               const isNaturalColorScent = formData.scent === SoapScent.COFFEE || formData.scent === SoapScent.TURMERIC;
@@ -584,38 +614,38 @@ export const SoapForm: React.FC = () => {
                   type="button"
                   onClick={() => handleColorChange(option.label)}
                   className={`
-                    relative flex flex-col items-center gap-2 p-3 rounded-xl transition-all
+                    relative flex flex-col items-center gap-2 p-4 rounded-2xl transition-all
                     hover:scale-105 cursor-pointer
-                    ${isSelected ? 'ring-2 ring-earth-400 bg-earth-50' : ''}
-                    ${isRecommended && !isSelected ? 'ring-2 ring-amber-300 bg-amber-50' : ''}
+                    ${isSelected ? 'ring-2 ring-sage-400 bg-sage-50 shadow-md' : ''}
+                    ${isRecommended && !isSelected ? 'ring-2 ring-terracotta-300 bg-terracotta-50' : ''}
                   `}
                   aria-pressed={isSelected}
                 >
                   <div 
                     className={`
-                      w-16 h-16 rounded-full shadow-sm border-3 transition-all
+                      w-18 h-18 rounded-full shadow-md border-3 transition-all
                       ${option.class}
-                      ${isSelected ? 'border-earth-400 scale-105' : 'border-transparent'}
-                      ${isRecommended ? 'ring-2 ring-amber-400' : ''}
+                      ${isSelected ? 'border-sage-400 scale-105' : 'border-transparent'}
+                      ${isRecommended ? 'ring-2 ring-terracotta-400' : ''}
                     `}
                     style={{ backgroundColor: option.hex }}
                   >
                     {isSelected && (
                       <span className="absolute inset-0 flex items-center justify-center">
-                        <Check className="w-6 h-6 text-black/30" />
+                        <Check className="w-8 h-8 text-white drop-shadow-md" />
                       </span>
                     )}
                   </div>
-                  <span className={`text-sm font-medium ${isSelected ? 'text-earth-800' : 'text-gray-600'}`}>
+                  <span className={`text-sm font-medium ${isSelected ? 'text-earth-800' : 'text-stone-600'}`}>
                     {option.label}
                   </span>
                   {isRecommended && !isSelected && (
-                    <span className="absolute -top-1 text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium border border-amber-200">
+                    <span className="absolute -top-1 text-xs bg-terracotta-100 text-terracotta-700 px-3 py-1 rounded-full font-medium border border-terracotta-200">
                       Recommended
                     </span>
                   )}
                   {isSelected && (
-                    <span className="absolute -bottom-2 text-[10px] bg-earth-200 text-earth-700 px-2 py-0.5 rounded-full">
+                    <span className="absolute -bottom-1 text-xs bg-sage-200 text-sage-700 px-3 py-1 rounded-full">
                       Selected
                     </span>
                   )}
@@ -627,53 +657,53 @@ export const SoapForm: React.FC = () => {
       )}
 
       {currentStep === 'quantity' && formData.scent && formData.color && (
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-earth-100">
+        <div className="card-organic p-6 md:p-8">
           <button
             type="button"
             onClick={() => setCurrentStep('color')}
-            className="flex items-center gap-2 text-earth-600 hover:text-earth-800 mb-4"
+            className="flex items-center gap-2 text-stone-500 hover:text-sage-600 mb-6 transition-colors"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-5 h-5" />
             Back to color
           </button>
           
-          <h2 className="text-lg font-serif font-bold mb-2 text-earth-800 flex items-center gap-3">
-            <span className="bg-earth-100 w-10 h-10 rounded-full flex items-center justify-center">
-              <Layers className="w-5 h-5 text-earth-600" />
+          <h2 className="text-xl font-serif font-bold mb-2 text-earth-800 flex items-center gap-4">
+            <span className="bg-sage-100 w-12 h-12 rounded-full flex items-center justify-center">
+              <Layers className="w-6 h-6 text-sage-600" />
             </span>
-            How Many?
+            How Many Soaps?
           </h2>
           
-          <div className="bg-earth-50 p-4 rounded-lg mb-4">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600">{formData.scent} • {formData.size}g/{formData.size}ml • {formData.color}</span>
-              <span className="font-bold text-earth-800">Rs. {currentPrice} each</span>
+          <div className="bg-cream-100 p-4 rounded-2xl mb-6">
+            <div className="flex items-center justify-between">
+              <span className="text-stone-600">{formData.scent} • {formData.size}g/{formData.size}ml • {formData.color}</span>
+              <span className="font-serif font-bold text-earth-800">Rs. {currentPrice} each</span>
             </div>
           </div>
           
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center gap-4 mb-6">
             <input
               type="text"
               inputMode="numeric"
               value={formData.quantity}
               onChange={handleQuantityChange}
               placeholder="0"
-              className="flex-1 p-4 text-center text-2xl font-bold rounded-xl border-2 border-gray-200 focus:border-earth-500 outline-none"
+              className="flex-1 p-4 text-center text-3xl font-serif font-bold rounded-2xl border-2 border-cream-300 focus:border-sage-400 focus:ring-4 focus:ring-sage-100 outline-none bg-white"
               autoFocus
             />
-            <span className="text-lg font-medium text-earth-700">soaps</span>
+            <span className="text-lg font-medium text-stone-500">soaps</span>
           </div>
           
-          <div className="flex gap-2 mb-4">
+          <div className="flex gap-3 mb-6">
             {[1, 3, 5, 10].map((num) => (
               <button
                 key={num}
                 type="button"
                 onClick={() => setFormData(prev => ({ ...prev, quantity: String(num) }))}
-                className={`flex-1 py-2 rounded-lg font-medium transition-all ${
+                className={`flex-1 py-3 rounded-2xl font-semibold transition-all ${
                   formData.quantity === String(num)
-                    ? 'bg-earth-600 text-white'
-                    : 'bg-earth-100 text-earth-700 hover:bg-earth-200'
+                    ? 'bg-sage-500 text-white shadow-md'
+                    : 'bg-cream-100 text-stone-600 hover:bg-sage-100 hover:text-sage-700'
                 }`}
               >
                 {num}
@@ -681,28 +711,28 @@ export const SoapForm: React.FC = () => {
             ))}
           </div>
           
-          <div className="bg-gradient-to-r from-green-100 to-emerald-100 border-2 border-green-300 rounded-xl p-4 mb-4 animate-pulse">
-            <div className="flex items-center gap-2 text-green-800">
-              <Tag className="w-5 h-5" />
-              <span className="text-base font-bold">Bulk Discount on Total Order:</span>
+          <div className="bg-gradient-to-r from-sage-100 to-sage-200 border-2 border-sage-300 rounded-2xl p-5 mb-6 animate-soft-pulse">
+            <div className="flex items-center gap-3 text-sage-800">
+            <Tag className="w-5 h-5" />
+              <span className="text-base font-bold">Bulk Discount on Your Order:</span>
             </div>
-            <div className="mt-2 text-sm text-green-800 ml-7">
-              <span className="inline-block bg-green-200 px-2 py-1 rounded-lg font-bold text-lg">10% OFF</span>
-              <span className="mx-2">for 2-3 soaps</span>
-              <span className="mx-1">•</span>
-              <span className="inline-block bg-green-300 px-2 py-1 rounded-lg font-bold text-lg">15% OFF</span>
-              <span className="mx-2">for 4+ soaps</span>
+            <div className="mt-2 text-sm text-sage-800 ml-7">
+              <span className="inline-block bg-sage-200 px-3 py-1 rounded-xl font-bold text-lg">10% OFF</span>
+              <span className="mx-3">for 2-3 soaps</span>
+              <span className="mx-2">•</span>
+              <span className="inline-block bg-sage-300 px-3 py-1 rounded-xl font-bold text-lg">15% OFF</span>
+              <span className="mx-3">for 4+ soaps</span>
             </div>
-            <div className="mt-2 text-sm text-green-700 ml-7 flex items-center gap-2">
+            <div className="mt-2 text-sm text-sage-700 ml-7 flex items-center gap-2">
               <span className="text-lg">💰</span>
               <span className="font-semibold">Mix & match any scents — discount applies to your entire order!</span>
             </div>
           </div>
           
           {formData.quantity && parseInt(formData.quantity, 10) > 0 && (
-            <div className="bg-earth-100 p-4 rounded-lg flex items-center justify-between">
-              <span className="text-sm text-earth-700">Total for {formData.quantity} soap{parseInt(formData.quantity, 10) > 1 ? 's' : ''}:</span>
-              <span className="text-xl font-bold text-earth-800">
+            <div className="bg-cream-100 p-4 rounded-2xl flex items-center justify-between">
+              <span className="text-stone-600">Total for {formData.quantity} soap{parseInt(formData.quantity, 10) > 1 ? 's' : ''}:</span>
+              <span className="text-xl font-serif font-bold text-earth-800">
                 Rs. {currentPrice * parseInt(formData.quantity, 10)}
               </span>
             </div>
@@ -710,11 +740,11 @@ export const SoapForm: React.FC = () => {
         </div>
       )}
 
-      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-earth-200 p-4 z-40 shadow-[0_-4px_20px_-5px_rgba(0,0,0,0.15)]">
+      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-cream-200 p-4 z-40 shadow-lg">
         <div className="max-w-3xl mx-auto">
           {cart.items.length > 0 && (
-            <div className="mb-2 p-2 bg-earth-50 rounded-lg text-center">
-              <span className="text-xs text-earth-700">
+            <div className="mb-3 p-3 bg-sage-50 rounded-xl text-center">
+              <span className="text-sm text-stone-600">
                 {cart.totalQuantity} soap{cart.totalQuantity > 1 ? 's' : ''} in cart • Tap cart to review
               </span>
             </div>
@@ -725,9 +755,9 @@ export const SoapForm: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsCartOpen(true)}
-                className="px-4 py-3 rounded-full font-bold text-sm flex items-center gap-2 bg-earth-100 text-earth-700 hover:bg-earth-200"
+                className="px-5 py-3 rounded-full font-semibold text-sm flex items-center gap-2 bg-cream-200 text-stone-600 hover:bg-sage-200 hover:text-sage-800 transition-all"
               >
-                <ShoppingCart className="w-4 h-4" />
+                <ShoppingCart className="w-5 h-5" />
                 Cart ({cart.totalQuantity})
               </button>
             )}
@@ -737,10 +767,10 @@ export const SoapForm: React.FC = () => {
               onClick={handleAddToCart}
               disabled={isButtonDisabled}
               className={`
-                flex-1 py-3 rounded-full font-bold text-base flex items-center justify-center gap-2 transition-all
+                flex-1 py-4 rounded-full font-bold text-base flex items-center justify-center gap-2 transition-all shadow-md
                 ${!isButtonDisabled
-                  ? 'bg-earth-600 text-white hover:bg-earth-700 shadow-lg' 
-                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'}
+                  ? 'bg-sage-500 text-white hover:bg-sage-600 hover:shadow-lg' 
+                  : 'bg-stone-200 text-stone-400 cursor-not-allowed'}
               `}
             >
               <Plus className="w-5 h-5" />
@@ -748,8 +778,8 @@ export const SoapForm: React.FC = () => {
             </button>
           </div>
           
-          <div className="text-center mt-2">
-            <span className="text-[10px] text-earth-400">
+          <div className="text-center mt-3">
+            <span className="text-xs text-stone-400">
               {rateLimit.cooldownRemaining !== null
                 ? `Try again in ${rateLimit.cooldownRemaining}s`
                 : `${remainingCount}/10 submissions`}
