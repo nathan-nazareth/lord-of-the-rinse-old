@@ -566,7 +566,7 @@ export const SoapForm: React.FC = () => {
                     : 'Turmeric gives a natural golden color.'}
                 </p>
                 <p className="text-xs text-amber-700 mt-1">
-                  White is recommended. Click White below to continue.
+                  White is recommended, but you can choose any color you like.
                 </p>
               </div>
             </div>
@@ -577,20 +577,17 @@ export const SoapForm: React.FC = () => {
               const isSelected = formData.color === option.label;
               const isNaturalColorScent = formData.scent === SoapScent.COFFEE || formData.scent === SoapScent.TURMERIC;
               const isRecommended = isNaturalColorScent && option.label === SoapColor.WHITE;
-              const isDisabled = isNaturalColorScent && option.label !== SoapColor.WHITE;
-              const mustSelectWhite = isNaturalColorScent && option.label === SoapColor.WHITE;
 
               return (
                 <button
                   key={option.label}
                   type="button"
-                  onClick={() => !isDisabled && handleColorChange(option.label)}
-                  disabled={isDisabled}
+                  onClick={() => handleColorChange(option.label)}
                   className={`
                     relative flex flex-col items-center gap-2 p-3 rounded-xl transition-all
-                    ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 cursor-pointer'}
+                    hover:scale-105 cursor-pointer
                     ${isSelected ? 'ring-2 ring-earth-400 bg-earth-50' : ''}
-                    ${mustSelectWhite && !isSelected ? 'ring-2 ring-amber-300 bg-amber-50' : ''}
+                    ${isRecommended && !isSelected ? 'ring-2 ring-amber-300 bg-amber-50' : ''}
                   `}
                   aria-pressed={isSelected}
                 >
@@ -608,17 +605,12 @@ export const SoapForm: React.FC = () => {
                         <Check className="w-6 h-6 text-black/30" />
                       </span>
                     )}
-                    {mustSelectWhite && !isSelected && (
-                      <span className="absolute inset-0 flex items-center justify-center">
-                        <ArrowRight className="w-6 h-6 text-amber-500" />
-                      </span>
-                    )}
                   </div>
                   <span className={`text-sm font-medium ${isSelected ? 'text-earth-800' : 'text-gray-600'}`}>
                     {option.label}
                   </span>
                   {isRecommended && !isSelected && (
-                    <span className="absolute -top-1 text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">
+                    <span className="absolute -top-1 text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium border border-amber-200">
                       Recommended
                     </span>
                   )}
