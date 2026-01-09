@@ -558,12 +558,17 @@ export const SoapForm: React.FC = () => {
           
           {(formData.scent === SoapScent.COFFEE || formData.scent === SoapScent.TURMERIC) && (
             <div className="mb-4 p-3 bg-amber-50 rounded-lg border border-amber-200 flex items-start gap-2">
-              <Droplets className="w-5 h-5 text-amber-600 flex-shrink-0" />
-              <p className="text-sm text-amber-800">
-                {formData.scent === SoapScent.COFFEE 
-                  ? 'Coffee creates a natural brown color.'
-                  : 'Turmeric gives a natural golden color.'}
-              </p>
+              <Droplets className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm text-amber-800 font-medium">
+                  {formData.scent === SoapScent.COFFEE 
+                    ? 'Coffee creates a natural brown color.' 
+                    : 'Turmeric gives a natural golden color.'}
+                </p>
+                <p className="text-xs text-amber-700 mt-1">
+                  White is recommended. Click White below to continue.
+                </p>
+              </div>
             </div>
           )}
 
@@ -573,6 +578,7 @@ export const SoapForm: React.FC = () => {
               const isNaturalColorScent = formData.scent === SoapScent.COFFEE || formData.scent === SoapScent.TURMERIC;
               const isRecommended = isNaturalColorScent && option.label === SoapColor.WHITE;
               const isDisabled = isNaturalColorScent && option.label !== SoapColor.WHITE;
+              const mustSelectWhite = isNaturalColorScent && option.label === SoapColor.WHITE;
 
               return (
                 <button
@@ -582,9 +588,11 @@ export const SoapForm: React.FC = () => {
                   disabled={isDisabled}
                   className={`
                     relative flex flex-col items-center gap-2 p-3 rounded-xl transition-all
-                    ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}
-                    ${isSelected ? 'ring-2 ring-earth-400 bg-gray-50' : ''}
+                    ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 cursor-pointer'}
+                    ${isSelected ? 'ring-2 ring-earth-400 bg-earth-50' : ''}
+                    ${mustSelectWhite && !isSelected ? 'ring-2 ring-amber-300 bg-amber-50' : ''}
                   `}
+                  aria-pressed={isSelected}
                 >
                   <div 
                     className={`
@@ -600,13 +608,23 @@ export const SoapForm: React.FC = () => {
                         <Check className="w-6 h-6 text-black/30" />
                       </span>
                     )}
+                    {mustSelectWhite && !isSelected && (
+                      <span className="absolute inset-0 flex items-center justify-center">
+                        <ArrowRight className="w-6 h-6 text-amber-500" />
+                      </span>
+                    )}
                   </div>
                   <span className={`text-sm font-medium ${isSelected ? 'text-earth-800' : 'text-gray-600'}`}>
                     {option.label}
                   </span>
-                  {isRecommended && (
-                    <span className="absolute -top-1 text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
+                  {isRecommended && !isSelected && (
+                    <span className="absolute -top-1 text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">
                       Recommended
+                    </span>
+                  )}
+                  {isSelected && (
+                    <span className="absolute -bottom-2 text-[10px] bg-earth-200 text-earth-700 px-2 py-0.5 rounded-full">
+                      Selected
                     </span>
                   )}
                 </button>
