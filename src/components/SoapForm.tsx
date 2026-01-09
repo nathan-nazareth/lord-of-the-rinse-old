@@ -671,16 +671,21 @@ export const SoapForm: React.FC = () => {
             ))}
           </div>
           
-          <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-3 mb-4">
+          <div className="bg-gradient-to-r from-green-100 to-emerald-100 border-2 border-green-300 rounded-xl p-4 mb-4 animate-pulse">
             <div className="flex items-center gap-2 text-green-800">
-              <Tag className="w-4 h-4" />
-              <span className="text-sm font-medium">Bulk Discount on Total Order:</span>
+              <Tag className="w-5 h-5" />
+              <span className="text-base font-bold">Bulk Discount on Total Order:</span>
             </div>
-            <div className="mt-1 text-xs text-green-700 ml-6">
-              Order 2-3 soaps <span className="font-semibold">10% OFF</span> • Order 4+ soaps <span className="font-semibold">15% OFF</span>
+            <div className="mt-2 text-sm text-green-800 ml-7">
+              <span className="inline-block bg-green-200 px-2 py-1 rounded-lg font-bold text-lg">10% OFF</span>
+              <span className="mx-2">for 2-3 soaps</span>
+              <span className="mx-1">•</span>
+              <span className="inline-block bg-green-300 px-2 py-1 rounded-lg font-bold text-lg">15% OFF</span>
+              <span className="mx-2">for 4+ soaps</span>
             </div>
-            <div className="mt-1 text-[10px] text-green-600 ml-6">
-              Mix & match different scents — discount applies to your entire order!
+            <div className="mt-2 text-sm text-green-700 ml-7 flex items-center gap-2">
+              <span className="text-lg">💰</span>
+              <span className="font-semibold">Mix & match any scents — discount applies to your entire order!</span>
             </div>
           </div>
           
