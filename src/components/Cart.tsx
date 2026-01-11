@@ -39,9 +39,9 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, isSubmi
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const newErrors: { name?: string; email?: string; phone?: string } = {};
-    
+
     if (formData.name.trim().length < 2) {
       newErrors.name = 'Please enter your name (at least 2 characters)';
     }
@@ -51,7 +51,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, isSubmi
     if (!validatePhone(formData.phone)) {
       newErrors.phone = 'Please enter a valid phone number';
     }
-    
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
@@ -69,7 +69,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, isSubmi
   return (
     <div className="p-4">
       <h3 className="text-lg font-serif font-bold text-bark-800 mb-4">Your Contact Details</h3>
-       
+
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         {/* Name Field */}
         <div>
@@ -162,23 +162,23 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, isSubmi
           >
             Cancel
           </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex-1 py-3 rounded-full font-bold bg-bark-600 text-white hover:bg-bark-700 transition-colors flex items-center justify-center gap-2"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Sending...
-                </>
-              ) : (
-                <>
-                  <Send className="w-5 h-5" />
-                  Submit Order
-                </>
-              )}
-            </button>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="flex-1 py-3 rounded-full font-bold bg-bark-600 text-white hover:bg-bark-700 transition-colors flex items-center justify-center gap-2"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Sending...
+              </>
+            ) : (
+              <>
+                <Send className="w-5 h-5" />
+                Submit Order
+              </>
+            )}
+          </button>
         </div>
       </form>
     </div>
@@ -260,7 +260,7 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
 
   const handleCheckout = async (customer: Customer) => {
     setIsSubmitting(true);
-    
+
     try {
       const result = await submitCartToWebhook(
         customer,
@@ -305,31 +305,31 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
   return (
     <>
       {/* Backdrop */}
-      <div 
+      <div
         className="fixed inset-0 bg-black/20 z-40"
         onClick={onClose}
       />
-      
+
       {/* Sidebar */}
       <div className="fixed right-0 top-0 bottom-0 w-full max-w-sm bg-white shadow-xl z-50 flex flex-col animate-in slide-in-from-right duration-300">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-bark-100">
+        <div className="flex items-center justify-between p-4 border-b border-cream-200">
           <div className="flex items-center gap-2">
-            <ShoppingCart className="w-5 h-5 text-bark-600" />
-            <h2 className="text-lg font-serif font-bold text-bark-800">
+            <ShoppingCart className="w-5 h-5 text-sage-600" />
+            <h2 className="text-lg font-serif font-bold text-natural-800">
               {showConfirmation ? 'Thank You!' : 'Your Cart'}
             </h2>
             {!showConfirmation && cart.totalQuantity > 0 && (
-              <span className="bg-bark-200 text-bark-800 text-xs px-2 py-0.5 rounded-full">
+              <span className="bg-blush-100 text-blush-700 text-xs px-2 py-0.5 rounded-full border border-blush-200">
                 {cart.totalQuantity} soap{cart.totalQuantity > 1 ? 's' : ''}
               </span>
             )}
           </div>
-            {!showConfirmation && (
+          {!showConfirmation && (
             <button
               ref={closeButtonRef}
               onClick={onClose}
-              className="px-3 py-1.5 hover:bg-bark-50 rounded-full transition-colors text-sm text-bark-600 font-medium flex items-center gap-1"
+              className="px-3 py-1.5 hover:bg-cream-100 rounded-full transition-colors text-sm text-natural-600 font-medium flex items-center gap-1 border border-transparent hover:border-cream-200"
               aria-label="Close cart"
             >
               Close
@@ -343,8 +343,8 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
         {/* Content */}
         <div className="flex-1 overflow-y-auto pb-24">
           {showConfirmation ? (
-            <OrderConfirmation 
-              itemCount={orderItemCount} 
+            <OrderConfirmation
+              itemCount={orderItemCount}
               onContinue={handleContinue}
             />
           ) : showCheckout ? (
@@ -371,17 +371,17 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
                       </p>
                     </div>
                     {cart.items.map((item) => (
-                      <div key={item.id} className="flex items-start gap-3 p-3 bg-white rounded-lg border border-bark-100 shadow-sm">
+                      <div key={item.id} className="flex items-start gap-3 p-3 bg-white/50 rounded-lg border border-cream-200 shadow-sm backdrop-blur-sm">
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
-                            <span className="font-medium text-bark-800">{item.scent}</span>
+                            <span className="font-medium text-natural-800">{item.scent}</span>
                             {item.hasLavenderPieces && (
-                              <span className="text-[10px] bg-bark-200 text-bark-700 px-2 py-0.5 rounded-full">
+                              <span className="text-[10px] bg-lavender-100 text-lavender-600 px-2 py-0.5 rounded-full border border-lavender-200">
                                 + Lavender Pieces
                               </span>
                             )}
                           </div>
-                          <div className="text-sm text-gray-600">
+                          <div className="text-sm text-natural-500">
                             {item.color} • {item.size}g/{item.size}ml • {item.quantity} soap{item.quantity > 1 ? 's' : ''} • Rs. {item.price} each
                           </div>
                         </div>
@@ -406,61 +406,60 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
 
         {/* Footer */}
         {!showConfirmation && !showCheckout && cart.items.length > 0 && (
-          <div className="p-4 border-t border-bark-100 bg-bark-50">
+          <div className="p-4 border-t border-cream-200 bg-cream-50/80 backdrop-blur-sm">
             {discountPercentage > 0 && (
-              <div className="bg-green-100 border-2 border-green-300 rounded-xl p-4 mb-4 animate-pulse" role="alert" aria-live="polite">
-                <div className="flex items-center gap-2 text-green-800">
+              <div className="bg-gradient-to-r from-sage-50 to-cream-100 border-2 border-sage-200 rounded-xl p-4 mb-4 animate-soft-pulse" role="alert" aria-live="polite">
+                <div className="flex items-center gap-2 text-sage-700">
                   <Check className="w-5 h-5" />
                   <span className="font-bold text-lg">Bulk Discount Applied!</span>
                 </div>
-                <p className="text-green-800 mt-1 ml-7">
+                <p className="text-sage-600 mt-1 ml-7">
                   <span className="font-bold">{discountPercentage}% OFF</span> on your total order ({cart.totalQuantity} soaps)
                 </p>
-                <p className="text-green-700 text-sm mt-1 ml-7">
+                <p className="text-sage-500 text-sm mt-1 ml-7">
                   💰 Mix & match — discount applies to all items!
                 </p>
               </div>
             )}
             <div className="flex items-center justify-between mb-3">
-              <span className="text-gray-600">Total unique types:</span>
-              <span className="font-bold text-bark-800">{cart.items.length}</span>
+              <span className="text-natural-500">Total unique types:</span>
+              <span className="font-bold text-natural-700">{cart.items.length}</span>
             </div>
             <div className="flex items-center justify-between mb-3">
-              <span className="text-gray-600">Total soaps:</span>
-              <span className="font-bold text-bark-800">{cart.totalQuantity} soap{cart.totalQuantity > 1 ? 's' : ''}</span>
+              <span className="text-natural-500">Total soaps:</span>
+              <span className="font-bold text-natural-700">{cart.totalQuantity} soap{cart.totalQuantity > 1 ? 's' : ''}</span>
             </div>
             {discountPercentage > 0 && (
-              <div className="flex items-center justify-between mb-2 text-green-700 bg-green-50 p-2 rounded-lg">
+              <div className="flex items-center justify-between mb-2 text-sage-600 bg-sage-50/50 p-2 rounded-lg border border-sage-100">
                 <span className="font-semibold">Discount ({discountPercentage}%):</span>
                 <span className="font-bold">- Rs. {discountAmount}</span>
               </div>
             )}
-            <div className="flex items-center justify-between mb-3 pt-3 border-t border-bark-200">
-              <span className="text-xl font-bold text-bark-800">Total:</span>
+            <div className="flex items-center justify-between mb-3 pt-3 border-t border-cream-200">
+              <span className="text-xl font-bold text-natural-800">Total:</span>
               <div className="text-right">
                 {discountPercentage > 0 && (
-                  <span className="text-gray-400 line-through mr-2">Rs. {subtotal}</span>
+                  <span className="text-natural-400 line-through mr-2">Rs. {subtotal}</span>
                 )}
-                <span className="text-xl font-bold text-bark-800">Rs. {total}</span>
+                <span className="text-xl font-bold text-sage-700">Rs. {total}</span>
               </div>
             </div>
             <div className="flex gap-3">
               <button
                 onClick={handleClearCart}
-                className={`flex-1 py-3 border-2 rounded-full font-bold transition-colors ${
-                  showClearCartConfirm 
-                    ? 'border-red-300 text-red-600 bg-red-50' 
-                    : 'border-bark-200 text-bark-700 hover:bg-bark-100'
-                }`}
+                className={`flex-1 py-3 border-2 rounded-full font-bold transition-all ${showClearCartConfirm
+                    ? 'border-red-300 text-red-600 bg-red-50'
+                    : 'border-cream-300 text-natural-600 hover:bg-cream-100 hover:border-cream-400'
+                  }`}
               >
                 {showClearCartConfirm ? 'Clear All?' : 'Clear Cart'}
               </button>
               <button
                 onClick={() => setShowCheckout(true)}
-                className="flex-[2] py-3 bg-bark-600 text-white rounded-full font-bold hover:bg-bark-700 transition-colors flex items-center justify-center gap-2"
+                className="btn-soft flex-[2] py-3 text-white flex items-center justify-center gap-2"
               >
                 <Send className="w-5 h-5" />
-                Submit Order ({cart.items.length} item{cart.items.length > 1 ? 's' : ''})
+                Submit Order
               </button>
             </div>
           </div>
