@@ -5,7 +5,7 @@ test('homepage loads and app is interactive', async ({ page }) => {
   
   await expect(page).toHaveTitle(/Organic Soap Builder/);
   
-  await expect(page.locator('h1:has-text("Botanical Soap Workshop")')).toBeVisible();
+  await expect(page.locator('h1:has-text("Handmade Soap Workshop")')).toBeVisible();
   
   await expect(page.locator('text=Handcraft your own organic soaps')).toBeVisible();
   
@@ -14,6 +14,4 @@ test('homepage loads and app is interactive', async ({ page }) => {
   
   const footer = page.locator('footer');
   await expect(footer).toBeVisible();
-  
-  console.log('App is working correctly!');
 });

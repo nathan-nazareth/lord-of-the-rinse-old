@@ -142,7 +142,8 @@ export const SoapForm: React.FC = () => {
     formData.scent &&
     formData.color &&
     formData.size > 0 &&
-    formData.quantity.length > 0;
+    formData.quantity.length > 0 &&
+    parseInt(formData.quantity, 10) > 0;
 
   const isButtonDisabled = !isFormValid || !rateLimit.isAllowed;
   const buttonText = rateLimit.cooldownRemaining !== null
@@ -443,6 +444,8 @@ export const SoapForm: React.FC = () => {
                           ? 'border-sage-400 bg-sage-100 shadow-md ring-2 ring-sage-200'
                           : 'border-cream-200 bg-white hover:border-sage-300 hover:bg-cream-50'}
                     `}
+                      aria-label={`${option.scent} - ${info.description}${isSelected ? ', selected' : ''}`}
+                      aria-pressed={isSelected}
                     >
                       {isSelected && (
                         <span className="absolute top-2 right-2 text-sage-600 text-lg">✓</span>
@@ -475,6 +478,8 @@ export const SoapForm: React.FC = () => {
                           ? 'bg-sage-600 text-white border-sage-600 shadow-md'
                           : 'bg-white text-natural-600 border-cream-300 hover:border-sage-400 hover:bg-sage-50'}
                     `}
+                      aria-label={`${option.label} size (${option.weight} grams)${formData.size === option.weight ? ', selected' : ''}`}
+                      aria-pressed={formData.size === option.weight}
                     >
                       {option.label} ({option.weight}g)
                     </button>
@@ -492,6 +497,8 @@ export const SoapForm: React.FC = () => {
                     ? 'border-sage-300 bg-sage-50 shadow-sm'
                     : 'border-cream-300 hover:border-sage-200 hover:bg-cream-50'}
                 `}
+                  aria-label={`${formData.hasLavenderPieces ? 'Remove' : 'Add'} lavender pieces for an additional Rs. ${LAVENDER_PIECES_PRICE}`}
+                  aria-pressed={formData.hasLavenderPieces}
                 >
                   <div className="flex items-center gap-4">
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${formData.hasLavenderPieces ? 'border-sage-300 bg-sage-200' : 'border-cream-200'
@@ -605,6 +612,7 @@ export const SoapForm: React.FC = () => {
                     ${isSelected ? 'ring-2 ring-sage-400 bg-jungle-50 shadow-md' : ''}
                     ${isRecommended && !isSelected ? 'ring-2 ring-terracotta-300 bg-bark-50' : ''}
                   `}
+                    aria-label={`Select ${option.label} color${isRecommended ? ', recommended for this scent' : ''}${isSelected ? ', currently selected' : ''}`}
                     aria-pressed={isSelected}
                   >
                     <div
@@ -689,11 +697,23 @@ export const SoapForm: React.FC = () => {
                 value={formData.quantity}
                 onChange={handleQuantityChange}
                 placeholder="0"
-                className="flex-1 p-4 text-center text-3xl font-serif font-bold rounded-2xl border-2 border-cream-300 focus:border-sage-400 focus:ring-4 focus:ring-sage-100 outline-none bg-cream-50"
+                className={`flex-1 p-4 text-center text-3xl font-serif font-bold rounded-2xl border-2 focus:ring-4 focus:ring-sage-100 outline-none bg-cream-50 ${
+                  formData.quantity && parseInt(formData.quantity, 10) === 0
+                    ? 'border-red-300 focus:border-red-400'
+                    : 'border-cream-300 focus:border-sage-400'
+                }`}
                 autoFocus
               />
               <span className="text-lg font-medium text-natural-500">soaps</span>
             </div>
+            {formData.quantity && parseInt(formData.quantity, 10) === 0 && (
+              <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg border border-red-200 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+                <span className="text-sm">Please enter a quantity greater than 0</span>
+              </div>
+            )}
 
             <div className="flex gap-3 mb-6">
               {[1, 3, 5, 10].map((num) => (
