@@ -32,3 +32,22 @@ export interface WebhookLogEntry {
   success: boolean;
   error?: string;
 }
+
+export type SubmissionState = 'pending' | 'submitting' | 'sent' | 'failed';
+
+export interface LocalStorageSubmission {
+  orderId: string;
+  submissionState: SubmissionState;
+  timestamp: string;
+  lastAttempt: string | null;
+  retryCount: number;
+  formData: {
+    scent: string | null;
+    customScent: string;
+    color: string | null;
+    quantity: string;
+    customerName: string;
+    customerEmail: string;
+    customerPhone: string;
+  };
+}
