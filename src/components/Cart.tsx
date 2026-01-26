@@ -19,9 +19,10 @@ interface CheckoutFormProps {
   onSubmit: (customer: Customer) => Promise<void>;
   onCancel: () => void;
   isSubmitting: boolean;
+  errorMessage?: string | null;
 }
 
-const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, isSubmitting }) => {
+const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, isSubmitting, errorMessage }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -69,6 +70,15 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, isSubmi
   return (
     <div className="p-4">
       <h3 className="text-lg font-serif font-bold text-bark-800 mb-4">Your Contact Details</h3>
+
+      {errorMessage && (
+        <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-700 text-sm flex items-center gap-2">
+          <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <span>{errorMessage}</span>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         {/* Name Field */}
@@ -153,11 +163,11 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, isSubmi
         </div>
 
         {/* Buttons */}
-        <div className="flex gap-3 pt-2">
+        <div className="flex gap-3 pt-4 mt-4 border-t border-cream-200">
           <button
             type="button"
             onClick={onCancel}
-            className="flex-1 py-3 rounded-full font-bold border-2 border-bark-200 text-bark-700 hover:bg-bark-50 transition-colors"
+            className="flex-1 py-3 px-4 rounded-full font-bold border-2 border-bark-200 text-bark-700 hover:bg-bark-50 transition-colors"
             disabled={isSubmitting}
           >
             Cancel
@@ -165,7 +175,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, isSubmi
           <button
             type="submit"
             disabled={isSubmitting}
-            className="flex-1 py-3 rounded-full font-bold bg-bark-600 text-white hover:bg-bark-700 transition-colors flex items-center justify-center gap-2"
+            className="flex-1 py-3 px-4 rounded-full font-bold bg-bark-600 text-white hover:bg-bark-700 transition-colors flex items-center justify-center gap-2 shadow-md"
           >
             {isSubmitting ? (
               <>
@@ -196,11 +206,14 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ itemCount, onCont
       <Check className="w-8 h-8 text-green-600" />
     </div>
     <h3 className="text-xl font-serif font-bold text-bark-800 mb-2">Order Sent Successfully!</h3>
-    <p className="text-gray-600 mb-6">
-      Thank you for your order! We'll be in touch with you shortly.
+    <p className="text-gray-600 mb-4">
+      Thank you for your order! We've received your soap customization details and will be in touch shortly.
     </p>
     <p className="text-sm text-gray-500 mb-6">
       You ordered: {itemCount} soap{itemCount > 1 ? 's' : ''}
+    </p>
+    <p className="text-xs text-gray-400 mb-6">
+      Order submitted via Web3Forms
     </p>
     <button
       onClick={onContinue}
@@ -217,6 +230,7 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [orderItemCount, setOrderItemCount] = useState(0);
   const [showClearCartConfirm, setShowClearCartConfirm] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const sidebarRef = React.useRef<HTMLDivElement>(null);
   const closeButtonRef = React.useRef<HTMLButtonElement>(null);
 
@@ -260,6 +274,7 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
 
   const handleCheckout = async (customer: Customer) => {
     setIsSubmitting(true);
+    setErrorMessage(null);
 
     try {
       const result = await submitCartToWebhook(
@@ -273,6 +288,10 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
             timestamp: log.timestamp,
             attempt: log.attempt,
           });
+
+          if (log.status === 429) {
+            setErrorMessage('Service busy. Please wait and try again.');
+          }
         }
       );
 
@@ -281,11 +300,11 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
         setShowConfirmation(true);
         onClearCart();
       } else {
-        alert('Failed to send order. Please try again.');
+        setErrorMessage('Failed to send order. Please try again.');
       }
     } catch (error) {
       console.error('[Checkout] Error:', error);
-      alert('An error occurred. Please try again.');
+      setErrorMessage('An error occurred. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -350,8 +369,9 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
           ) : showCheckout ? (
             <CheckoutForm
               onSubmit={handleCheckout}
-              onCancel={() => setShowCheckout(false)}
+              onCancel={() => { setShowCheckout(false); setErrorMessage(null); }}
               isSubmitting={isSubmitting}
+              errorMessage={errorMessage}
             />
           ) : (
             <>

@@ -7,8 +7,10 @@ import {
   Customer
 } from '../types/webhook';
 import { CartItem } from '../types/cart';
+import { logWeb3FormsRateLimit, logWeb3FormsError, logWeb3FormsSuccess } from '../utils/errorLogging';
 
-const WEBHOOK_URL = import.meta.env.VITE_PABBLY_WEBHOOK_URL;
+const WEB3FORMS_ENDPOINT = import.meta.env.VITE_WEB3FORMS_ENDPOINT || 'https://api.web3forms.com/submit';
+const WEB3FORMS_ACCESS_KEY = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY;
 const TIMEOUT_MS = 10000;
 const MAX_RETRIES = 3;
 
@@ -22,6 +24,36 @@ async function sleep(ms: number): Promise<void> {
 
 function getRetryDelay(attempt: number): number {
   return Math.pow(2, attempt - 1) * 1000;
+}
+
+interface Web3FormsResponse {
+  success: boolean;
+  message?: string;
+  data?: {
+    order_id?: string;
+  };
+  errors?: Array<{
+    field: string;
+    message: string;
+  }>;
+}
+
+function mapCartItemsToOrderItems(items: CartItem[]) {
+  return items.map((item, index) => ({
+    [`Item ${index + 1} - Flavour`]: item.scent,
+    [`Item ${index + 1} - Size`]: `${item.size}g`,
+    [`Item ${index + 1} - Color`]: item.color,
+    [`Item ${index + 1} - Amount`]: item.quantity,
+    [`Item ${index + 1} - Price`]: `Rs. ${item.price * item.quantity}`
+  }));
+}
+
+function flattenOrderItems(items: CartItem[]) {
+  const result: Record<string, string> = {};
+  items.forEach((item, index) => {
+    result[`Item ${index + 1}`] = `${item.scent}, ${item.size}g, ${item.color}, Qty: ${item.quantity}, Rs. ${item.price * item.quantity}`;
+  });
+  return result;
 }
 
 export async function submitCartToWebhook(
@@ -38,23 +70,27 @@ export async function submitCartToWebhook(
   const discountAmount = Math.round(subtotal * (discountPercentage / 100));
   const finalTotal = subtotal - discountAmount;
 
-  const payload: WebhookPayload = {
-    customer,
-    items: items.map(item => ({
-      id: item.id,
-      scent: item.scent,
-      price: item.price,
-      color: item.color,
-      quantity: item.quantity
-    })),
-    totalQuantity,
-    subtotal,
-    discountPercentage,
-    discountAmount,
-    finalTotal
+  const orderItemsFormatted = items.map((item, index) => 
+    `${index + 1}. ${item.scent} | Size: ${item.size}g | Color: ${item.color} | Qty: ${item.quantity} | Rs. ${item.price * item.quantity}`
+  ).join('\n');
+
+  const web3FormsPayload: Record<string, any> = {
+    access_key: WEB3FORMS_ACCESS_KEY,
+    Name: customer.name,
+    Email: customer.email,
+    'Phone number': customer.phone || '',
+    'Order Details': orderItemsFormatted,
+    'Total items': totalQuantity,
+    Subtotal: `Rs. ${subtotal}`,
+    Discount: `${discountPercentage}% (Rs. ${discountAmount})`,
+    'Final Total': `Rs. ${finalTotal}`,
+    order_id: orderId,
+    submission_timestamp: new Date().toISOString(),
+    from_name: customer.name,
+    subject: `New Soap Order from ${customer.name}`
   };
 
-  console.log('[Webhook] Submitting order:', JSON.stringify(payload, null, 2));
+  console.log('[Webhook] Submitting order to Web3Forms:', JSON.stringify(web3FormsPayload, null, 2));
 
   let lastError: Error | null = null;
 
@@ -67,39 +103,62 @@ export async function submitCartToWebhook(
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
-      const response = await fetch(WEBHOOK_URL, {
+      const response = await fetch(WEB3FORMS_ENDPOINT, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(web3FormsPayload),
         signal: controller.signal,
       });
 
       clearTimeout(timeoutId);
+
+      const responseData: Web3FormsResponse = await response.json();
 
       const logEntry: WebhookLogEntry = {
         orderId,
         status: response.status,
         timestamp: new Date().toISOString(),
         attempt,
-        success: response.ok,
+        success: responseData.success,
       };
 
       if (onLog) {
         onLog(logEntry);
       }
 
-      if (response.ok) {
+      if (responseData.success) {
+        logWeb3FormsSuccess(orderId);
         if (onStatusChange) {
           onStatusChange('submitted');
         }
         return { success: true, orderId };
       }
 
-      lastError = new Error(`Webhook returned status ${response.status}`);
+      if (response.status === 429) {
+        logWeb3FormsRateLimit(orderId, attempt, MAX_RETRIES);
+        if (attempt < MAX_RETRIES) {
+          const delay = getRetryDelay(attempt);
+          await sleep(delay);
+          continue;
+        }
+      }
+
+      if (response.status === 401) {
+        logWeb3FormsError(orderId, 'unauthorized', 'Invalid Web3Forms access key', attempt);
+      } else if (response.status === 400) {
+        logWeb3FormsError(orderId, 'validation', responseData.message || 'Validation failed', attempt);
+      } else if (response.status >= 500) {
+        logWeb3FormsError(orderId, 'server_error', responseData.message || 'Server error', attempt);
+      } else {
+        logWeb3FormsError(orderId, 'network_error', `HTTP ${response.status}`, attempt);
+      }
+
+      lastError = new Error(responseData.message || `Webhook returned status ${response.status}`);
     } catch (error) {
       lastError = error instanceof Error ? error : new Error('Unknown error');
+      logWeb3FormsError(orderId, 'network_error', lastError.message, attempt);
 
       const logEntry: WebhookLogEntry = {
         orderId,
