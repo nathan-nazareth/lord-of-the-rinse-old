@@ -40,6 +40,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, isSubmi
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
 
     const newErrors: { name?: string; email?: string; phone?: string } = {};
 
@@ -175,7 +176,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, isSubmi
           <button
             type="submit"
             disabled={isSubmitting}
-            className="flex-1 py-3 px-4 rounded-full font-bold bg-bark-600 text-white hover:bg-bark-700 transition-colors flex items-center justify-center gap-2 shadow-md"
+            className="flex-1 py-3 px-4 rounded-full font-bold text-white flex items-center justify-center gap-2 shadow-md transition-colors bg-[#5D4E37] hover:bg-[#4A3F2D]"
           >
             {isSubmitting ? (
               <>
@@ -475,8 +476,8 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
                 {showClearCartConfirm ? 'Clear All?' : 'Clear Cart'}
               </button>
               <button
-                onClick={() => setShowCheckout(true)}
-                className="btn-soft flex-[2] py-3 text-white flex items-center justify-center gap-2"
+                onClick={(e) => { e.preventDefault(); setShowCheckout(true); }}
+                className="btn-soft flex-[2] py-3 px-4 rounded-full font-bold text-white flex items-center justify-center gap-2 shadow-md transition-colors bg-[#5D4E37] hover:bg-[#4A3F2D]"
               >
                 <Send className="w-5 h-5" />
                 Submit Order
