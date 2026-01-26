@@ -80,3 +80,49 @@ export const setupGlobalErrorHandlers = (): void => {
 
   window.addEventListener('unhandledrejection', logUnhandledRejection);
 };
+
+export interface Web3FormsErrorLog {
+  message: string;
+  timestamp: string;
+  orderId?: string;
+  errorType: 'rate_limit' | 'unauthorized' | 'validation' | 'server_error' | 'network_error';
+  attempt?: number;
+  maxRetries?: number;
+}
+
+export const logWeb3FormsRateLimit = (orderId: string, attempt: number, maxRetries: number): void => {
+  const errorLog: Web3FormsErrorLog = {
+    message: 'Web3Forms API rate limit exceeded',
+    timestamp: new Date().toISOString(),
+    orderId,
+    errorType: 'rate_limit',
+    attempt,
+    maxRetries,
+  };
+  console.warn('[Web3Forms Rate Limit]', JSON.stringify(errorLog, null, 2));
+};
+
+export const logWeb3FormsError = (
+  orderId: string,
+  errorType: Web3FormsErrorLog['errorType'],
+  message: string,
+  attempt?: number
+): void => {
+  const errorLog: Web3FormsErrorLog = {
+    message,
+    timestamp: new Date().toISOString(),
+    orderId,
+    errorType,
+    attempt,
+  };
+  console.error('[Web3Forms Error]', JSON.stringify(errorLog, null, 2));
+};
+
+export const logWeb3FormsSuccess = (orderId: string): void => {
+  const successLog = {
+    message: 'Web3Forms submission successful',
+    timestamp: new Date().toISOString(),
+    orderId,
+  };
+  console.log('[Web3Forms Success]', JSON.stringify(successLog, null, 2));
+};
