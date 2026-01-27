@@ -199,29 +199,37 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onSubmit, onCancel, isSubmi
 interface OrderConfirmationProps {
   itemCount: number;
   onContinue: () => void;
+  onCheckout: () => void;
 }
 
-const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ itemCount, onContinue }) => (
-  <div className="p-8 text-center">
+const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ itemCount, onContinue, onCheckout }) => (
+  <div className="p-6 text-center">
     <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
       <Check className="w-8 h-8 text-green-600" />
     </div>
-    <h3 className="text-xl font-serif font-bold text-bark-800 mb-2">Order Sent Successfully!</h3>
+    <h3 className="text-xl font-serif font-bold text-bark-800 mb-2">Added to Cart!</h3>
     <p className="text-gray-600 mb-4">
-      Thank you for your order! We've received your soap customization details and will be in touch shortly.
+      Your soap has been added to your cart.
     </p>
     <p className="text-sm text-gray-500 mb-6">
-      You ordered: {itemCount} soap{itemCount > 1 ? 's' : ''}
+      {itemCount} soap{itemCount > 1 ? 's' : ''} in your cart
     </p>
-    <p className="text-xs text-gray-400 mb-6">
-      Order submitted via Web3Forms
-    </p>
-    <button
-      onClick={onContinue}
-      className="w-full py-3 rounded-full font-bold bg-bark-600 text-white hover:bg-bark-700 transition-colors"
-    >
-      Order More Soaps
-    </button>
+    
+    <div className="space-y-3">
+      <button
+        onClick={onCheckout}
+        className="w-full py-4 px-6 rounded-full font-bold text-white flex items-center justify-center gap-2 shadow-md transition-colors bg-[#5D4E37] hover:bg-[#4A3F2D]"
+      >
+        <ShoppingCart className="w-5 h-5" />
+        Proceed to Checkout
+      </button>
+      <button
+        onClick={onContinue}
+        className="w-full py-3 px-6 rounded-full font-bold border-2 border-bark-200 text-bark-700 hover:bg-bark-50 transition-colors"
+      >
+        + Order Another Soap
+      </button>
+    </div>
   </div>
 );
 
@@ -229,6 +237,7 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
   const [showCheckout, setShowCheckout] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showAddedToCart, setShowAddedToCart] = useState(false);
   const [orderItemCount, setOrderItemCount] = useState(0);
   const [showClearCartConfirm, setShowClearCartConfirm] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -237,13 +246,13 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
 
   // Focus management when cart opens
   React.useEffect(() => {
-    if (isOpen && !showConfirmation && !showCheckout) {
+    if (isOpen && !showConfirmation && !showCheckout && !showAddedToCart) {
       // Move focus to close button when cart opens
       setTimeout(() => {
         closeButtonRef.current?.focus();
       }, 100);
     }
-  }, [isOpen, showConfirmation, showCheckout]);
+  }, [isOpen, showConfirmation, showCheckout, showAddedToCart]);
 
   // Trap focus within sidebar when open
   React.useEffect(() => {
@@ -314,8 +323,19 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
   const handleContinue = () => {
     setShowConfirmation(false);
     setShowCheckout(false);
+    setShowAddedToCart(false);
     setOrderItemCount(0);
     onClose();
+  };
+
+  const handleAddedToCartContinue = () => {
+    setShowAddedToCart(false);
+    onClose();
+  };
+
+  const handleAddedToCartCheckout = () => {
+    setShowAddedToCart(false);
+    setShowCheckout(true);
   };
 
   if (!isOpen) {
@@ -333,23 +353,23 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
       {/* Sidebar */}
       <div className="fixed right-0 top-0 bottom-0 w-full max-w-sm bg-white shadow-xl z-50 flex flex-col animate-in slide-in-from-right duration-300">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-cream-200">
+        <div className="flex items-center justify-between p-4 border-b border-cream-200 bg-[#5D4E37] text-white">
           <div className="flex items-center gap-2">
-            <ShoppingCart className="w-5 h-5 text-sage-600" />
-            <h2 className="text-lg font-serif font-bold text-natural-800">
-              {showConfirmation ? 'Thank You!' : 'Your Cart'}
+            <ShoppingCart className="w-5 h-5 text-white" />
+            <h2 className="text-lg font-serif font-bold text-white">
+              {showConfirmation ? 'Thank You!' : showAddedToCart ? 'Added to Cart!' : 'Your Cart'}
             </h2>
-            {!showConfirmation && cart.totalQuantity > 0 && (
-              <span className="bg-blush-100 text-blush-700 text-xs px-2 py-0.5 rounded-full border border-blush-200">
-                {cart.totalQuantity} soap{cart.totalQuantity > 1 ? 's' : ''}
+            {!showConfirmation && !showAddedToCart && cart.totalQuantity > 0 && (
+              <span className="bg-white text-[#5D4E37] text-xs px-2 py-0.5 rounded-full font-bold">
+                {cart.totalQuantity}
               </span>
             )}
           </div>
-          {!showConfirmation && (
+          {!showConfirmation && !showAddedToCart && (
             <button
               ref={closeButtonRef}
               onClick={onClose}
-              className="px-3 py-1.5 hover:bg-cream-100 rounded-full transition-colors text-sm text-natural-600 font-medium flex items-center gap-1 border border-transparent hover:border-cream-200"
+              className="px-3 py-1.5 hover:bg-white/20 rounded-full transition-colors text-sm text-white font-medium flex items-center gap-1 border border-white/30 hover:border-white"
               aria-label="Close cart"
             >
               Close
@@ -366,6 +386,13 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
             <OrderConfirmation
               itemCount={orderItemCount}
               onContinue={handleContinue}
+              onCheckout={handleAddedToCartCheckout}
+            />
+          ) : showAddedToCart ? (
+            <OrderConfirmation
+              itemCount={cart.totalQuantity}
+              onContinue={handleAddedToCartContinue}
+              onCheckout={handleAddedToCartCheckout}
             />
           ) : showCheckout ? (
             <CheckoutForm
@@ -465,22 +492,22 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
                 <span className="text-xl font-bold text-sage-700">Rs. {total}</span>
               </div>
             </div>
-            <div className="flex gap-3">
+            <div className="space-y-3">
+              <button
+                onClick={(e) => { e.preventDefault(); setShowCheckout(true); }}
+                className="w-full py-4 px-6 rounded-full font-bold text-white flex items-center justify-center gap-2 shadow-md transition-colors bg-[#5D4E37] hover:bg-[#4A3F2D]"
+              >
+                <ShoppingCart className="w-5 h-5" />
+                Proceed to Checkout - Rs. {total}
+              </button>
               <button
                 onClick={handleClearCart}
-                className={`flex-1 py-3 border-2 rounded-full font-bold transition-all ${showClearCartConfirm
+                className={`w-full py-3 border-2 rounded-full font-bold transition-all ${showClearCartConfirm
                     ? 'border-red-300 text-red-600 bg-red-50'
                     : 'border-cream-300 text-natural-600 hover:bg-cream-100 hover:border-cream-400'
                   }`}
               >
                 {showClearCartConfirm ? 'Clear All?' : 'Clear Cart'}
-              </button>
-              <button
-                onClick={(e) => { e.preventDefault(); setShowCheckout(true); }}
-                className="btn-soft flex-[2] py-3 px-4 rounded-full font-bold text-white flex items-center justify-center gap-2 shadow-md transition-colors bg-[#5D4E37] hover:bg-[#4A3F2D]"
-              >
-                <Send className="w-5 h-5" />
-                Submit Order
               </button>
             </div>
           </div>
@@ -497,11 +524,11 @@ export const CartBadge: React.FC<{ count: number; onClick: () => void }> = ({ co
   return (
     <button
       onClick={onClick}
-      className="relative p-2 bg-bark-100 hover:bg-bark-200 rounded-full transition-colors"
+      className="relative p-3 bg-[#5D4E37] hover:bg-[#4A3F2D] rounded-full transition-colors shadow-lg"
       aria-label="Open cart"
     >
-      <ShoppingCart className="w-5 h-5 text-bark-700" />
-      <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+      <ShoppingCart className="w-6 h-6 text-white" />
+      <span className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 text-white text-sm font-bold rounded-full flex items-center justify-center shadow">
         {count > 99 ? '99+' : count}
       </span>
     </button>

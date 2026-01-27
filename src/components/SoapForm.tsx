@@ -148,9 +148,7 @@ export const SoapForm: React.FC = () => {
   const isButtonDisabled = !isFormValid || !rateLimit.isAllowed;
   const buttonText = rateLimit.cooldownRemaining !== null
     ? `Wait ${rateLimit.cooldownRemaining}s`
-    : cart.totalQuantity > 0
-      ? 'Add Another'
-      : 'Add to Cart';
+    : 'Add to Cart';
   const remainingCount = rateLimit.remainingSubmissions;
 
   const getBasePriceForScent = (scent: SoapScent): number => {
@@ -197,6 +195,7 @@ export const SoapForm: React.FC = () => {
         hasLavenderPieces: false
       }));
       setCurrentStep('landing');
+      setIsCartOpen(true);
     }
   };
 
