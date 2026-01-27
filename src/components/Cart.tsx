@@ -3,6 +3,7 @@ import { ShoppingCart, Trash2, Send, User, Phone, Mail as MailIcon, Loader2, Che
 import { CartItem as CartItemType } from '../types/cart';
 import { Customer } from '../types/webhook';
 import { submitCartToWebhook } from '../services/webhook';
+import { useFormRateLimit } from '../hooks/useFormRateLimit';
 
 interface CartProps {
   cart: {
@@ -241,8 +242,17 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
   const [orderItemCount, setOrderItemCount] = useState(0);
   const [showClearCartConfirm, setShowClearCartConfirm] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showRateLimitModal, setShowRateLimitModal] = useState(false);
   const sidebarRef = React.useRef<HTMLDivElement>(null);
   const closeButtonRef = React.useRef<HTMLButtonElement>(null);
+  const rateLimit = useFormRateLimit({ maxSubmissions: 10, windowMs: 300000, cooldownMs: 300000 });
+
+  // Show rate limit modal when triggered
+  React.useEffect(() => {
+    if (rateLimit.cooldownRemaining !== null && !showRateLimitModal) {
+      setShowRateLimitModal(true);
+    }
+  }, [rateLimit.cooldownRemaining]);
 
   // Focus management when cart opens
   React.useEffect(() => {
@@ -283,6 +293,13 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
   };
 
   const handleCheckout = async (customer: Customer) => {
+    // Check rate limit before proceeding
+    if (!rateLimit.isAllowed) {
+      setShowRateLimitModal(true);
+      setIsSubmitting(false);
+      return;
+    }
+
     setIsSubmitting(true);
     setErrorMessage(null);
 
@@ -306,6 +323,8 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
       );
 
       if (result.success) {
+        // Record the successful checkout for rate limiting
+        rateLimit.recordSubmission();
         setOrderItemCount(cart.totalQuantity);
         setShowConfirmation(true);
         onClearCart();
@@ -512,6 +531,30 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
             </div>
           </div>
         )}
+
+        {/* Rate Limit Modal */}
+        {showRateLimitModal && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl animate-in zoom-in duration-300">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-serif font-bold text-bark-800 mb-2">Rate Limit Reached</h3>
+              <p className="text-gray-600 mb-6">
+                Only 10 orders per 5 minutes are allowed.<br />
+                Please wait 5 minutes before placing another order.
+              </p>
+              <button
+                onClick={() => setShowRateLimitModal(false)}
+                className="w-full py-3 px-6 rounded-full font-bold bg-[#5D4E37] text-white hover:bg-[#4A3F2D] transition-colors"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
@@ -524,11 +567,11 @@ export const CartBadge: React.FC<{ count: number; onClick: () => void }> = ({ co
   return (
     <button
       onClick={onClick}
-      className="relative p-3 bg-[#5D4E37] hover:bg-[#4A3F2D] rounded-full transition-colors shadow-lg"
+      className="relative p-4 bg-[#5D4E37] hover:bg-[#4A3F2D] rounded-full transition-all shadow-xl border-2 border-white"
       aria-label="Open cart"
     >
       <ShoppingCart className="w-6 h-6 text-white" />
-      <span className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 text-white text-sm font-bold rounded-full flex items-center justify-center shadow">
+      <span className="absolute -top-2 -right-2 w-7 h-7 bg-green-500 text-white text-sm font-bold rounded-full flex items-center justify-center shadow border-2 border-white">
         {count > 99 ? '99+' : count}
       </span>
     </button>

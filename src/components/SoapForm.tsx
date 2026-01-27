@@ -46,15 +46,69 @@ const COLOR_OPTIONS = [
 
 type FormStep = 'landing' | 'scent' | 'color' | 'quantity' | 'complete';
 
+const FORM_STATE_KEY = 'soap_form_state';
+
+interface SavedFormState {
+  scent: SoapScent | null;
+  color: SoapColor | null;
+  quantity: string;
+  size: number;
+  hasLavenderPieces: boolean;
+  currentStep: FormStep;
+}
+
 export const SoapForm: React.FC = () => {
   const [formData, setFormData] = useState<OrderFormState>(INITIAL_STATE);
   const [showAddedToast, setShowAddedToast] = useState(false);
   const [currentStep, setCurrentStep] = useState<FormStep>('landing');
   const [showScentInfo, setShowScentInfo] = useState<string | null>(null);
   const { cart, addItem, removeItem, clearCart, isCartOpen, setIsCartOpen } = useCart();
-  const rateLimit = useFormRateLimit({ maxSubmissions: 10, windowMs: 60000, cooldownMs: 30000 });
   const scentTooltipTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const formTopRef = useRef<HTMLDivElement>(null);
+
+  // Load saved form state on mount
+  useEffect(() => {
+    const savedState = localStorage.getItem(FORM_STATE_KEY);
+    if (savedState) {
+      try {
+        const parsed: SavedFormState = JSON.parse(savedState);
+        if (parsed.currentStep && parsed.currentStep !== 'landing') {
+          setFormData(prev => ({
+            ...prev,
+            scent: parsed.scent,
+            color: parsed.color,
+            quantity: parsed.quantity,
+            size: parsed.size,
+            hasLavenderPieces: parsed.hasLavenderPieces
+          }));
+          setCurrentStep(parsed.currentStep);
+        }
+      } catch (e) {
+        console.warn('Failed to load saved form state');
+      }
+    }
+  }, []);
+
+  // Save form state on change
+  useEffect(() => {
+    const stateToSave: SavedFormState = {
+      scent: formData.scent,
+      color: formData.color,
+      quantity: formData.quantity,
+      size: formData.size,
+      hasLavenderPieces: formData.hasLavenderPieces,
+      currentStep
+    };
+    localStorage.setItem(FORM_STATE_KEY, JSON.stringify(stateToSave));
+  }, [formData, currentStep]);
+
+  const handleClearCartAndReset = () => {
+    clearCart();
+    setFormData(INITIAL_STATE);
+    setCurrentStep('landing');
+    localStorage.removeItem(FORM_STATE_KEY);
+    setIsCartOpen(false);
+  };
 
   const steps: { key: FormStep; label: string }[] = [
     { key: 'scent', label: 'Scent & Size' },
@@ -142,6 +196,14 @@ export const SoapForm: React.FC = () => {
   const handleContinueFromColor = () => {
     if (formData.color) {
       setCurrentStep('quantity');
+      
+      // Scroll to center quantity section
+      setTimeout(() => {
+        const quantitySection = document.getElementById('quantity-section');
+        if (quantitySection) {
+          quantitySection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
     }
   };
 
@@ -150,8 +212,8 @@ export const SoapForm: React.FC = () => {
       setCurrentStep(formData.scent ? 'color' : 'scent');
     }
 
-    // Auto-scroll to top when step changes
-    if (currentStep !== 'landing') {
+    // Auto-scroll to top when step changes (but not on initial load)
+    if (currentStep !== 'landing' && formData.scent) {
       formTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, [currentStep, formData.scent, formData.color]);
@@ -169,11 +231,8 @@ export const SoapForm: React.FC = () => {
     formData.quantity.length > 0 &&
     parseInt(formData.quantity, 10) > 0;
 
-  const isButtonDisabled = !isFormValid || !rateLimit.isAllowed;
-  const buttonText = rateLimit.cooldownRemaining !== null
-    ? `Wait ${rateLimit.cooldownRemaining}s`
-    : 'Add to Cart';
-  const remainingCount = rateLimit.remainingSubmissions;
+  const isButtonDisabled = !isFormValid;
+  const buttonText = 'Add to Cart';
 
   const getBasePriceForScent = (scent: SoapScent): number => {
     const option = SOAP_OPTIONS.find(o => o.scent === scent);
@@ -194,10 +253,10 @@ export const SoapForm: React.FC = () => {
   };
 
   const handleAddToCart = () => {
-    if (!isFormValid || !rateLimit.isAllowed) return;
+    if (!isFormValid) return;
 
     const price = getTotalPrice();
-    const success = rateLimit.recordSubmission() && addItem(
+    const success = addItem(
       formData.scent!,
       price,
       formData.color!,
@@ -267,13 +326,26 @@ export const SoapForm: React.FC = () => {
           />
 
           {cart.totalQuantity > 0 && !isCartOpen && (
-            <div className="fixed bottom-28 right-4 z-50">
+            <div className="fixed bottom-28 right-4 z-50 flex flex-col gap-2">
               <CartBadge count={cart.totalQuantity} onClick={() => setIsCartOpen(true)} />
             </div>
           )}
 
-          <div className="parchment-paper rounded-2xl shadow-lg border border-cream-200 overflow-hidden animate-in fade-in zoom-in duration-500">
-            <div className="p-8 md:p-12 text-center border-b border-blush-100">
+          <div className="parchment-paper rounded-2xl shadow-lg border border-cream-200 overflow-hidden animate-in fade-in zoom-in duration-500 relative">
+            {/* Clear Cart Button */}
+            {cart.totalQuantity > 0 && (
+              <button
+                onClick={handleClearCartAndReset}
+                className="absolute top-4 right-4 z-10 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg transition-colors flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Clear & Reset
+              </button>
+            )}
+
+            <div className="p-8 md:p-12 text-center border-b border-blush-100 pt-16">
               <h1 className="text-4xl md:text-5xl font-serif font-bold text-natural-800 mb-6 botanical-heading">
                 Handcrafted Botanical Soaps
               </h1>
@@ -853,14 +925,6 @@ export const SoapForm: React.FC = () => {
                   <Plus className="w-6 h-6" />
                   {buttonText}
                 </button>
-              </div>
-
-              <div className="text-center mt-3">
-                <span className="text-xs text-natural-400">
-                  {rateLimit.cooldownRemaining !== null
-                    ? `Try again in ${rateLimit.cooldownRemaining}s`
-                    : `${remainingCount}/10 submissions`}
-                </span>
               </div>
             </div>
           </div>
