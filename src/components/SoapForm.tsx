@@ -69,31 +69,13 @@ export const SoapForm: React.FC = () => {
 
   // Load saved form state on mount
   useEffect(() => {
-    // Clear old saved state on first load
-    const savedState = localStorage.getItem(FORM_STATE_KEY);
-    if (savedState) {
-      try {
-        const parsed: SavedFormState = JSON.parse(savedState);
-        // Only restore if we have valid form data and not on landing
-        if (parsed.currentStep && parsed.currentStep !== 'landing' && parsed.scent && parsed.color && parsed.quantity) {
-          setFormData(prev => ({
-            ...prev,
-            scent: parsed.scent,
-            color: parsed.color,
-            quantity: parsed.quantity,
-            size: parsed.size,
-            hasLavenderPieces: parsed.hasLavenderPieces
-          }));
-          setCurrentStep(parsed.currentStep);
-        } else {
-          // Clear invalid/old state
-          localStorage.removeItem(FORM_STATE_KEY);
-        }
-      } catch (e) {
-        console.warn('Failed to load saved form state');
-        localStorage.removeItem(FORM_STATE_KEY);
-      }
-    }
+    // Clear old saved state on first load - force fresh start
+    localStorage.removeItem(FORM_STATE_KEY);
+    
+    // Also clear any cart state persistence
+    try {
+      localStorage.removeItem('soap_cart_state');
+    } catch (e) {}
   }, []);
 
   // Save form state on change

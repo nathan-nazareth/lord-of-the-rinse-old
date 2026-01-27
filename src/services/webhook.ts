@@ -64,6 +64,13 @@ export async function submitCartToWebhook(
 ): Promise<{ success: boolean; orderId: string }> {
   const orderId = generateOrderId();
   
+  // Validate access key
+  if (!WEB3FORMS_ACCESS_KEY || WEB3FORMS_ACCESS_KEY.trim() === '') {
+    console.error('[Webhook] ERROR: VITE_WEB3FORMS_ACCESS_KEY is not set. Please add it to your .env file and Vercel environment variables.');
+    if (onStatusChange) onStatusChange('failed');
+    return { success: false, orderId };
+  }
+  
   const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const discountPercentage = totalQuantity >= 4 ? 15 : totalQuantity >= 2 ? 10 : 0;

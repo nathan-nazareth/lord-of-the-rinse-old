@@ -26,3 +26,5 @@ nul
 
 # Playwright
 test-results/
+.vercel
+.env*.local
