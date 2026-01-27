@@ -71,10 +71,26 @@ export const SoapForm: React.FC = () => {
       color: (scent === SoapScent.COFFEE || scent === SoapScent.TURMERIC) ? SoapColor.WHITE : prev.color
     }));
     setShowScentInfo(scent);
+    
+    // Scroll to size section
+    setTimeout(() => {
+      const sizeSection = document.getElementById('size-section');
+      if (sizeSection) {
+        sizeSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 150);
   };
 
   const handleSizeChange = (size: number) => {
     setFormData(prev => ({ ...prev, size }));
+    
+    // Scroll to lavender pieces section
+    setTimeout(() => {
+      const lavenderSection = document.getElementById('lavender-section');
+      if (lavenderSection) {
+        lavenderSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 150);
   };
 
   const handleMouseEnterScent = (scent: string) => {
@@ -113,6 +129,14 @@ export const SoapForm: React.FC = () => {
 
   const handleColorChange = (color: SoapColor) => {
     setFormData(prev => ({ ...prev, color }));
+    
+    // Scroll to lavender section
+    setTimeout(() => {
+      const lavenderSection = document.getElementById('lavender-section');
+      if (lavenderSection) {
+        lavenderSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 150);
   };
 
   const handleContinueFromColor = () => {
@@ -462,7 +486,7 @@ export const SoapForm: React.FC = () => {
             </div>
 
             {formData.scent && (
-              <div className="border-t border-parchment-200 pt-6 mt-6">
+              <div id="size-section" className="border-t border-parchment-200 pt-6 mt-6">
                 <p className="text-bark-600 mb-3 font-medium">Pick a size:</p>
 
                 <div className="flex gap-3">
@@ -488,10 +512,19 @@ export const SoapForm: React.FC = () => {
             )}
 
             {formData.scent && (
-              <div className="mt-6 pt-6 border-t border-cream-200">
+              <div id="lavender-section" className="mt-6 pt-6 border-t border-cream-200">
                 <button
                   type="button"
-                  onClick={() => setFormData(prev => ({ ...prev, hasLavenderPieces: !prev.hasLavenderPieces }))}
+                  onClick={() => {
+                    setFormData(prev => ({ ...prev, hasLavenderPieces: !prev.hasLavenderPieces }));
+                    // Scroll to quantity section
+                    setTimeout(() => {
+                      const quantitySection = document.getElementById('quantity-section');
+                      if (quantitySection) {
+                        quantitySection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }
+                    }, 150);
+                  }}
                   className={`w-full p-4 rounded-2xl border-2 flex items-center justify-between transition-all ${formData.hasLavenderPieces
                     ? 'border-sage-300 bg-sage-50 shadow-sm'
                     : 'border-cream-300 hover:border-sage-200 hover:bg-cream-50'}
@@ -665,7 +698,7 @@ export const SoapForm: React.FC = () => {
         )}
 
         {currentStep === 'quantity' && formData.scent && formData.color && (
-          <div className="card-organic p-8 md:p-10">
+          <div id="quantity-section" className="card-organic p-8 md:p-10">
             <button
               type="button"
               onClick={() => setCurrentStep('color')}
