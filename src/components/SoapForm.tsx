@@ -62,17 +62,20 @@ export const SoapForm: React.FC = () => {
   const [showAddedToast, setShowAddedToast] = useState(false);
   const [currentStep, setCurrentStep] = useState<FormStep>('landing');
   const [showScentInfo, setShowScentInfo] = useState<string | null>(null);
+  const showCartButtonsRef = useRef(false);
   const { cart, addItem, removeItem, clearCart, isCartOpen, setIsCartOpen } = useCart();
   const scentTooltipTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const formTopRef = useRef<HTMLDivElement>(null);
 
   // Load saved form state on mount
   useEffect(() => {
+    // Clear old saved state on first load
     const savedState = localStorage.getItem(FORM_STATE_KEY);
     if (savedState) {
       try {
         const parsed: SavedFormState = JSON.parse(savedState);
-        if (parsed.currentStep && parsed.currentStep !== 'landing') {
+        // Only restore if we have valid form data and not on landing
+        if (parsed.currentStep && parsed.currentStep !== 'landing' && parsed.scent && parsed.color && parsed.quantity) {
           setFormData(prev => ({
             ...prev,
             scent: parsed.scent,
@@ -82,9 +85,13 @@ export const SoapForm: React.FC = () => {
             hasLavenderPieces: parsed.hasLavenderPieces
           }));
           setCurrentStep(parsed.currentStep);
+        } else {
+          // Clear invalid/old state
+          localStorage.removeItem(FORM_STATE_KEY);
         }
       } catch (e) {
         console.warn('Failed to load saved form state');
+        localStorage.removeItem(FORM_STATE_KEY);
       }
     }
   }, []);
@@ -156,12 +163,6 @@ export const SoapForm: React.FC = () => {
     }, 150);
   };
 
-  useEffect(() => {
-    if (cart.items.length > 0) {
-      setCurrentStep('scent');
-    }
-  }, [cart.items.length]);
-
   const handleMouseLeaveScent = () => {
     if (scentTooltipTimerRef.current) {
       clearTimeout(scentTooltipTimerRef.current);
@@ -194,7 +195,9 @@ export const SoapForm: React.FC = () => {
   };
 
   const handleContinueFromColor = () => {
+    console.log('[Debug] handleContinueFromColor called, formData.color:', formData.color);
     if (formData.color) {
+      console.log('[Debug] Setting currentStep to quantity');
       setCurrentStep('quantity');
       
       // Scroll to center quantity section
@@ -204,19 +207,17 @@ export const SoapForm: React.FC = () => {
           quantitySection.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
       }, 100);
+    } else {
+      console.log('[Debug] formData.color is falsy, not proceeding');
     }
   };
 
+  // Track currentStep changes for debugging
   useEffect(() => {
-    if (currentStep === 'quantity' && (!formData.scent || !formData.color)) {
-      setCurrentStep(formData.scent ? 'color' : 'scent');
-    }
+    console.log('[Step Debug] currentStep changed to:', currentStep);
+  }, [currentStep]);
 
-    // Auto-scroll to top when step changes (but not on initial load)
-    if (currentStep !== 'landing' && formData.scent) {
-      formTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  }, [currentStep, formData.scent, formData.color]);
+  // Remove auto-scroll effect
 
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/[^0-9]/g, '');
@@ -268,6 +269,7 @@ export const SoapForm: React.FC = () => {
     if (success) {
       setShowAddedToast(true);
       setTimeout(() => setShowAddedToast(false), 2000);
+      showCartButtonsRef.current = true;
 
       setFormData(prev => ({
         ...prev,
@@ -277,8 +279,6 @@ export const SoapForm: React.FC = () => {
         size: DEFAULT_SIZE,
         hasLavenderPieces: false
       }));
-      setCurrentStep('landing');
-      setIsCartOpen(true);
     }
   };
 
@@ -894,37 +894,85 @@ export const SoapForm: React.FC = () => {
               {cart.items.length > 0 && (
                 <div className="mb-3 p-3 bg-sage-50 rounded-xl text-center border border-sage-100">
                   <span className="text-sm text-natural-600">
-                    {cart.totalQuantity} soap{cart.totalQuantity > 1 ? 's' : ''} in cart • Tap cart to review 🌿
+                    {cart.totalQuantity} soap{cart.totalQuantity > 1 ? 's' : ''} in cart
                   </span>
                 </div>
               )}
 
               <div className="flex items-center gap-4">
-                {cart.totalQuantity > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => setIsCartOpen(true)}
-                    className="px-6 py-4 rounded-full font-semibold text-base flex items-center gap-3 bg-cream-300 text-natural-700 hover:bg-sage-200 hover:text-sage-700 transition-all border border-blush-200 shadow-sm"
-                  >
-                    <ShoppingCart className="w-6 h-6" />
-                    Cart ({cart.totalQuantity})
-                  </button>
+                {showCartButtonsRef.current ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        showCartButtonsRef.current = false;
+                        setFormData(prev => ({
+                          ...prev,
+                          scent: null,
+                          color: null,
+                          quantity: '',
+                          size: DEFAULT_SIZE,
+                          hasLavenderPieces: false
+                        }));
+                        setCurrentStep('scent');
+                      }}
+                      className="flex-1 py-5 rounded-full font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-md btn-soft"
+                    >
+                      <Plus className="w-6 h-6" />
+                      Order Another Soap
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsCartOpen(true)}
+                      className="flex-1 py-5 rounded-full font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-md bg-[#5D4E37] text-white hover:bg-[#4A3F2D]"
+                    >
+                      <ShoppingCart className="w-6 h-6" />
+                      Proceed to Checkout - Rs. {cart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)}
+                    </button>
+                  </>
+                ) : cart.items.length > 0 ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setIsCartOpen(true)}
+                      className="px-6 py-4 rounded-full font-semibold text-base flex items-center gap-3 bg-cream-300 text-natural-700 hover:bg-sage-200 hover:text-sage-700 transition-all border border-blush-200 shadow-sm"
+                    >
+                      <ShoppingCart className="w-6 h-6" />
+                      Cart ({cart.totalQuantity})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleAddToCart}
+                      disabled={isButtonDisabled}
+                      className={`
+                        flex-1 py-5 rounded-full font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-md
+                        ${!isButtonDisabled
+                          ? 'btn-soft hover:shadow-lg'
+                          : 'bg-natural-200 text-natural-400 cursor-not-allowed'}
+                      `}
+                    >
+                      <Plus className="w-6 h-6" />
+                      {buttonText}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={handleAddToCart}
+                      disabled={isButtonDisabled}
+                      className={`
+                        flex-1 py-5 rounded-full font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-md
+                        ${!isButtonDisabled
+                          ? 'btn-soft hover:shadow-lg'
+                          : 'bg-natural-200 text-natural-400 cursor-not-allowed'}
+                      `}
+                    >
+                      <Plus className="w-6 h-6" />
+                      {buttonText}
+                    </button>
+                  </>
                 )}
-
-                <button
-                  type="button"
-                  onClick={handleAddToCart}
-                  disabled={isButtonDisabled}
-                  className={`
-                flex-1 py-5 rounded-full font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-md
-                ${!isButtonDisabled
-                      ? 'btn-soft hover:shadow-lg'
-                      : 'bg-natural-200 text-natural-400 cursor-not-allowed'}
-              `}
-                >
-                  <Plus className="w-6 h-6" />
-                  {buttonText}
-                </button>
               </div>
             </div>
           </div>
