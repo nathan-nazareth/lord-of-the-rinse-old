@@ -325,9 +325,16 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
       if (result.success) {
         // Record the successful checkout for rate limiting
         rateLimit.recordSubmission();
-        setOrderItemCount(cart.totalQuantity);
+        const itemsJustOrdered = cart.totalQuantity;
+        setOrderItemCount(itemsJustOrdered);
         setShowConfirmation(true);
         onClearCart();
+
+        // After showing confirmation, if user clicks "Proceed to Checkout" on the
+        // confirmation screen, they should see an empty cart since we just checked out
+        if (itemsJustOrdered > 0 && cart.items.length === 1) {
+          setShowAddedToCart(false);
+        }
       } else {
         setErrorMessage('Failed to send order. Please try again.');
       }
