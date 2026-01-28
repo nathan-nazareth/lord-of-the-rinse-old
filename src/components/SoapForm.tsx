@@ -3,8 +3,7 @@ import { SoapScent, SoapColor, OrderFormState, SOAP_OPTIONS, DEFAULT_SIZE, LAVEN
 import { useCart } from '../hooks/useCart';
 import { Customer } from '../types/webhook';
 import { submitCartToWebhook } from '../services/webhook';
-import { useFormRateLimit } from '../hooks/useFormRateLimit';
-import { ShoppingCart, Check, Sparkles, Palette, Layers, ArrowRight, ArrowLeft, Leaf, Droplets, Plus, Scale, Info, Tag, X } from 'lucide-react';
+import { ShoppingCart, Check, Sparkles, Palette, Layers, ArrowRight, ArrowLeft, Leaf, Plus, Tag, X, Home, Trash2 } from 'lucide-react';
 
 const SIZE_OPTIONS = [
   { label: 'S', weight: 50 },
@@ -45,19 +44,19 @@ const COLOR_OPTIONS = [
   { label: SoapColor.PURPLE, class: 'bg-purple-100 border-purple-200', hex: '#f3e8ff' },
 ];
 
-type FormStep = 'landing' | 'scent' | 'color' | 'quantity' | 'complete';
-type PageType = 'form' | 'checkout' | 'confirmation';
-
-const FORM_STATE_KEY = 'soap_form_state';
+type FormStep = 'landing' | 'scent' | 'color' | 'quantity';
+type PageType = 'landing' | 'form' | 'cart' | 'checkout' | 'confirmation';
 
 interface SavedFormState {
-  scent: SoapScent | null;
-  color: SoapColor | null;
+  scent: string | null;
+  color: string | null;
   quantity: string;
   size: number;
   hasLavenderPieces: boolean;
   currentStep: FormStep;
 }
+
+const FORM_STATE_KEY = 'soap_form_state';
 
 const CheckoutPage: React.FC<{
   cart: { items: any[]; totalQuantity: number };
@@ -97,107 +96,211 @@ const CheckoutPage: React.FC<{
   };
 
   return (
-    <div className="min-h-screen bg-cream-50 py-8 px-4">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen bg-[#FAF8F5] py-6 px-4">
+      <div className="max-w-md mx-auto">
         <button
           onClick={onBack}
-          className="flex items-center gap-2 text-natural-500 hover:text-sage-600 mb-6 transition-colors text-lg"
+          className="flex items-center gap-2 text-[#5D4E37] mb-6 text-lg font-medium"
         >
-          <ArrowLeft className="w-5 h-5" />
-          Back to form
+          <ArrowLeft className="w-6 h-6" />
+          Back to Order Form
         </button>
 
-        <div className="bg-white rounded-2xl shadow-lg border border-cream-200 overflow-hidden">
-          <div className="bg-[#5D4E37] p-6 text-white">
-            <h1 className="text-2xl font-serif font-bold">Checkout</h1>
+        <div className="bg-white rounded-3xl shadow-lg overflow-hidden">
+          <div className="bg-[#5D4E37] p-6 text-white text-center">
+            <h1 className="text-2xl font-bold">Checkout</h1>
             <p className="text-white/80 mt-1">{cart.totalQuantity} soap{cart.totalQuantity > 1 ? 's' : ''} in your order</p>
           </div>
 
           <div className="p-6">
-            <div className="bg-cream-50 rounded-xl p-4 mb-6 space-y-2">
+            <div className="bg-[#FAF8F5] rounded-2xl p-4 mb-6 space-y-3">
               {cart.items.map((item, idx) => (
-                <div key={item.id || idx} className="flex justify-between text-sm">
-                  <span className="text-natural-600">{item.scent} • {item.color} • {item.size}g × {item.quantity}</span>
-                  <span className="font-medium text-natural-800">Rs. {item.price * item.quantity}</span>
+                <div key={item.id || idx} className="flex justify-between items-center">
+                  <div>
+                    <p className="font-medium text-[#3D3425]">{item.scent}</p>
+                    <p className="text-sm text-gray-500">{item.color} • {item.size}g × {item.quantity}</p>
+                  </div>
+                  <p className="font-bold text-[#5D4E37]">Rs. {item.price * item.quantity}</p>
                 </div>
               ))}
-              <div className="border-t border-cream-200 pt-2 mt-2 flex justify-between">
-                <span className="text-natural-600">Subtotal</span>
+              <div className="border-t border-gray-200 pt-3 flex justify-between">
+                <span className="text-gray-600">Subtotal</span>
                 <span className="font-medium">Rs. {subtotal}</span>
               </div>
               {discountPercentage > 0 && (
-                <div className="flex justify-between text-sage-600">
+                <div className="flex justify-between text-green-600">
                   <span>Discount ({discountPercentage}%)</span>
                   <span>- Rs. {discountAmount}</span>
                 </div>
               )}
-              <div className="border-t border-cream-200 pt-2 flex justify-between text-lg font-bold text-sage-700">
+              <div className="border-t border-gray-200 pt-3 flex justify-between text-xl font-bold text-[#5D4E37]">
                 <span>Total</span>
                 <span>Rs. {total}</span>
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="block text-sm text-natural-600 mb-1">Your Name</label>
+                <label className="block text-[#3D3425] font-medium mb-2">Your Name</label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                   onFocus={() => setErrors(prev => ({ ...prev, name: undefined }))}
-                  placeholder="Your full name"
-                  className={`w-full p-3 rounded-lg border ${errors.name ? 'border-red-300' : 'border-gray-300'} focus:border-bark-500 focus:ring-2 focus:ring-earth-200 outline-none`}
-                  required
+                  placeholder="Enter your full name"
+                  className={`w-full p-4 rounded-xl border-2 text-lg ${errors.name ? 'border-red-300' : 'border-gray-200'} focus:border-[#5D4E37] outline-none`}
                 />
-                {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
+                {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
               </div>
 
               <div>
-                <label className="block text-sm text-natural-600 mb-1">Email Address</label>
+                <label className="block text-[#3D3425] font-medium mb-2">Email Address</label>
                 <input
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                   onFocus={() => setErrors(prev => ({ ...prev, email: undefined }))}
-                  placeholder="you@example.com"
-                  className={`w-full p-3 rounded-lg border ${errors.email ? 'border-red-300' : 'border-gray-300'} focus:border-bark-500 focus:ring-2 focus:ring-earth-200 outline-none`}
-                  required
+                  placeholder="Enter your email"
+                  className={`w-full p-4 rounded-xl border-2 text-lg ${errors.email ? 'border-red-300' : 'border-gray-200'} focus:border-[#5D4E37] outline-none`}
                 />
-                {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+                {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
               </div>
 
               <div>
-                <label className="block text-sm text-natural-600 mb-1">Phone Number</label>
+                <label className="block text-[#3D3425] font-medium mb-2">Phone Number</label>
                 <input
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
                   onFocus={() => setErrors(prev => ({ ...prev, phone: undefined }))}
-                  placeholder="(555) 123-4567"
-                  className={`w-full p-3 rounded-lg border ${errors.phone ? 'border-red-300' : 'border-gray-300'} focus:border-bark-500 focus:ring-2 focus:ring-earth-200 outline-none`}
-                  required
+                  placeholder="Enter your phone number"
+                  className={`w-full p-4 rounded-xl border-2 text-lg ${errors.phone ? 'border-red-300' : 'border-gray-200'} focus:border-[#5D4E37] outline-none`}
                 />
-                {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
+                {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
               </div>
 
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-4 rounded-full font-bold text-white flex items-center justify-center gap-2 shadow-md transition-colors bg-[#5D4E37] hover:bg-[#4A3F2D] disabled:opacity-50"
+                className="w-full py-5 rounded-xl font-bold text-xl text-white bg-[#5D4E37] hover:bg-[#4A3F2D] transition-colors disabled:opacity-50"
               >
-                {isSubmitting ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <ShoppingCart className="w-5 h-5" />
-                    Submit Order - Rs. {total}
-                  </>
-                )}
+                {isSubmitting ? 'Processing...' : `Submit Order - Rs. ${total}`}
               </button>
             </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const CartPage: React.FC<{
+  cart: { items: any[]; totalQuantity: number };
+  onBackToForm: () => void;
+  onCheckout: () => void;
+  onRemoveItem: (id: string) => void;
+  onClearCart: () => void;
+}> = ({ cart, onBackToForm, onCheckout, onRemoveItem, onClearCart }) => {
+  const subtotal = cart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const discountPercentage = cart.totalQuantity >= 4 ? 15 : cart.totalQuantity >= 2 ? 10 : 0;
+  const discountAmount = Math.round(subtotal * (discountPercentage / 100));
+  const total = subtotal - discountAmount;
+
+  return (
+    <div className="min-h-screen bg-[#FAF8F5] py-6 px-4">
+      <div className="max-w-md mx-auto">
+        <button
+          onClick={onBackToForm}
+          className="flex items-center gap-2 text-[#5D4E37] mb-6 text-lg font-medium"
+        >
+          <ArrowLeft className="w-6 h-6" />
+          Back to Order Form
+        </button>
+
+        <div className="bg-white rounded-3xl shadow-lg overflow-hidden">
+          <div className="bg-[#5D4E37] p-6 text-white text-center">
+            <h1 className="text-2xl font-bold">Your Cart</h1>
+            <p className="text-white/80 mt-1">{cart.totalQuantity} soap{cart.totalQuantity !== 1 ? 's' : ''} in your order</p>
+          </div>
+
+          <div className="p-6">
+            {cart.items.length === 0 ? (
+              <div className="text-center py-12">
+                <ShoppingCart className="w-20 h-20 text-gray-300 mx-auto mb-4" />
+                <p className="text-xl text-gray-500 mb-6">Your cart is empty</p>
+                <button
+                  onClick={onBackToForm}
+                  className="px-8 py-4 rounded-xl font-bold text-xl text-white bg-[#5D4E37] hover:bg-[#4A3F2D] transition-colors"
+                >
+                  Start Ordering
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="space-y-4 mb-6">
+                  {cart.items.map((item) => (
+                    <div key={item.id} className="flex items-center justify-between p-4 bg-[#FAF8F5] rounded-2xl">
+                      <div className="flex-1">
+                        <p className="font-bold text-[#3D3425] text-lg">{item.scent}</p>
+                        <p className="text-gray-500">{item.color} • {item.size}g • Qty: {item.quantity}</p>
+                        {item.hasLavenderPieces && <span className="text-sm text-green-600">+ Lavender Pieces</span>}
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <p className="font-bold text-[#5D4E37] text-lg">Rs. {item.price * item.quantity}</p>
+                        <button
+                          onClick={() => onRemoveItem(item.id)}
+                          className="p-3 bg-red-100 text-red-600 rounded-full hover:bg-red-200 transition-colors"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {discountPercentage > 0 && (
+                  <div className="bg-green-50 rounded-2xl p-4 mb-4 border-2 border-green-200">
+                    <div className="flex items-center gap-2 text-green-700 font-bold">
+                      <Check className="w-6 h-6" />
+                      Bulk Discount Applied!
+                    </div>
+                    <p className="text-green-600 text-sm mt-1">{discountPercentage}% OFF on {cart.totalQuantity} soaps</p>
+                  </div>
+                )}
+
+                <div className="border-t-2 border-gray-200 pt-4 mb-6">
+                  <div className="flex justify-between text-gray-600 mb-2">
+                    <span>Subtotal</span>
+                    <span>Rs. {subtotal}</span>
+                  </div>
+                  {discountPercentage > 0 && (
+                    <div className="flex justify-between text-green-600 mb-2">
+                      <span>Discount ({discountPercentage}%)</span>
+                      <span>- Rs. {discountAmount}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-2xl font-bold text-[#5D4E37]">
+                    <span>Total</span>
+                    <span>Rs. {total}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <button
+                    onClick={onCheckout}
+                    className="w-full py-5 rounded-xl font-bold text-xl text-white bg-[#5D4E37] hover:bg-[#4A3F2D] transition-colors"
+                  >
+                    Proceed to Checkout - Rs. {total}
+                  </button>
+                  <button
+                    onClick={onClearCart}
+                    className="w-full py-4 rounded-xl font-bold text-lg border-2 border-red-300 text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    Clear Cart
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -209,20 +312,19 @@ const ConfirmationPage: React.FC<{
   itemCount: number;
   onContinue: () => void;
 }> = ({ itemCount, onContinue }) => (
-  <div className="min-h-screen bg-cream-50 flex items-center justify-center p-4">
-    <div className="bg-white rounded-2xl shadow-lg border border-cream-200 p-8 max-w-md w-full text-center">
-      <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-        <Check className="w-10 h-10 text-green-600" />
+  <div className="min-h-screen bg-[#FAF8F5] flex items-center justify-center p-4">
+    <div className="bg-white rounded-3xl shadow-lg p-8 max-w-md w-full text-center">
+      <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+        <Check className="w-12 h-12 text-green-600" />
       </div>
-      <h1 className="text-3xl font-serif font-bold text-bark-800 mb-4">Thank You!</h1>
-      <p className="text-lg text-gray-600 mb-2">Your order has been submitted successfully.</p>
-      <p className="text-gray-500 mb-8">{itemCount} soap{itemCount > 1 ? 's' : ''} ordered</p>
+      <h1 className="text-3xl font-bold text-[#3D3425] mb-4">Thank You!</h1>
+      <p className="text-xl text-gray-600 mb-2">Your order has been submitted.</p>
+      <p className="text-gray-500 mb-8">{itemCount} soap{itemCount !== 1 ? 's' : ''} ordered</p>
       <button
         onClick={onContinue}
-        className="w-full py-4 rounded-full font-bold text-white flex items-center justify-center gap-2 shadow-md transition-colors bg-[#5D4E37] hover:bg-[#4A3F2D]"
+        className="w-full py-5 rounded-xl font-bold text-xl text-white bg-[#5D4E37] hover:bg-[#4A3F2D] transition-colors"
       >
-        <Plus className="w-5 h-5" />
-        Order Another Soap
+        Order More Soaps
       </button>
     </div>
   </div>
@@ -233,19 +335,40 @@ export const SoapForm: React.FC = () => {
   const [showAddedToast, setShowAddedToast] = useState(false);
   const [currentStep, setCurrentStep] = useState<FormStep>('landing');
   const [showScentInfo, setShowScentInfo] = useState<string | null>(null);
-  const showCartButtonsRef = useRef(false);
   const { cart, addItem, removeItem, clearCart } = useCart();
   const scentTooltipTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const formTopRef = useRef<HTMLDivElement>(null);
-  const [page, setPage] = useState<PageType>('form');
+  const [page, setPage] = useState<PageType>('landing');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmationItemCount, setConfirmationItemCount] = useState(0);
-  const [expandedBottomBar, setExpandedBottomBar] = useState(false);
-  const bottomBarTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const formTopRef = useRef<HTMLDivElement>(null);
+  const flavorSectionRef = useRef<HTMLDivElement>(null);
+  const sizeSectionRef = useRef<HTMLDivElement>(null);
+  const lavenderSectionRef = useRef<HTMLDivElement>(null);
+  const colorSectionRef = useRef<HTMLDivElement>(null);
+  const quantitySectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    localStorage.removeItem(FORM_STATE_KEY);
-    try { localStorage.removeItem('soap_cart_state'); } catch (e) {}
+    const savedState = localStorage.getItem(FORM_STATE_KEY);
+    if (savedState) {
+      try {
+        const parsed: SavedFormState = JSON.parse(savedState);
+        setFormData(prev => ({
+          ...prev,
+          scent: parsed.scent as SoapScent,
+          color: parsed.color as SoapColor,
+          quantity: parsed.quantity,
+          size: parsed.size,
+          hasLavenderPieces: parsed.hasLavenderPieces
+        }));
+        if (parsed.currentStep && parsed.currentStep !== 'landing') {
+          setCurrentStep(parsed.currentStep);
+          setPage('form');
+        }
+      } catch (e) {
+        console.error('Failed to load saved form state:', e);
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -260,18 +383,8 @@ export const SoapForm: React.FC = () => {
     localStorage.setItem(FORM_STATE_KEY, JSON.stringify(stateToSave));
   }, [formData, currentStep]);
 
-  useEffect(() => {
-    if (cart.totalQuantity > 0 && page === 'form' && !expandedBottomBar) {
-      setExpandedBottomBar(true);
-    }
-  }, [cart.totalQuantity, page]);
-
-  const handleClearCartAndReset = () => {
-    clearCart();
-    setFormData(INITIAL_STATE);
-    setCurrentStep('landing');
-    localStorage.removeItem(FORM_STATE_KEY);
-    setExpandedBottomBar(false);
+  const scrollToSection = (ref: React.RefObject<HTMLDivElement>) => {
+    ref.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
 
   const handleScentChange = (scent: SoapScent) => {
@@ -281,10 +394,12 @@ export const SoapForm: React.FC = () => {
       color: (scent === SoapScent.COFFEE || scent === SoapScent.TURMERIC) ? SoapColor.WHITE : prev.color
     }));
     setShowScentInfo(scent);
+    setTimeout(() => scrollToSection(sizeSectionRef), 300);
   };
 
   const handleSizeChange = (size: number) => {
     setFormData(prev => ({ ...prev, size }));
+    setTimeout(() => scrollToSection(lavenderSectionRef), 300);
   };
 
   const handleMouseEnterScent = (scent: string) => {
@@ -297,10 +412,29 @@ export const SoapForm: React.FC = () => {
     scentTooltipTimerRef.current = setTimeout(() => setShowScentInfo(null), 100);
   };
 
-  const handleContinueFromLanding = () => setCurrentStep('scent');
-  const handleContinueFromScent = () => formData.scent && formData.size > 0 && setCurrentStep('color');
-  const handleColorChange = (color: SoapColor) => setFormData(prev => ({ ...prev, color }));
-  const handleContinueFromColor = () => formData.color && setCurrentStep('quantity');
+  const handleContinueFromLanding = () => {
+    setCurrentStep('scent');
+    setPage('form');
+    setTimeout(() => scrollToSection(flavorSectionRef), 300);
+  };
+
+  const handleContinueFromScent = () => {
+    if (formData.scent && formData.size > 0) {
+      setCurrentStep('color');
+      setTimeout(() => scrollToSection(colorSectionRef), 300);
+    }
+  };
+
+  const handleColorChange = (color: SoapColor) => {
+    setFormData(prev => ({ ...prev, color }));
+  };
+
+  const handleContinueFromColor = () => {
+    if (formData.color) {
+      setCurrentStep('quantity');
+      setTimeout(() => scrollToSection(quantitySectionRef), 300);
+    }
+  };
 
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/[^0-9]/g, '');
@@ -332,9 +466,6 @@ export const SoapForm: React.FC = () => {
     if (success) {
       setShowAddedToast(true);
       setTimeout(() => setShowAddedToast(false), 2000);
-      showCartButtonsRef.current = true;
-      setExpandedBottomBar(true);
-
       setFormData(prev => ({
         ...prev,
         scent: null,
@@ -344,6 +475,8 @@ export const SoapForm: React.FC = () => {
         hasLavenderPieces: false
       }));
       setCurrentStep('scent');
+      setPage('cart');
+      localStorage.removeItem(FORM_STATE_KEY);
     }
   };
 
@@ -354,7 +487,9 @@ export const SoapForm: React.FC = () => {
       if (result.success) {
         setConfirmationItemCount(cart.totalQuantity);
         clearCart();
-        setExpandedBottomBar(false);
+        localStorage.removeItem(FORM_STATE_KEY);
+        setFormData(INITIAL_STATE);
+        setCurrentStep('scent');
         setPage('confirmation');
       }
     } finally {
@@ -363,17 +498,35 @@ export const SoapForm: React.FC = () => {
   };
 
   const handleContinueAfterConfirmation = () => {
-    setFormData(INITIAL_STATE);
-    setCurrentStep('landing');
+    setCurrentStep('scent');
     setPage('form');
-    setExpandedBottomBar(false);
+    setTimeout(() => scrollToSection(flavorSectionRef), 300);
   };
+
+  const handleGoToForm = () => {
+    setPage('form');
+    setTimeout(() => scrollToSection(flavorSectionRef), 300);
+  };
+
+  const currentPrice = formData.scent ? getTotalPrice() : 0;
+
+  if (page === 'cart') {
+    return (
+      <CartPage
+        cart={cart}
+        onBackToForm={handleGoToForm}
+        onCheckout={() => setPage('checkout')}
+        onRemoveItem={removeItem}
+        onClearCart={clearCart}
+      />
+    );
+  }
 
   if (page === 'checkout') {
     return (
       <CheckoutPage
         cart={cart}
-        onBack={() => setPage('form')}
+        onBack={handleGoToForm}
         onSubmit={handleCheckout}
         isSubmitting={isSubmitting}
       />
@@ -384,141 +537,112 @@ export const SoapForm: React.FC = () => {
     return <ConfirmationPage itemCount={confirmationItemCount} onContinue={handleContinueAfterConfirmation} />;
   }
 
-  const currentPrice = formData.scent ? getTotalPrice() : 0;
+  const subtotal = cart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const discountPercentage = cart.totalQuantity >= 4 ? 15 : cart.totalQuantity >= 2 ? 10 : 0;
+  const discountAmount = Math.round(subtotal * (discountPercentage / 100));
+  const cartTotal = subtotal - discountAmount;
 
   return (
-    <div className="min-h-screen pb-32 px-4">
-      <div className="max-w-4xl mx-auto pt-8">
-        {showAddedToast && (
-          <div className="fixed top-4 right-4 z-50 bg-green-600 text-white px-4 py-2 rounded-full shadow-lg animate-in fade-in slide-in-from-top-4 flex items-center gap-2">
-            <Check className="w-5 h-5" />
-            Added to cart!
-          </div>
-        )}
+    <div className="min-h-screen bg-[#FAF8F5]" ref={formTopRef}>
+      {showAddedToast && (
+        <div className="fixed top-4 right-4 z-50 bg-green-600 text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-2 font-medium">
+          <Check className="w-5 h-5" />
+          Added to cart!
+        </div>
+      )}
 
-        {cart.totalQuantity > 0 && (
-          <button
-            onClick={handleClearCartAndReset}
-            className="absolute top-4 right-4 z-10 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg transition-colors flex items-center gap-2"
-          >
-            <X className="w-4 h-4" />
-            Clear & Reset
-          </button>
-        )}
-
+      <div className="max-w-lg mx-auto pt-4 px-4 pb-36">
         {currentStep === 'landing' ? (
-          <div className="parchment-paper rounded-2xl shadow-lg border border-cream-200 overflow-hidden animate-in fade-in zoom-in duration-500 relative">
-            <div className="p-8 md:p-12 text-center border-b border-blush-100 pt-16">
-              <h1 className="text-4xl md:text-5xl font-serif font-bold text-natural-800 mb-6 botanical-heading">
-                Handcrafted Botanical Soaps
-              </h1>
-              <p className="text-xl text-natural-600 italic max-w-2xl mx-auto leading-relaxed">
-                Create your own organic bar of soap using traditional recipes and natural ingredients
-              </p>
+          <div className="bg-white rounded-3xl shadow-lg overflow-hidden">
+            <div className="bg-[#5D4E37] p-8 text-white text-center">
+              <h1 className="text-3xl md:text-4xl font-bold mb-3">Homemade Plant-Based Soaps</h1>
+              <p className="text-white/80 text-lg">Create your own organic soap with natural ingredients</p>
             </div>
 
-            <div className="p-10 space-y-8">
-              <div>
-                <h2 className="text-2xl font-bold text-natural-800 mb-6 flex items-center gap-3">
-                  <Info className="w-6 h-6 text-sage-600" />
-                  How It Works
+            <div className="p-6 space-y-6">
+              <div className="bg-[#FAF8F5] rounded-2xl p-5">
+                <h2 className="text-xl font-bold text-[#3D3425] mb-4 flex items-center gap-2">
+                  <span className="bg-[#5D4E37] text-white w-8 h-8 rounded-full flex items-center justify-center text-sm">1</span>
+                  Choose Scent & Size
                 </h2>
-                <div className="space-y-4">
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-full bg-cream-200 flex items-center justify-center flex-shrink-0">
-                      <span className="text-natural-700 font-bold">1</span>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-natural-800">Choose Scent & Size</h3>
-                      <p className="text-base text-natural-600 mt-1">Pick from 9 natural scents. Select your preferred size between 50-100g/ml.</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-full bg-cream-200 flex items-center justify-center flex-shrink-0">
-                      <span className="text-natural-700 font-bold">2</span>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-natural-800">Pick a Color</h3>
-                      <p className="text-base text-natural-600 mt-1">Select from 7 beautiful colors.</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-full bg-cream-200 flex items-center justify-center flex-shrink-0">
-                      <span className="text-natural-700 font-bold">3</span>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-natural-800">Set Quantity</h3>
-                      <p className="text-base text-natural-600 mt-1">Enter how many soaps you want. Mix and match to get bulk discounts!</p>
-                    </div>
-                  </div>
+                <p className="text-gray-600 ml-10">Pick from 9 natural scents in 3 sizes (50g, 75g, 100g)</p>
+              </div>
+
+              <div className="bg-[#FAF8F5] rounded-2xl p-5">
+                <h2 className="text-xl font-bold text-[#3D3425] mb-4 flex items-center gap-2">
+                  <span className="bg-[#5D4E37] text-white w-8 h-8 rounded-full flex items-center justify-center text-sm">2</span>
+                  Pick a Color
+                </h2>
+                <p className="text-gray-600 ml-10">Choose from 7 beautiful colors for your soap</p>
+              </div>
+
+              <div className="bg-[#FAF8F5] rounded-2xl p-5">
+                <h2 className="text-xl font-bold text-[#3D3425] mb-4 flex items-center gap-2">
+                  <span className="bg-[#5D4E37] text-white w-8 h-8 rounded-full flex items-center justify-center text-sm">3</span>
+                  Set Quantity
+                </h2>
+                <p className="text-gray-600 ml-10">Order multiple soaps and get bulk discounts!</p>
+              </div>
+
+              <div className="bg-green-50 rounded-2xl p-4 border-2 border-green-200">
+                <div className="flex items-center gap-2 text-green-700 font-bold">
+                  <Leaf className="w-6 h-6" />
+                  100% Natural Ingredients
                 </div>
               </div>
 
-              <div className="bg-sage-50 rounded-xl p-5 border border-sage-100">
-                <div className="flex items-center gap-3 text-sage-700 text-base">
-                  <Leaf className="w-5 h-5" />
-                  <span>100% natural coconut soap base</span>
-                </div>
-                <div className="flex items-center gap-3 text-sage-700 text-base mt-2">
-                  <Sparkles className="w-5 h-5" />
-                  <span>Handmade with love in small batches</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-8 bg-cream-100/50 border-t border-blush-200">
               <button
-                type="button"
                 onClick={handleContinueFromLanding}
-                className="btn-soft w-full text-xl py-5 flex items-center justify-center gap-3 shadow-lg"
+                className="w-full py-5 rounded-xl font-bold text-xl text-white bg-[#5D4E37] hover:bg-[#4A3F2D] transition-colors flex items-center justify-center gap-2"
               >
-                Start Building Soaps
+                Start Creating Soaps
                 <ArrowRight className="w-6 h-6" />
               </button>
             </div>
           </div>
         ) : (
           <>
-            <div className="mb-8 flex items-center justify-between gap-4">
-              <button
-                type="button"
-                onClick={() => setCurrentStep('landing')}
-                className="flex items-center gap-1 text-lg text-natural-500 hover:text-sage-600 transition-colors"
-              >
-                <ArrowLeft className="w-5 h-5" />
-                Back
-              </button>
-              <div className="flex items-center gap-2">
-                {['scent', 'color', 'quantity'].map((step, index, arr) => (
-                  <React.Fragment key={step}>
-                    {index > 0 && <div className="w-6 h-px bg-parchment-400" />}
-                    <div className={`flex flex-col items-center min-w-[60px] ${currentStep === step ? 'text-jungle-400' : index < arr.indexOf(currentStep) ? 'text-jungle-500' : 'text-parchment-400'}`}>
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${index < arr.indexOf(currentStep) ? 'bg-jungle-200 text-parchment-100' : currentStep === step ? 'bg-parchment-200 border-2 border-jungle-300' : 'bg-parchment-300'}`}>
-                        {index < arr.indexOf(currentStep) ? <Check className="w-5 h-5" /> : <span className={`text-sm font-bold ${currentStep === step ? 'text-jungle-500' : ''}`}>{index + 1}</span>}
-                      </div>
-                      <span className="text-xs mt-2 font-medium text-center leading-tight max-w-[70px] text-natural-600">
-                        {step === 'scent' ? 'Scent & Size' : step.charAt(0).toUpperCase() + step.slice(1)}
-                      </span>
-                    </div>
-                  </React.Fragment>
-                ))}
+            <div className="bg-white rounded-3xl shadow-lg overflow-hidden mb-4">
+              <div className="bg-[#5D4E37] p-5 text-white">
+                <h1 className="text-2xl font-bold">Homemade Plant-Based Soaps</h1>
               </div>
-              <div className="w-16" />
-            </div>
 
-            {currentStep === 'scent' && (
-              <div className="card-catalog p-8 md:p-10 pb-40">
-                <h2 className="text-2xl font-serif font-bold mb-8 text-sage-700 flex items-center gap-4">
-                  <span className="bg-sage-100 w-14 h-14 rounded-full flex items-center justify-center">
-                    <Sparkles className="w-7 h-7 text-sage-600" />
-                  </span>
-                  Choose Your Scent & Size
-                </h2>
+              <div className="p-4 bg-[#FAF8F5] flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <button
+                    onClick={() => setPage('cart')}
+                    className="flex items-center gap-2 px-4 py-3 bg-white rounded-xl font-medium text-[#5D4E37] border-2 border-[#5D4E37]"
+                  >
+                    <ShoppingCart className="w-5 h-5" />
+                    View Cart ({cart.totalQuantity})
+                  </button>
+                  <button
+                    onClick={() => setPage('checkout')}
+                    disabled={cart.totalQuantity === 0}
+                    className="flex-1 ml-3 py-3 rounded-xl font-bold text-white bg-[#5D4E37] hover:bg-[#4A3F2D] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Checkout - Rs. {cartTotal}
+                  </button>
+                </div>
+              </div>
 
-                <div className="mb-6">
-                  <p className="text-bark-500 mb-4 font-medium flex items-center gap-2">
-                    <span className="text-lg">Pick a scent:</span>
-                  </p>
+              <div className="p-5">
+                <div className="flex items-center justify-between mb-6">
+                  {['scent', 'color', 'quantity'].map((step, index, arr) => (
+                    <React.Fragment key={step}>
+                      {index > 0 && <div className="flex-1 h-2 bg-gray-200 mx-2 rounded" />}
+                      <div className={`flex flex-col items-center ${currentStep === step ? 'text-[#5D4E37]' : index < arr.indexOf(currentStep) ? 'text-green-500' : 'text-gray-300'}`}>
+                        <div className={`w-14 h-14 rounded-full flex items-center justify-center font-bold text-lg transition-all ${index < arr.indexOf(currentStep) ? 'bg-green-500 text-white' : currentStep === step ? 'bg-[#5D4E37] text-white' : 'bg-gray-200'}`}>
+                          {index < arr.indexOf(currentStep) ? <Check className="w-7 h-7" /> : index + 1}
+                        </div>
+                        <span className="text-xs mt-2 font-medium text-center">{step === 'scent' ? 'Scent' : step.charAt(0).toUpperCase() + step.slice(1)}</span>
+                      </div>
+                    </React.Fragment>
+                  ))}
+                </div>
+
+                <div ref={flavorSectionRef} className="space-y-6">
+                  <p className="text-lg font-medium text-[#3D3425]">Pick a scent:</p>
                   <div className="grid grid-cols-3 gap-3">
                     {SOAP_OPTIONS.map((option) => {
                       const info = SCENT_INFO[option.scent];
@@ -526,15 +650,11 @@ export const SoapForm: React.FC = () => {
                       return (
                         <button
                           key={option.scent}
-                          type="button"
                           onClick={() => handleScentChange(option.scent)}
-                          onMouseEnter={() => handleMouseEnterScent(option.scent)}
-                          onMouseLeave={handleMouseLeaveScent}
-                          className={`p-4 rounded-xl border-2 text-left relative transition-all ${isSelected ? 'border-sage-400 bg-sage-100 shadow-md' : 'border-cream-200 bg-white hover:border-sage-300'}`}
+                          className={`p-4 rounded-xl border-2 text-center transition-all ${isSelected ? 'border-[#5D4E37] bg-[#FAF8F5]' : 'border-gray-200 bg-white'}`}
                         >
-                          {isSelected && <span className="absolute top-2 right-2 text-sage-600 text-lg">✓</span>}
-                          <span className={`font-serif font-semibold text-lg block ${isSelected ? 'text-sage-700' : 'text-natural-700'}`}>{option.scent}</span>
-                          <p className={`text-sm italic ${isSelected ? 'text-sage-600' : 'text-natural-500'}`}>{info.description}</p>
+                          <span className="font-bold text-[#3D3425] block">{option.scent}</span>
+                          <span className="text-sm text-gray-500">{info.description}</span>
                         </button>
                       );
                     })}
@@ -542,264 +662,168 @@ export const SoapForm: React.FC = () => {
                 </div>
 
                 {formData.scent && (
-                  <div className="border-t border-parchment-200 pt-6 mt-6">
-                    <p className="text-bark-600 mb-3 font-medium">Pick a size:</p>
+                  <div ref={sizeSectionRef} className="space-y-6 mt-8">
+                    <p className="text-lg font-medium text-[#3D3425]">Pick a size:</p>
                     <div className="flex gap-3">
                       {SIZE_OPTIONS.map((option) => (
                         <button
                           key={option.label}
-                          type="button"
                           onClick={() => handleSizeChange(option.weight)}
-                          className={`flex-1 py-4 rounded-2xl font-bold transition-all border-2 ${formData.size === option.weight ? 'bg-sage-600 text-white border-sage-600' : 'bg-white text-natural-600 border-cream-300'}`}
+                          className={`flex-1 py-4 rounded-xl font-bold text-lg transition-all ${formData.size === option.weight ? 'bg-[#5D4E37] text-white' : 'bg-gray-100 text-gray-600'}`}
                         >
                           {option.label} ({option.weight}g)
                         </button>
                       ))}
                     </div>
-                  </div>
-                )}
 
-                {formData.scent && (
-                  <div className="mt-6 pt-6 border-t border-cream-200">
-                    <button
-                      type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, hasLavenderPieces: !prev.hasLavenderPieces }))}
-                      className={`w-full p-4 rounded-2xl border-2 flex items-center justify-between transition-all ${formData.hasLavenderPieces ? 'border-sage-300 bg-sage-50' : 'border-cream-300'}`}
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${formData.hasLavenderPieces ? 'border-sage-300 bg-sage-200' : 'border-cream-200'}`}>
-                          {formData.hasLavenderPieces && <Check className="w-5 h-5 text-white" />}
-                        </div>
-                        <span className="font-medium">Add Lavender Pieces 🌿</span>
-                      </div>
-                      <span className="font-bold text-natural-400">+Rs. {LAVENDER_PIECES_PRICE}</span>
-                    </button>
-                  </div>
-                )}
-
-                {formData.scent && (
-                  <div className="mt-6 pt-6 border-t border-cream-200">
-                    <div className="flex items-center justify-between bg-cream-100 p-4 rounded-xl">
-                      <span className="text-natural-600">
-                        {formData.size}g {formData.scent}
-                        {formData.hasLavenderPieces && <span className="text-sage-600 ml-2">+ Lavender</span>}
-                      </span>
-                      <span className="text-xl font-serif font-bold text-sage-700">Rs. {getTotalPrice()}</span>
-                    </div>
-                  </div>
-                )}
-
-                <button
-                  type="button"
-                  onClick={handleContinueFromScent}
-                  disabled={!isScentStepValid}
-                  className={`w-full mt-10 py-5 rounded-full font-bold text-xl flex items-center justify-center gap-3 transition-all shadow-md ${isScentStepValid ? 'btn-soft' : 'bg-natural-200 text-natural-400 cursor-not-allowed'}`}
-                >
-                  Continue to Color
-                  <ArrowRight className="w-6 h-6" />
-                </button>
-              </div>
-            )}
-
-            {currentStep === 'color' && formData.scent && (
-              <div className="card-catalog p-8 md:p-10 pb-40">
-                <button type="button" onClick={() => setCurrentStep('scent')} className="flex items-center gap-2 text-natural-500 hover:text-sage-600 mb-8">
-                  <ArrowLeft className="w-5 h-5" />
-                  Back to scent & size
-                </button>
-
-                <h2 className="text-2xl font-serif font-bold mb-3 text-sage-700 flex items-center gap-4">
-                  <span className="bg-sage-100 w-14 h-14 rounded-full flex items-center justify-center">
-                    <Palette className="w-7 h-7 text-sage-600" />
-                  </span>
-                  Choose Your Color
-                </h2>
-                <p className="text-bark-400 mb-6">{formData.scent} • {formData.size}g • Rs. {currentPrice}</p>
-
-                <div className="flex flex-wrap gap-4 justify-center">
-                  {COLOR_OPTIONS.map((option) => {
-                    const isSelected = formData.color === option.label;
-                    return (
+                    <div ref={lavenderSectionRef} className="space-y-4">
                       <button
-                        key={option.label}
-                        type="button"
-                        onClick={() => handleColorChange(option.label)}
-                        className={`flex flex-col items-center gap-2 p-4 rounded-2xl transition-all hover:scale-105 ${isSelected ? 'ring-2 ring-sage-400 bg-jungle-50 shadow-md' : ''}`}
+                        onClick={() => setFormData(prev => ({ ...prev, hasLavenderPieces: !prev.hasLavenderPieces }))}
+                        className={`w-full p-4 rounded-xl border-2 flex items-center justify-between transition-all ${formData.hasLavenderPieces ? 'border-[#5D4E37] bg-[#FAF8F5]' : 'border-gray-200'}`}
                       >
-                        <div className={`w-18 h-18 rounded-full shadow-md border-3 ${option.class} ${isSelected ? 'border-jungle-400 scale-105' : 'border-transparent'}`} style={{ backgroundColor: option.hex }}>
-                          {isSelected && <span className="absolute inset-0 flex items-center justify-center"><Check className="w-8 h-8 text-white drop-shadow-md" /></span>}
-                        </div>
-                        <span className={`text-sm font-medium ${isSelected ? 'text-bark-800' : 'text-bark-600'}`}>{option.label}</span>
+                        <span className="font-medium text-[#3D3425]">Add Lavender Pieces (+Rs. {LAVENDER_PIECES_PRICE})</span>
+                        {formData.hasLavenderPieces && <Check className="w-6 h-6 text-[#5D4E37]" />}
                       </button>
-                    );
-                  })}
-                </div>
 
-                <button
-                  type="button"
-                  onClick={handleContinueFromColor}
-                  disabled={!formData.color}
-                  className={`w-full mt-10 py-5 rounded-full font-bold text-xl flex items-center justify-center gap-3 transition-all shadow-md ${formData.color ? 'btn-soft' : 'bg-natural-200 text-natural-400 cursor-not-allowed'}`}
-                >
-                  Continue to Quantity
-                  <ArrowRight className="w-6 h-6" />
-                </button>
-              </div>
-            )}
-
-            {currentStep === 'quantity' && formData.scent && formData.color && (
-              <div id="quantity-section" className="card-organic p-8 md:p-10">
-                <button type="button" onClick={() => setCurrentStep('color')} className="flex items-center gap-2 text-natural-500 hover:text-sage-600 mb-8">
-                  <ArrowLeft className="w-5 h-5" />
-                  Back to color
-                </button>
-
-                <h2 className="text-2xl font-serif font-bold mb-3 text-sage-700 flex items-center gap-4">
-                  <span className="bg-sage-100 w-14 h-14 rounded-full flex items-center justify-center">
-                    <Layers className="w-7 h-7 text-sage-600" />
-                  </span>
-                  How Many Soaps?
-                </h2>
-
-                <div className="bg-cream-100 p-4 rounded-2xl mb-6">
-                  <div className="flex items-center justify-between">
-                    <span className="text-natural-600">{formData.scent} • {formData.size}g • {formData.color}</span>
-                    <span className="font-serif font-bold text-natural-800">Rs. {currentPrice} each</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-4 mb-6">
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    value={formData.quantity}
-                    onChange={handleQuantityChange}
-                    placeholder="0"
-                    className="flex-1 p-4 text-center text-3xl font-serif font-bold rounded-2xl border-2 focus:ring-4 focus:ring-sage-100 outline-none bg-cream-50 border-cream-300"
-                    autoFocus
-                  />
-                  <span className="text-lg font-medium text-natural-500">soaps</span>
-                </div>
-
-                <div className="flex gap-3 mb-6">
-                  {[1, 3, 5, 10].map((num) => (
-                    <button
-                      key={num}
-                      type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, quantity: String(num) }))}
-                      className={`flex-1 py-3 rounded-2xl font-semibold transition-all ${formData.quantity === String(num) ? 'bg-sage-600 text-white shadow-md' : 'bg-cream-200 text-natural-600'}`}
-                    >
-                      {num}
-                    </button>
-                  ))}
-                </div>
-
-                {formData.quantity && parseInt(formData.quantity, 10) > 0 && (() => {
-                  const qty = parseInt(formData.quantity, 10);
-                  const subtotal = currentPrice * qty;
-                  const totalQty = qty + cart.totalQuantity;
-                  const discountPercent = totalQty >= 4 ? 15 : totalQty >= 2 ? 10 : 0;
-                  const discountAmount = Math.round(subtotal * (discountPercent / 100));
-                  const total = subtotal - discountAmount;
-
-                  return (
-                    <div className="bg-cream-200 p-5 rounded-2xl space-y-2 border border-cream-300">
-                      <div className="flex items-center justify-between text-sm text-natural-500">
-                        <span>Subtotal for {qty} soap{qty > 1 ? 's' : ''}:</span>
-                        <span>Rs. {subtotal}</span>
+                      <div className="bg-[#FAF8F5] p-4 rounded-xl flex justify-between items-center">
+                        <span className="text-[#3D3425]">{formData.size}g {formData.scent}</span>
+                        <span className="text-xl font-bold text-[#5D4E37]">Rs. {getTotalPrice()}</span>
                       </div>
-                      {discountPercent > 0 && (
-                        <div className="flex items-center justify-between text-sm text-sage-600 font-medium">
-                          <span>Bulk Discount ({discountPercent}%):</span>
-                          <span>- Rs. {discountAmount}</span>
-                        </div>
-                      )}
-                      <div className="flex items-center justify-between pt-2 border-t border-cream-300">
-                        <span className="font-bold text-natural-800">Total:</span>
-                        <span className="text-2xl font-serif font-bold text-sage-700">Rs. {total}</span>
-                      </div>
+
+                      <button
+                        onClick={handleContinueFromScent}
+                        disabled={!isScentStepValid}
+                        className={`w-full py-4 rounded-xl font-bold text-lg text-white transition-colors ${isScentStepValid ? 'bg-[#5D4E37] hover:bg-[#4A3F2D]' : 'bg-gray-300 cursor-not-allowed'}`}
+                      >
+                        Continue
+                      </button>
                     </div>
-                  );
-                })()}
-              </div>
-            )}
-          </>
-        )}
+                  </div>
+                )}
 
-        {currentStep === 'quantity' && (
-          <div className={`fixed bottom-0 left-0 right-0 bg-cream-50/95 backdrop-blur-md border-t border-cream-200 p-4 z-40 shadow-lg transition-all duration-500 ease-out ${expandedBottomBar ? 'translate-y-0' : 'translate-y-full'}`}>
-            <div className="max-w-4xl mx-auto">
-              {expandedBottomBar && cart.items.length > 0 && (
-                <div className="mb-3 p-3 bg-sage-50 rounded-xl text-center border border-sage-100 animate-in fade-in slide-in-from-top-2">
-                  <span className="text-sm text-natural-600 font-medium">{cart.totalQuantity} soap{cart.totalQuantity > 1 ? 's' : ''} in cart</span>
-                </div>
-              )}
+                {currentStep === 'color' && formData.scent && (
+                  <div ref={colorSectionRef} className="space-y-6 mt-8">
+                    <div className="text-center">
+                      <p className="text-lg font-medium text-[#3D3425]">Choose Color</p>
+                      <p className="text-gray-500">{formData.scent} • {formData.size}g • Rs. {currentPrice}</p>
+                    </div>
 
-              <div className="flex items-center gap-4">
-                {expandedBottomBar && cart.items.length > 0 ? (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        showCartButtonsRef.current = false;
-                        setFormData(prev => ({
-                          ...prev,
-                          scent: null,
-                          color: null,
-                          quantity: '',
-                          size: DEFAULT_SIZE,
-                          hasLavenderPieces: false
-                        }));
-                        setCurrentStep('scent');
-                      }}
-                      className="flex-1 py-5 rounded-full font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-md btn-soft animate-in fade-in slide-in-from-bottom-4"
-                    >
-                      <Plus className="w-6 h-6" />
-                      Order Another Soap
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPage('checkout')}
-                      className="flex-1 py-5 rounded-full font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-md bg-[#5D4E37] text-white hover:bg-[#4A3F2D] animate-in fade-in slide-in-from-bottom-4"
-                    >
-                      <ShoppingCart className="w-6 h-6" />
-                      Proceed to Checkout - Rs. {cart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)}
-                    </button>
-                  </>
-                ) : cart.items.length > 0 ? (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => setPage('checkout')}
-                      className="px-6 py-4 rounded-full font-semibold text-base flex items-center gap-3 bg-cream-300 text-natural-700 hover:bg-sage-200 transition-all border border-blush-200 shadow-sm"
-                    >
-                      <ShoppingCart className="w-6 h-6" />
-                      Cart ({cart.totalQuantity})
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleAddToCart}
-                      disabled={isButtonDisabled}
-                      className={`flex-1 py-5 rounded-full font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-md ${!isButtonDisabled ? 'btn-soft' : 'bg-natural-200 text-natural-400 cursor-not-allowed'}`}
-                    >
-                      <Plus className="w-6 h-6" />
-                      Add to Cart
-                    </button>
-                  </>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={handleAddToCart}
-                    disabled={isButtonDisabled}
-                    className={`flex-1 py-5 rounded-full font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-md ${!isButtonDisabled ? 'btn-soft' : 'bg-natural-200 text-natural-400 cursor-not-allowed'}`}
-                  >
-                    <Plus className="w-6 h-6" />
-                    Add to Cart
-                  </button>
+                    <div className="flex flex-wrap gap-4 justify-center py-4">
+                      {COLOR_OPTIONS.map((option) => {
+                        const isSelected = formData.color === option.label;
+                        return (
+                          <button
+                            key={option.label}
+                            onClick={() => handleColorChange(option.label)}
+                            className={`flex flex-col items-center gap-2 p-2 rounded-xl transition-all ${isSelected ? 'bg-[#FAF8F5] ring-2 ring-[#5D4E37]' : ''}`}
+                          >
+                            <div className={`w-16 h-16 rounded-full shadow-md border-4 ${option.class} ${isSelected ? 'border-[#5D4E37]' : 'border-transparent'}`} style={{ backgroundColor: option.hex }}>
+                              {isSelected && <span className="flex items-center justify-center h-full"><Check className="w-8 h-8 text-white" /></span>}
+                            </div>
+                            <span className="text-sm font-medium text-[#3D3425]">{option.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => setCurrentStep('scent')}
+                        className="flex-1 py-4 rounded-xl font-bold border-2 border-gray-200 text-gray-600"
+                      >
+                        Back
+                      </button>
+                      <button
+                        onClick={handleContinueFromColor}
+                        disabled={!formData.color}
+                        className={`flex-1 py-4 rounded-xl font-bold text-white transition-colors ${formData.color ? 'bg-[#5D4E37]' : 'bg-gray-300 cursor-not-allowed'}`}
+                      >
+                        Continue
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {currentStep === 'quantity' && formData.scent && formData.color && (
+                  <div ref={quantitySectionRef} className="space-y-6 mt-8">
+                    <div className="text-center">
+                      <p className="text-lg font-medium text-[#3D3425]">How Many Soaps?</p>
+                      <p className="text-gray-500">{formData.scent} • {formData.size}g • {formData.color} • Rs. {currentPrice} each</p>
+                    </div>
+
+                    <div className="flex items-center justify-center gap-4">
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={formData.quantity}
+                        onChange={handleQuantityChange}
+                        placeholder="0"
+                        className="w-28 p-4 text-center text-4xl font-bold rounded-2xl border-2 border-gray-200 bg-[#FAF8F5]"
+                        autoFocus
+                      />
+                      <span className="text-2xl font-medium text-gray-500">soaps</span>
+                    </div>
+
+                    <div className="flex gap-2 justify-center">
+                      {[1, 2, 3, 5, 10].map((num) => (
+                        <button
+                          key={num}
+                          onClick={() => setFormData(prev => ({ ...prev, quantity: String(num) }))}
+                          className={`px-5 py-3 rounded-xl font-medium transition-all ${formData.quantity === String(num) ? 'bg-[#5D4E37] text-white' : 'bg-gray-100 text-gray-600'}`}
+                        >
+                          {num}
+                        </button>
+                      ))}
+                    </div>
+
+                    {formData.quantity && parseInt(formData.quantity, 10) > 0 && (() => {
+                      const qty = parseInt(formData.quantity, 10);
+                      const subtotal = currentPrice * qty;
+                      const totalQty = qty + cart.totalQuantity;
+                      const discountPercent = totalQty >= 4 ? 15 : totalQty >= 2 ? 10 : 0;
+                      const discountAmt = Math.round(subtotal * (discountPercent / 100));
+                      const total = subtotal - discountAmt;
+
+                      return (
+                        <div className="bg-[#FAF8F5] p-4 rounded-xl space-y-2">
+                          <div className="flex justify-between text-gray-600">
+                            <span>Subtotal ({qty} soaps):</span>
+                            <span>Rs. {subtotal}</span>
+                          </div>
+                          {discountPercent > 0 && (
+                            <div className="flex justify-between text-green-600 font-medium">
+                              <span>Discount ({discountPercent}%):</span>
+                              <span>- Rs. {discountAmt}</span>
+                            </div>
+                          )}
+                          <div className="flex justify-between text-xl font-bold text-[#5D4E37] pt-2 border-t border-gray-200">
+                            <span>Total:</span>
+                            <span>Rs. {total}</span>
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => setCurrentStep('color')}
+                        className="flex-1 py-4 rounded-xl font-bold border-2 border-gray-200 text-gray-600"
+                      >
+                        Back
+                      </button>
+                      <button
+                        onClick={handleAddToCart}
+                        disabled={isButtonDisabled}
+                        className={`flex-1 py-4 rounded-xl font-bold text-white transition-colors ${!isButtonDisabled ? 'bg-[#5D4E37]' : 'bg-gray-300 cursor-not-allowed'}`}
+                      >
+                        Add to Cart
+                      </button>
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
-          </div>
+          </>
         )}
       </div>
     </div>
