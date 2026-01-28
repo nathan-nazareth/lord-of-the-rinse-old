@@ -128,8 +128,8 @@ const CheckoutPage: React.FC<{
                 <span className="font-medium">Rs. {subtotal}</span>
               </div>
               {discountPercentage > 0 && (
-                <div className="flex justify-between text-green-600">
-                  <span>Discount ({discountPercentage}%)</span>
+                <div className="flex justify-between text-green-600 font-medium">
+                  <span className="flex items-center gap-1"><Sparkles className="w-4 h-4" /> Discount ({discountPercentage}%)</span>
                   <span>- Rs. {discountAmount}</span>
                 </div>
               )}
@@ -259,12 +259,13 @@ const CartPage: React.FC<{
                 </div>
 
                 {discountPercentage > 0 && (
-                  <div className="bg-green-50 rounded-2xl p-4 mb-4 border-2 border-green-200">
-                    <div className="flex items-center gap-2 text-green-700 font-bold">
-                      <Check className="w-6 h-6" />
+                  <div className="bg-gradient-to-r from-green-100 to-emerald-100 rounded-2xl p-4 mb-4 border-2 border-green-300 animate-pulse">
+                    <div className="flex items-center justify-center gap-2 text-green-700 font-bold text-lg">
+                      <Sparkles className="w-6 h-6" />
                       Bulk Discount Applied!
+                      <Sparkles className="w-6 h-6" />
                     </div>
-                    <p className="text-green-600 text-sm mt-1">{discountPercentage}% OFF on {cart.totalQuantity} soaps</p>
+                    <p className="text-green-600 text-center text-sm mt-2">{discountPercentage}% OFF on {cart.totalQuantity} soaps</p>
                   </div>
                 )}
 
@@ -274,8 +275,8 @@ const CartPage: React.FC<{
                     <span>Rs. {subtotal}</span>
                   </div>
                   {discountPercentage > 0 && (
-                    <div className="flex justify-between text-green-600 mb-2">
-                      <span>Discount ({discountPercentage}%)</span>
+                    <div className="flex justify-between text-green-600 mb-2 font-medium">
+                      <span className="flex items-center gap-1"><Sparkles className="w-4 h-4" /> Discount ({discountPercentage}%)</span>
                       <span>- Rs. {discountAmount}</span>
                     </div>
                   )}
@@ -792,7 +793,7 @@ export const SoapForm: React.FC = () => {
                           </div>
                           {discountPercent > 0 && (
                             <div className="flex justify-between text-green-600 font-medium">
-                              <span>Discount ({discountPercent}%):</span>
+                              <span className="flex items-center gap-1"><Sparkles className="w-4 h-4" /> Discount ({discountPercent}%):</span>
                               <span>- Rs. {discountAmt}</span>
                             </div>
                           )}
