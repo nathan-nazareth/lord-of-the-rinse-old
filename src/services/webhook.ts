@@ -10,7 +10,7 @@ import { CartItem } from '../types/cart';
 import { logWeb3FormsRateLimit, logWeb3FormsError, logWeb3FormsSuccess } from '../utils/errorLogging';
 
 const WEB3FORMS_ENDPOINT = import.meta.env.VITE_WEB3FORMS_ENDPOINT || 'https://api.web3forms.com/submit';
-const WEB3FORMS_ACCESS_KEY = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY;
+const WEB3FORMS_ACCESS_KEY = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY?.trim();
 const TIMEOUT_MS = 10000;
 const MAX_RETRIES = 3;
 
@@ -64,7 +64,7 @@ export async function submitCartToWebhook(
 ): Promise<{ success: boolean; orderId: string }> {
   const orderId = generateOrderId();
   
-  // Validate access key
+   // Validate access key
   if (!WEB3FORMS_ACCESS_KEY || WEB3FORMS_ACCESS_KEY.trim() === '') {
     console.error('[Webhook] ERROR: VITE_WEB3FORMS_ACCESS_KEY is not set. Please add it to your .env file and Vercel environment variables.');
     if (onStatusChange) onStatusChange('failed');
@@ -97,7 +97,7 @@ export async function submitCartToWebhook(
     subject: `New Soap Order from ${customer.name}`
   };
 
-  console.log('[Webhook] Submitting order to Web3Forms:', JSON.stringify(web3FormsPayload, null, 2));
+   console.log('[Webhook] Submitting order to Web3Forms');
 
   let lastError: Error | null = null;
 
