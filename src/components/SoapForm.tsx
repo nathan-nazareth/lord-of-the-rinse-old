@@ -3,7 +3,7 @@ import { SoapScent, SoapColor, OrderFormState, SOAP_OPTIONS, DEFAULT_SIZE, LAVEN
 import { useCart } from '../hooks/useCart';
 import { Customer } from '../types/webhook';
 import { submitCartToWebhook } from '../services/webhook';
-import { ShoppingCart, Check, Sparkles, ArrowRight, ArrowLeft, Leaf, Plus, Tag, X, Home, Trash2 } from 'lucide-react';
+import { ShoppingCart, Check, Sparkles, ArrowRight, ArrowLeft, Leaf, Trash2 } from 'lucide-react';
 
 const SIZE_OPTIONS = [
   { label: 'S', weight: 50 },
@@ -234,15 +234,12 @@ export const SoapForm: React.FC = () => {
   const [formData, setFormData] = useState<OrderFormState>(INITIAL_STATE);
   const [showAddedToast, setShowAddedToast] = useState(false);
   const [currentStep, setCurrentStep] = useState<FormStep>('landing');
-  const [showScentInfo, setShowScentInfo] = useState<string | null>(null);
   const { cart, addItem, removeItem, clearCart } = useCart();
-  const scentTooltipTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [page, setPage] = useState<PageType>('landing');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmationItemCount, setConfirmationItemCount] = useState(0);
   const [hasVisited, setHasVisited] = useState(false);
 
-  const formTopRef = useRef<HTMLDivElement>(null);
   const flavorSectionRef = useRef<HTMLDivElement>(null);
   const sizeSectionRef = useRef<HTMLDivElement>(null);
   const lavenderSectionRef = useRef<HTMLDivElement>(null);
@@ -302,23 +299,12 @@ export const SoapForm: React.FC = () => {
       scent,
       color: (scent === SoapScent.COFFEE || scent === SoapScent.TURMERIC) ? SoapColor.WHITE : prev.color
     }));
-    setShowScentInfo(scent);
     setTimeout(() => scrollToSection(sizeSectionRef), 300);
   };
 
   const handleSizeChange = (size: number) => {
     setFormData(prev => ({ ...prev, size }));
     setTimeout(() => scrollToSection(lavenderSectionRef), 300);
-  };
-
-  const handleMouseEnterScent = (scent: string) => {
-    if (scentTooltipTimerRef.current) clearTimeout(scentTooltipTimerRef.current);
-    scentTooltipTimerRef.current = setTimeout(() => setShowScentInfo(scent), 150);
-  };
-
-  const handleMouseLeaveScent = () => {
-    if (scentTooltipTimerRef.current) clearTimeout(scentTooltipTimerRef.current);
-    scentTooltipTimerRef.current = setTimeout(() => setShowScentInfo(null), 100);
   };
 
   const handleContinueFromLanding = () => {
@@ -430,7 +416,7 @@ export const SoapForm: React.FC = () => {
   const cartTotal = subtotal - discountAmount;
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5]" ref={formTopRef}>
+    <div className="min-h-screen bg-[#FAF8F5]">
       {showAddedToast && (
         <div className="fixed top-4 right-4 z-50 bg-green-600 text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-2 font-medium">
           <Check className="w-5 h-5" />Added to cart!
