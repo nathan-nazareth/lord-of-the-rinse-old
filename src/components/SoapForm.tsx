@@ -24,14 +24,8 @@ const INITIAL_STATE: OrderFormState = {
 
 const SCENT_INFO: Record<string, { description: string; tip: string }> = {
   'Lavender': { description: 'Calming & relaxing', tip: 'Great for bedtime' },
-  'Aloe Vera': { description: 'Soothing & gentle', tip: 'Perfect for sensitive skin' },
   'Coconut': { description: 'Tropical & hydrating', tip: 'Leaves skin silky smooth' },
-  'Coffee': { description: 'Energizing & exfoliating', tip: 'Great morning shower scent' },
-  'Clove': { description: 'Warm & spicy', tip: 'Unique aromatic experience' },
-  'Cinnamon': { description: 'Cozy & warming', tip: 'Like a sweet treat' },
-  'Lemongrass': { description: 'Fresh & uplifting', tip: 'Invigorating citrus scent' },
-  'Turmeric': { description: 'Anti-inflammatory', tip: 'Traditional beauty secret' },
-  'Honey': { description: 'Sweet & nourishing', tip: 'Naturally antibacterial' }
+  'Lemongrass': { description: 'Fresh & uplifting', tip: 'Invigorating citrus scent' }
 };
 
 const COLOR_OPTIONS = [
@@ -296,8 +290,7 @@ export const SoapForm: React.FC = () => {
   const handleScentChange = (scent: SoapScent) => {
     setFormData(prev => ({
       ...prev,
-      scent,
-      color: (scent === SoapScent.COFFEE || scent === SoapScent.TURMERIC) ? SoapColor.WHITE : prev.color
+      scent
     }));
     setTimeout(() => scrollToSection(sizeSectionRef), 300);
   };
@@ -435,7 +428,7 @@ export const SoapForm: React.FC = () => {
                 <h2 className="text-xl font-bold text-[#3D3425] mb-4 flex items-center gap-2">
                   <span className="bg-[#5D4E37] text-white w-8 h-8 rounded-full flex items-center justify-center text-sm">1</span>Choose Scent & Size
                 </h2>
-                <p className="text-gray-600 ml-10">Pick from 9 natural scents in 3 sizes (50g, 75g, 100g)</p>
+                <p className="text-gray-600 ml-10">Pick from 3 natural scents in 3 sizes (50g, 75g, 100g)</p>
               </div>
               <div className="bg-[#FAF8F5] rounded-2xl p-5">
                 <h2 className="text-xl font-bold text-[#3D3425] mb-4 flex items-center gap-2">
