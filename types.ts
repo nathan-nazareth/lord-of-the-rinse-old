@@ -1,13 +1,7 @@
 export enum SoapScent {
   LAVENDER = 'Lavender',
-  COFFEE = 'Coffee',
-  CLOVE = 'Clove',
-  CINNAMON = 'Cinnamon',
   LEMONGRASS = 'Lemongrass',
-  ALOE_VERA = 'Aloe Vera',
-  COCONUT = 'Coconut',
-  TURMERIC = 'Turmeric',
-  HONEY = 'Honey'
+  COCONUT = 'Coconut'
 }
 
 export interface SoapOption {
@@ -17,14 +11,8 @@ export interface SoapOption {
 
 export const SOAP_OPTIONS: SoapOption[] = [
   { scent: SoapScent.LAVENDER, price: 110 },
-  { scent: SoapScent.ALOE_VERA, price: 100 },
   { scent: SoapScent.COCONUT, price: 100 },
-  { scent: SoapScent.COFFEE, price: 100 },
-  { scent: SoapScent.CLOVE, price: 100 },
-  { scent: SoapScent.CINNAMON, price: 100 },
-  { scent: SoapScent.LEMONGRASS, price: 100 },
-  { scent: SoapScent.TURMERIC, price: 100 },
-  { scent: SoapScent.HONEY, price: 110 }
+  { scent: SoapScent.LEMONGRASS, price: 100 }
 ];
 
 export const DEFAULT_SIZE = 100;
