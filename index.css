@@ -254,6 +254,39 @@ html { font-size: var(--base-font-size); scroll-behavior: smooth; }
 .z-toast { z-index: 9999; }
 .inner-shadow { box-shadow: inset 0 1px 3px rgba(45, 42, 38, 0.06); }
 
+.hero {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-image: linear-gradient(rgba(248, 243, 236, 0.9), rgba(248, 243, 236, 0.9)), url('https://via.placeholder.com/1920x1080?text=Hero+Image+Placeholder');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.hero-content {
+  text-align: center;
+}
+
+.btn-apothecary {
+  text-transform: uppercase;
+  font-weight: bold;
+  padding: 12px 36px;
+}
+
+.btn-primary {
+  color: white;
+  background-color: var(--color-terra-400);
+  box-shadow: var(--shadow-btn);
+  text-decoration: none;
+}
+
+.btn-primary:hover {
+  background-color: var(--color-terra-500);
+  box-shadow: var(--shadow-btn-hover);
+  transform: scale(1.05);
+}
+
 /* Legacy class mappings */
 .bg-bark-50 { background-color: var(--color-parchment-50); }
 .bg-bark-100 { background-color: var(--color-parchment-100); }
