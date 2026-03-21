@@ -1,84 +1,85 @@
+import { useState, useCallback } from 'react';
+
+const STORAGE_KEY = 'soap:v1:formRateLimit';
+
 interface UseFormRateLimitOptions {
   maxSubmissions: number;
   windowMs: number;
   cooldownMs: number;
 }
 
-interface UseFormRateLimitReturn {
-  isAllowed: boolean;
-  remainingSubmissions: number;
-  cooldownRemaining: number | null;
-  recordSubmission: () => boolean;
-  reset: () => void;
+interface RateLimitData {
+  count: number;
+  windowStart: number;
+  lastSubmission: number;
 }
 
-export const useFormRateLimit = (options: UseFormRateLimitOptions): UseFormRateLimitReturn => {
-  const { maxSubmissions, windowMs, cooldownMs } = options;
-
-  const getStorageData = () => {
-    const stored = localStorage.getItem('formRateLimit');
-    if (!stored) {
+function readStorage(): RateLimitData {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) return { count: 0, windowStart: Date.now(), lastSubmission: 0 };
+    const parsed = JSON.parse(stored);
+    if (typeof parsed.count !== 'number' || typeof parsed.windowStart !== 'number') {
       return { count: 0, windowStart: Date.now(), lastSubmission: 0 };
     }
-    return JSON.parse(stored);
-  };
+    return parsed;
+  } catch {
+    return { count: 0, windowStart: Date.now(), lastSubmission: 0 };
+  }
+}
 
-  const setStorageData = (data: { count: number; windowStart: number; lastSubmission: number }) => {
-    localStorage.setItem('formRateLimit', JSON.stringify(data));
-  };
+function writeStorage(data: RateLimitData): void {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch {
+    // Incognito, quota exceeded, or disabled
+  }
+}
 
-  const getCooldownRemaining = (): number | null => {
-    const data = getStorageData();
-    if (data.count < maxSubmissions) return null;
-    const elapsed = Date.now() - data.windowStart;
-    if (elapsed >= windowMs) return null;
-    return Math.ceil((windowMs - elapsed) / 1000);
-  };
+export const useFormRateLimit = (options: UseFormRateLimitOptions) => {
+  const { maxSubmissions, windowMs } = options;
 
-  const isAllowed = (): boolean => {
-    const data = getStorageData();
-    const now = Date.now();
+  const [data, setData] = useState<RateLimitData>(readStorage);
 
-    if (now - data.windowStart >= windowMs) {
-      return true;
-    }
+  const refresh = useCallback(() => setData(readStorage()), []);
 
-    if (data.count >= maxSubmissions) {
-      return false;
-    }
+  const now = Date.now();
+  const windowExpired = now - data.windowStart >= windowMs;
 
-    return true;
-  };
+  const isAllowed = !windowExpired && data.count < maxSubmissions;
+  const remainingSubmissions = windowExpired
+    ? maxSubmissions
+    : Math.max(0, maxSubmissions - data.count);
 
-  const recordSubmission = (): boolean => {
-    if (!isAllowed()) return false;
+  let cooldownRemaining: number | null = null;
+  if (data.count >= maxSubmissions && !windowExpired) {
+    cooldownRemaining = Math.ceil((windowMs - (now - data.windowStart)) / 1000);
+  }
 
-    const data = getStorageData();
-    const now = Date.now();
+  const recordSubmission = useCallback((): boolean => {
+    if (!isAllowed) return false;
 
-    if (now - data.windowStart >= windowMs) {
-      setStorageData({ count: 1, windowStart: now, lastSubmission: now });
+    const current = readStorage();
+    const nowMs = Date.now();
+
+    if (nowMs - current.windowStart >= windowMs) {
+      writeStorage({ count: 1, windowStart: nowMs, lastSubmission: nowMs });
     } else {
-      setStorageData({ ...data, count: data.count + 1, lastSubmission: now });
+      writeStorage({ ...current, count: current.count + 1, lastSubmission: nowMs });
     }
 
+    refresh();
     return true;
-  };
+  }, [isAllowed, windowMs, refresh]);
 
-  const reset = () => {
-    localStorage.removeItem('formRateLimit');
-  };
+  const reset = useCallback(() => {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {
+      // Silently fail
+    }
+    refresh();
+  }, [refresh]);
 
-  return {
-    get isAllowed() { return isAllowed(); },
-    get remainingSubmissions() {
-      const data = getStorageData();
-      return Date.now() - data.windowStart >= windowMs
-        ? maxSubmissions
-        : Math.max(0, maxSubmissions - data.count);
-    },
-    get cooldownRemaining() { return getCooldownRemaining(); },
-    recordSubmission,
-    reset
-  };
+  return { isAllowed, remainingSubmissions, cooldownRemaining, recordSubmission, reset };
 };
