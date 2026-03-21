@@ -1,10 +1,26 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Cart, CartItem } from '../types/cart';
-import { saveCart, loadCart, removeItem, clearCart, createCartItem, calculateTotal, canAddToCart } from '../services/cart';
+import { useState, useEffect, useCallback } from "react";
+import { Cart, CartItem } from "../types/cart";
+import {
+  saveCart,
+  loadCart,
+  removeItem,
+  clearCart,
+  createCartItem,
+  calculateTotal,
+  canAddToCart,
+} from "../services/cart";
 
 interface UseCartReturn {
   cart: Cart;
-  addItem: (scent: string, price: number, color: string, quantity: string, size: number, hasLavenderPieces: boolean) => boolean;
+  addItem: (
+    scent: string,
+    price: number,
+    color: string,
+    quantity: string,
+    size: number,
+    hasLavenderPieces: boolean,
+    hasRosePieces: boolean,
+  ) => boolean;
   removeItem: (itemId: string) => void;
   clearCart: () => void;
   isCartOpen: boolean;
@@ -12,7 +28,11 @@ interface UseCartReturn {
 }
 
 export function useCart(): UseCartReturn {
-  const [cart, setCart] = useState<Cart>({ items: [], totalQuantity: 0, updatedAt: new Date().toISOString() });
+  const [cart, setCart] = useState<Cart>({
+    items: [],
+    totalQuantity: 0,
+    updatedAt: new Date().toISOString(),
+  });
   const [isCartOpen, setIsCartOpen] = useState(false);
 
   // Load cart from localStorage on mount
@@ -30,42 +50,61 @@ export function useCart(): UseCartReturn {
     }
   }, [cart]);
 
-  const addItem = useCallback((
-    scent: string,
-    price: number,
-    color: string,
-    quantity: string,
-    size: number,
-    hasLavenderPieces: boolean
-  ): boolean => {
-    if (!canAddToCart(cart.items)) {
-      console.warn('[Cart] Cannot add item - cart limit reached');
-      return false;
-    }
+  const addItem = useCallback(
+    (
+      scent: string,
+      price: number,
+      color: string,
+      quantity: string,
+      size: number,
+      hasLavenderPieces: boolean,
+      hasRosePieces: boolean,
+    ): boolean => {
+      if (!canAddToCart(cart.items)) {
+        console.warn("[Cart] Cannot add item - cart limit reached");
+        return false;
+      }
 
-    const newItem = createCartItem(scent, price, color, quantity, size, hasLavenderPieces);
-    const newItems = [...cart.items, newItem];
-    
-    setCart({
-      items: newItems,
-      totalQuantity: calculateTotal(newItems),
-      updatedAt: new Date().toISOString()
-    });
+      const newItem = createCartItem(
+        scent,
+        price,
+        color,
+        quantity,
+        size,
+        hasLavenderPieces,
+        hasRosePieces,
+      );
+      const newItems = [...cart.items, newItem];
 
-    return true;
-  }, [cart.items]);
+      setCart({
+        items: newItems,
+        totalQuantity: calculateTotal(newItems),
+        updatedAt: new Date().toISOString(),
+      });
 
-  const removeItemById = useCallback((itemId: string) => {
-    const updatedCart = removeItem(cart, itemId);
-    setCart(updatedCart);
-    
-    if (updatedCart.items.length === 0) {
-      clearCart();
-    }
-  }, [cart]);
+      return true;
+    },
+    [cart.items],
+  );
+
+  const removeItemById = useCallback(
+    (itemId: string) => {
+      const updatedCart = removeItem(cart, itemId);
+      setCart(updatedCart);
+
+      if (updatedCart.items.length === 0) {
+        clearCart();
+      }
+    },
+    [cart],
+  );
 
   const clearCartState = useCallback(() => {
-    setCart({ items: [], totalQuantity: 0, updatedAt: new Date().toISOString() });
+    setCart({
+      items: [],
+      totalQuantity: 0,
+      updatedAt: new Date().toISOString(),
+    });
     clearCart();
   }, []);
 
@@ -75,6 +114,6 @@ export function useCart(): UseCartReturn {
     removeItem: removeItemById,
     clearCart: clearCartState,
     isCartOpen,
-    setIsCartOpen
+    setIsCartOpen,
   };
 }
