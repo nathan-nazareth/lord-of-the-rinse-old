@@ -38,24 +38,6 @@ interface Web3FormsResponse {
   }>;
 }
 
-function mapCartItemsToOrderItems(items: CartItem[]) {
-  return items.map((item, index) => ({
-    [`Item ${index + 1} - Flavour`]: item.scent,
-    [`Item ${index + 1} - Size`]: `${item.size}g`,
-    [`Item ${index + 1} - Color`]: item.color,
-    [`Item ${index + 1} - Amount`]: item.quantity,
-    [`Item ${index + 1} - Price`]: `Rs. ${item.price * item.quantity}`
-  }));
-}
-
-function flattenOrderItems(items: CartItem[]) {
-  const result: Record<string, string> = {};
-  items.forEach((item, index) => {
-    result[`Item ${index + 1}`] = `${item.scent}, ${item.size}g, ${item.color}, Qty: ${item.quantity}, Rs. ${item.price * item.quantity}`;
-  });
-  return result;
-}
-
 export async function submitCartToWebhook(
   customer: Customer,
   items: CartItem[],

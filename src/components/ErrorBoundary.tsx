@@ -1,35 +1,17 @@
-import React from 'react';
+import { Component } from 'react';
 import { FallbackUI } from './FallbackUI';
 
-interface ErrorBoundaryState {
-  hasError: boolean;
-  error: Error | null;
-}
+type EBProps = { children: import('react').ReactNode };
+type EBState = { hasError: boolean; error: Error | null };
 
-interface ErrorBoundaryProps {
-  children: React.ReactNode;
-}
+export class ErrorBoundary extends Component<EBProps, EBState> {
+  state: EBState = { hasError: false, error: null };
 
-export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  private setState: React.Component<ErrorBoundaryProps, ErrorBoundaryState>['setState'];
-  private props: ErrorBoundaryProps;
-
-  state: ErrorBoundaryState = {
-    hasError: false,
-    error: null
-  };
-
-  constructor(props: ErrorBoundaryProps) {
-    super(props);
-    this.props = props;
-    this.setState = super.setState.bind(this);
-  }
-
-  static getDerivedStateFromError(error: Error) {
+  static getDerivedStateFromError(error: Error): EBState {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+  componentDidCatch(error: Error, errorInfo: import('react').ErrorInfo) {
     console.error('[ErrorBoundary] Render error:', {
       message: error.message,
       stack: error.stack,
@@ -43,9 +25,9 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     window.location.reload();
   };
 
-  render() {
+  render(): import('react').ReactNode {
     if (this.state.hasError) {
-      return <FallbackUI error={this.state.error} onRetry={this.handleRetry} />;
+      return <FallbackUI error={this.state.error!} onRetry={this.handleRetry} />;
     }
     return this.props.children;
   }

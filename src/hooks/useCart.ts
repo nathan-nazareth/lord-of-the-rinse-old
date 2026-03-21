@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Cart, CartItem } from "../types/cart";
 import {
   saveCart,
@@ -35,6 +35,9 @@ export function useCart(): UseCartReturn {
   });
   const [isCartOpen, setIsCartOpen] = useState(false);
 
+  const cartRef = useRef(cart);
+  cartRef.current = cart;
+
   // Load cart from localStorage on mount
   useEffect(() => {
     const savedCart = loadCart();
@@ -60,7 +63,8 @@ export function useCart(): UseCartReturn {
       hasLavenderPieces: boolean,
       hasRosePieces: boolean,
     ): boolean => {
-      if (!canAddToCart(cart.items)) {
+      const current = cartRef.current;
+      if (!canAddToCart(current.items)) {
         console.warn("[Cart] Cannot add item - cart limit reached");
         return false;
       }
@@ -74,7 +78,7 @@ export function useCart(): UseCartReturn {
         hasLavenderPieces,
         hasRosePieces,
       );
-      const newItems = [...cart.items, newItem];
+      const newItems = [...current.items, newItem];
 
       setCart({
         items: newItems,
@@ -84,19 +88,20 @@ export function useCart(): UseCartReturn {
 
       return true;
     },
-    [cart.items],
+    [],
   );
 
   const removeItemById = useCallback(
     (itemId: string) => {
-      const updatedCart = removeItem(cart, itemId);
+      const current = cartRef.current;
+      const updatedCart = removeItem(current, itemId);
       setCart(updatedCart);
 
       if (updatedCart.items.length === 0) {
         clearCart();
       }
     },
-    [cart],
+    [],
   );
 
   const clearCartState = useCallback(() => {
