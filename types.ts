@@ -1,7 +1,8 @@
 export enum SoapScent {
-  LAVENDER = 'Lavender',
-  LEMONGRASS = 'Lemongrass',
-  COCONUT = 'Coconut'
+  LAVENDER = "Lavender",
+  LEMONGRASS = "Lemongrass",
+  COCONUT = "Coconut",
+  ROSE = "Rose",
 }
 
 export interface SoapOption {
@@ -12,22 +13,24 @@ export interface SoapOption {
 export const SOAP_OPTIONS: SoapOption[] = [
   { scent: SoapScent.LAVENDER, price: 110 },
   { scent: SoapScent.COCONUT, price: 100 },
-  { scent: SoapScent.LEMONGRASS, price: 100 }
+  { scent: SoapScent.LEMONGRASS, price: 100 },
+  { scent: SoapScent.ROSE, price: 110 },
 ];
 
 export const DEFAULT_SIZE = 100;
 export const MAX_SIZE = 100;
 export const BASE_SIZE = 100;
 export const LAVENDER_PIECES_PRICE = 5;
+export const ROSE_PIECES_PRICE = 5;
 
 export enum SoapColor {
-  WHITE = 'White',
-  RED = 'Red',
-  ORANGE = 'Orange',
-  YELLOW = 'Yellow',
-  GREEN = 'Green',
-  BLUE = 'Blue',
-  PURPLE = 'Purple'
+  WHITE = "White",
+  RED = "Red",
+  ORANGE = "Orange",
+  YELLOW = "Yellow",
+  GREEN = "Green",
+  BLUE = "Blue",
+  PURPLE = "Purple",
 }
 
 export interface OrderItem {
@@ -37,6 +40,7 @@ export interface OrderItem {
   quantity: string;
   size: number;
   hasLavenderPieces: boolean;
+  hasRosePieces: boolean;
 }
 
 export interface OrderFormState {
@@ -45,6 +49,7 @@ export interface OrderFormState {
   quantity: string;
   size: number;
   hasLavenderPieces: boolean;
+  hasRosePieces: boolean;
   customerName: string;
   customerEmail: string;
   customerPhone: string;
