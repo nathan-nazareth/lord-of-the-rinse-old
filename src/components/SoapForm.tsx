@@ -58,31 +58,15 @@ const COLOR_OPTIONS = [
     class: "bg-slate-50 border-slate-200",
     hex: "#f8fafc",
   },
-  { label: SoapColor.RED, class: "bg-red-100 border-red-200", hex: "#fee2e2" },
-  {
-    label: SoapColor.ORANGE,
-    class: "bg-orange-100 border-orange-200",
-    hex: "#ffedd5",
-  },
   {
     label: SoapColor.YELLOW,
     class: "bg-yellow-100 border-yellow-200",
     hex: "#fef9c3",
   },
   {
-    label: SoapColor.GREEN,
-    class: "bg-green-100 border-green-200",
-    hex: "#dcfce7",
-  },
-  {
-    label: SoapColor.BLUE,
-    class: "bg-blue-100 border-blue-200",
-    hex: "#dbeafe",
-  },
-  {
-    label: SoapColor.PURPLE,
-    class: "bg-purple-100 border-purple-200",
-    hex: "#f3e8ff",
+    label: SoapColor.PINK,
+    class: "bg-pink-100 border-pink-200",
+    hex: "#fce4ec",
   },
 ];
 
@@ -541,6 +525,9 @@ export const SoapForm: React.FC = () => {
     setFormData((prev) => ({
       ...prev,
       scent,
+      hasLavenderPieces:
+        scent === SoapScent.COCONUT ? prev.hasLavenderPieces : false,
+      hasRosePieces: scent === SoapScent.COCONUT ? prev.hasRosePieces : false,
     }));
     setTimeout(() => scrollToSection(sizeSectionRef), 300);
   };
@@ -743,7 +730,7 @@ export const SoapForm: React.FC = () => {
                   Pick a Color
                 </h2>
                 <p className="text-gray-600 ml-10">
-                  Choose from 7 beautiful colors for your soap
+                  Choose from 3 beautiful colors for your soap
                 </p>
               </div>
               <div className="bg-[#FAF8F5] rounded-2xl p-5">
@@ -870,38 +857,44 @@ export const SoapForm: React.FC = () => {
                       ))}
                     </div>
                     <div ref={lavenderSectionRef} className="space-y-4">
-                      <button
-                        onClick={() =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            hasLavenderPieces: !prev.hasLavenderPieces,
-                          }))
-                        }
-                        className={`w-full p-4 rounded-xl border-2 flex items-center justify-between transition-all ${formData.hasLavenderPieces ? "border-[#5D4E37] bg-[#FAF8F5]" : "border-gray-200"}`}
-                      >
-                        <span className="font-medium text-[#3D3425]">
-                          Add Lavender Pieces (+Rs. {LAVENDER_PIECES_PRICE})
-                        </span>
-                        {formData.hasLavenderPieces && (
-                          <Check className="w-6 h-6 text-[#5D4E37]" />
-                        )}
-                      </button>
-                      <button
-                        onClick={() =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            hasRosePieces: !prev.hasRosePieces,
-                          }))
-                        }
-                        className={`w-full p-4 rounded-xl border-2 flex items-center justify-between transition-all ${formData.hasRosePieces ? "border-[#5D4E37] bg-[#FAF8F5]" : "border-gray-200"}`}
-                      >
-                        <span className="font-medium text-[#3D3425]">
-                          Add Rose Petals (+Rs. {ROSE_PIECES_PRICE})
-                        </span>
-                        {formData.hasRosePieces && (
-                          <Check className="w-6 h-6 text-[#5D4E37]" />
-                        )}
-                      </button>
+                      {(formData.scent === SoapScent.LAVENDER ||
+                        formData.scent === SoapScent.COCONUT) && (
+                        <button
+                          onClick={() =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              hasLavenderPieces: !prev.hasLavenderPieces,
+                            }))
+                          }
+                          className={`w-full p-4 rounded-xl border-2 flex items-center justify-between transition-all ${formData.hasLavenderPieces ? "border-[#5D4E37] bg-[#FAF8F5]" : "border-gray-200"}`}
+                        >
+                          <span className="font-medium text-[#3D3425]">
+                            Add Lavender Pieces (+Rs. {LAVENDER_PIECES_PRICE})
+                          </span>
+                          {formData.hasLavenderPieces && (
+                            <Check className="w-6 h-6 text-[#5D4E37]" />
+                          )}
+                        </button>
+                      )}
+                      {(formData.scent === SoapScent.ROSE ||
+                        formData.scent === SoapScent.COCONUT) && (
+                        <button
+                          onClick={() =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              hasRosePieces: !prev.hasRosePieces,
+                            }))
+                          }
+                          className={`w-full p-4 rounded-xl border-2 flex items-center justify-between transition-all ${formData.hasRosePieces ? "border-[#5D4E37] bg-[#FAF8F5]" : "border-gray-200"}`}
+                        >
+                          <span className="font-medium text-[#3D3425]">
+                            Add Rose Petals (+Rs. {ROSE_PIECES_PRICE})
+                          </span>
+                          {formData.hasRosePieces && (
+                            <Check className="w-6 h-6 text-[#5D4E37]" />
+                          )}
+                        </button>
+                      )}
                       <div className="bg-[#FAF8F5] p-4 rounded-xl flex justify-between items-center">
                         <span className="text-[#3D3425]">
                           {formData.size}g {formData.scent}

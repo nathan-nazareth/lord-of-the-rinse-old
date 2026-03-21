@@ -25,12 +25,8 @@ export const ROSE_PIECES_PRICE = 5;
 
 export enum SoapColor {
   WHITE = "White",
-  RED = "Red",
-  ORANGE = "Orange",
   YELLOW = "Yellow",
-  GREEN = "Green",
-  BLUE = "Blue",
-  PURPLE = "Purple",
+  PINK = "Pink",
 }
 
 export interface OrderItem {
