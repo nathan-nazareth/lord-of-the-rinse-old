@@ -9,15 +9,15 @@ const SCENTS = [
     name: "Lavender",
     description: "Calming & relaxing",
     detail: "Perfect for winding down after a long day",
-    color: "#C3B1E1",
-    accentBg: "bg-purple-50",
-    accentBorder: "border-purple-200",
+    color: "#FDE68A",
+    accentBg: "bg-amber-50",
+    accentBorder: "border-amber-200",
   },
   {
     name: "Coconut",
     description: "Tropical & hydrating",
     detail: "Rich moisture for silky smooth skin",
-    color: "#F5E6CA",
+    color: "#FFFFFF",
     accentBg: "bg-amber-50",
     accentBorder: "border-amber-200",
   },
@@ -49,56 +49,24 @@ const Hero: React.FC<{ onShopClick: () => void }> = ({ onShopClick }) => {
           viewBox="0 0 200 200"
           fill="none"
         >
-          <path
-            d="M100 10 Q140 50 140 100 Q100 160 60 100 Q60 50 100 10"
-            fill="#5A7A5F"
-          />
-          <ellipse
-            cx="55"
-            cy="85"
-            rx="18"
-            ry="28"
-            fill="#C4785A"
-            opacity="0.5"
-            transform="rotate(-25 55 85)"
-          />
-          <ellipse
-            cx="145"
-            cy="85"
-            rx="18"
-            ry="28"
-            fill="#C4785A"
-            opacity="0.5"
-            transform="rotate(25 145 85)"
-          />
+          <circle cx="100" cy="80" r="25" fill="#C4785A" opacity="0.6"/>
+          <circle cx="75" cy="60" r="18" fill="#7AA07F" opacity="0.5"/>
+          <circle cx="125" cy="60" r="18" fill="#7AA07F" opacity="0.5"/>
+          <circle cx="65" cy="85" r="18" fill="#7AA07F" opacity="0.5"/>
+          <circle cx="135" cy="85" r="18" fill="#7AA07F" opacity="0.5"/>
+          <circle cx="100" cy="80" r="12" fill="#FDE68A" opacity="0.7"/>
         </svg>
         <svg
           className="absolute -right-12 bottom-20 w-40 h-40 opacity-[0.05]"
           viewBox="0 0 200 200"
           fill="none"
         >
-          <path
-            d="M100 20 Q130 60 130 100 Q100 150 70 100 Q70 60 100 20"
-            fill="#5A7A5F"
-          />
-          <ellipse
-            cx="65"
-            cy="90"
-            rx="14"
-            ry="22"
-            fill="#C4785A"
-            opacity="0.4"
-            transform="rotate(-30 65 90)"
-          />
-          <ellipse
-            cx="135"
-            cy="90"
-            rx="14"
-            ry="22"
-            fill="#C4785A"
-            opacity="0.4"
-            transform="rotate(30 135 90)"
-          />
+          <circle cx="100" cy="100" r="20" fill="#C4785A" opacity="0.5"/>
+          <circle cx="80" cy="85" r="14" fill="#7AA07F" opacity="0.4"/>
+          <circle cx="120" cy="85" r="14" fill="#7AA07F" opacity="0.4"/>
+          <circle cx="80" cy="115" r="14" fill="#7AA07F" opacity="0.4"/>
+          <circle cx="120" cy="115" r="14" fill="#7AA07F" opacity="0.4"/>
+          <circle cx="100" cy="100" r="9" fill="#FDE68A" opacity="0.6"/>
         </svg>
       </div>
 
