@@ -97,9 +97,14 @@ const StepIndicator: React.FC<{ current: FormStep; onNavigate: (s: FormStep) => 
 
 const BotanicalLeafIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg className={className} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M20 4 Q28 12 28 22 Q20 32 12 22 Q12 12 20 4" fill="#7AA07F" opacity="0.7"/>
-    <ellipse cx="10" cy="18" rx="5" ry="8" fill="#C4785A" opacity="0.4" transform="rotate(-25 10 18)"/>
-    <ellipse cx="30" cy="18" rx="5" ry="8" fill="#C4785A" opacity="0.4" transform="rotate(25 30 18)"/>
+    <circle cx="20" cy="18" r="5" fill="#C4785A" opacity="0.6"/>
+    <circle cx="13" cy="12" r="4" fill="#7AA07F" opacity="0.5"/>
+    <circle cx="27" cy="12" r="4" fill="#7AA07F" opacity="0.5"/>
+    <circle cx="11" cy="20" r="4" fill="#7AA07F" opacity="0.5"/>
+    <circle cx="29" cy="20" r="4" fill="#7AA07F" opacity="0.5"/>
+    <circle cx="17" cy="26" r="4" fill="#7AA07F" opacity="0.5"/>
+    <circle cx="23" cy="26" r="4" fill="#7AA07F" opacity="0.5"/>
+    <circle cx="20" cy="18" r="2.5" fill="#FDE68A" opacity="0.8"/>
   </svg>
 );
 

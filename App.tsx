@@ -73,9 +73,12 @@ function App() {
                 {/* Botanical divider */}
                 <div className="botanical-divider">
                   <svg viewBox="0 0 40 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M20 2 Q25 8 25 14 Q20 18 15 14 Q15 8 20 2" fill="#7AA07F" opacity="0.7"/>
-                    <ellipse cx="10" cy="10" rx="4" ry="6" fill="#C4785A" opacity="0.5" transform="rotate(-20 10 10)"/>
-                    <ellipse cx="30" cy="10" rx="4" ry="6" fill="#C4785A" opacity="0.5" transform="rotate(20 30 10)"/>
+                    <circle cx="20" cy="10" r="4" fill="#C4785A" opacity="0.6"/>
+                    <circle cx="14" cy="6" r="3" fill="#7AA07F" opacity="0.5"/>
+                    <circle cx="26" cy="6" r="3" fill="#7AA07F" opacity="0.5"/>
+                    <circle cx="12" cy="12" r="3" fill="#7AA07F" opacity="0.5"/>
+                    <circle cx="28" cy="12" r="3" fill="#7AA07F" opacity="0.5"/>
+                    <circle cx="20" cy="10" r="2" fill="#FDE68A" opacity="0.8"/>
                   </svg>
                 </div>
 
@@ -94,9 +97,12 @@ function App() {
                 <footer className="mt-14 text-center animate-enter delay-3">
                   <div className="botanical-divider">
                     <svg viewBox="0 0 40 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M20 2 Q25 8 25 14 Q20 18 15 14 Q15 8 20 2" fill="#7AA07F" opacity="0.5"/>
-                      <ellipse cx="10" cy="10" rx="4" ry="6" fill="#C4785A" opacity="0.4" transform="rotate(-20 10 10)"/>
-                      <ellipse cx="30" cy="10" rx="4" ry="6" fill="#C4785A" opacity="0.4" transform="rotate(20 30 10)"/>
+                      <circle cx="20" cy="10" r="4" fill="#C4785A" opacity="0.5"/>
+                      <circle cx="14" cy="6" r="3" fill="#7AA07F" opacity="0.4"/>
+                      <circle cx="26" cy="6" r="3" fill="#7AA07F" opacity="0.4"/>
+                      <circle cx="12" cy="12" r="3" fill="#7AA07F" opacity="0.4"/>
+                      <circle cx="28" cy="12" r="3" fill="#7AA07F" opacity="0.4"/>
+                      <circle cx="20" cy="10" r="2" fill="#FDE68A" opacity="0.7"/>
                     </svg>
                   </div>
                   <p className="font-display italic text-ink-500 text-lg mb-4">
