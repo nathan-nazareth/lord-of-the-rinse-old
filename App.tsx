@@ -44,6 +44,7 @@ function App() {
 
   const handleCheckout = useCallback(async (customer: Customer) => {
     setIsSubmitting(true);
+    setJustAddedToCart(false);
     try {
       const result = await submitCartToWebhook(customer, cart.items);
       if (result.success) {
