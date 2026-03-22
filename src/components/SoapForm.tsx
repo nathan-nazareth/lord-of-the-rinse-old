@@ -52,7 +52,7 @@ const SCENT_INFO: Record<string, { description: string; tagline: string }> = {
 };
 
 const COLOR_CONFIG = [
-  { label: "Ivory", value: SoapColor.WHITE, hex: "#FFFBF0" },
+  { label: "Ivory", value: SoapColor.WHITE, hex: "#FFFFFF" },
   { label: "Honey", value: SoapColor.YELLOW, hex: "#FDE68A" },
   { label: "Blush", value: SoapColor.PINK, hex: "#FCD5CE" },
 ];
@@ -577,7 +577,10 @@ export const SoapForm: React.FC = () => {
                   </p>
                 </div>
 
-                <div className="flex items-center justify-center gap-5 py-2">
+                <form
+                  onSubmit={(e) => { e.preventDefault(); if (isFormValid) handleAddToCart(); }}
+                  className="flex items-center justify-center gap-5 py-2"
+                >
                   <input
                     type="text"
                     inputMode="numeric"
@@ -588,7 +591,7 @@ export const SoapForm: React.FC = () => {
                     autoFocus
                   />
                   <span className="text-2xl text-ink-400 font-display">soaps</span>
-                </div>
+                </form>
 
                 <div className="flex flex-wrap gap-2 justify-center">
                   {[1, 2, 3, 5, 10].map((num) => (
