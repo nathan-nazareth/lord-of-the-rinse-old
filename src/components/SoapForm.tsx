@@ -332,11 +332,11 @@ export const SoapForm: React.FC = () => {
               { num: "02", title: "Pick Color", desc: "Three beautiful natural tones" },
               { num: "03", title: "Set Quantity", desc: "Bulk discounts available" },
             ].map((item) => (
-              <div key={item.num} className="text-left p-5 bg-parchment-100 rounded-2xl border border-parchment-300">
-                <p className="overline mb-2">{item.num}</p>
-                <h3 className="font-display text-xl font-semibold text-ink-700 mb-1">{item.title}</h3>
-                <p className="text-ink-400 text-sm">{item.desc}</p>
-              </div>
+              <div key={item.num} className="text-left p-5">
+                 <p className="text-xs font-semibold text-terra-400 tracking-widest uppercase mb-2">{item.num}</p>
+                 <h3 className="font-display text-lg font-semibold text-ink-700 mb-1">{item.title}</h3>
+                 <p className="text-ink-400 text-sm">{item.desc}</p>
+               </div>
             ))}
           </div>
 
