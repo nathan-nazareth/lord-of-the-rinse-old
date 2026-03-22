@@ -17,6 +17,40 @@ const CartPage: React.FC<{
   const subtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const { discountPercentage, discountAmount, total } = calculateDiscount(subtotal, cart.totalQuantity);
 
+  if (justAdded) {
+    return (
+      <div className="min-h-screen bg-parchment-100">
+        <div className="max-w-md mx-auto px-4 pt-6">
+          <button
+            onClick={onBackToForm}
+            className="flex items-center gap-2 text-terra-500 hover:text-terra-600 font-medium mb-6 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span className="text-sm">Back to form</span>
+          </button>
+
+          <div className="card-apothecary overflow-hidden">
+            <div className="text-center py-16 px-6">
+              <div className="w-28 h-28 bg-botanical-100 rounded-full flex items-center justify-center mx-auto mb-8 animate-float">
+                <Check className="w-16 h-16 text-botanical-500" />
+              </div>
+              <h2 className="font-display text-3xl font-semibold text-botanical-700 mb-3">Soap added!</h2>
+              <p className="text-ink-500 text-lg mb-10">Your soap has been added to your order.</p>
+              <div className="space-y-3">
+                <button onClick={onCheckout} className="btn-apothecary btn-primary btn-full text-base py-4">
+                  Proceed to Checkout
+                </button>
+                <button onClick={onBackToForm} className="btn-apothecary btn-secondary btn-full text-sm py-3">
+                  + Add Another Soap
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-parchment-100">
       <div className="max-w-md mx-auto px-4 pt-6">
@@ -29,18 +63,6 @@ const CartPage: React.FC<{
         </button>
 
         <div className="card-apothecary overflow-hidden">
-          {justAdded && (
-            <div className="flex items-center gap-3 p-4 bg-botanical-100 border-b border-botanical-300">
-              <div className="w-10 h-10 bg-botanical-400 rounded-full flex items-center justify-center flex-shrink-0">
-                <Check className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <p className="font-semibold text-botanical-700">Added to cart!</p>
-                <p className="text-botanical-600 text-sm">Your soap has been added.</p>
-              </div>
-            </div>
-          )}
-
           <div className="bg-terra-400 p-6 text-white text-center">
             <h1 className="font-display text-2xl font-semibold">Your Cart</h1>
             <p className="text-white/75 mt-1 text-sm">
