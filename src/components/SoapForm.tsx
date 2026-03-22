@@ -231,6 +231,9 @@ export const SoapForm: React.FC = () => {
       setCurrentStep("scent");
       setJustAddedToCart(true);
       setPage("cart");
+      setTimeout(() => {
+        document.getElementById("main-content")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 50);
     }
   };
 
@@ -259,6 +262,9 @@ export const SoapForm: React.FC = () => {
   const handleGoToForm = () => {
     setJustAddedToCart(false);
     setPage("form");
+    setTimeout(() => {
+      document.getElementById("main-content")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
   };
 
   const currentStepIdx = STEPS.indexOf(currentStep);
