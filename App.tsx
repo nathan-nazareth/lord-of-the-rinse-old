@@ -119,7 +119,7 @@ function App() {
                 <CartPage
                   cart={cart}
                   onBackToForm={() => { navigate('/'); setTimeout(() => formSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100); }}
-                  onCheckout={() => navigate('/checkout')}
+                  onCheckout={() => { setJustAddedToCart(false); navigate('/checkout'); }}
                   onRemoveItem={removeItem}
                   onClearCart={clearCart}
                   justAdded={justAddedToCart}
