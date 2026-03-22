@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, lazy, Suspense } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   SoapScent,
   SoapColor,
@@ -8,23 +8,15 @@ import {
   LAVENDER_PIECES_PRICE,
   ROSE_PIECES_PRICE,
 } from "../../types";
-import { useCart } from "../hooks/useCart";
-import { submitCartToWebhook } from "../services/webhook";
 import { useSoapPricing } from "../hooks/useSoapPricing";
 import { useFormPersistence } from "../hooks/useFormPersistence";
 import { calculateDiscount } from "../utils/pricing";
-import { Customer } from "../types/webhook";
 import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
 import Check from "lucide-react/dist/esm/icons/check";
 import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
 import Leaf from "lucide-react/dist/esm/icons/leaf";
-import Loader2 from "lucide-react/dist/esm/icons/loader-2";
-
-const CheckoutPage = lazy(() => import("./CheckoutPage"));
-const CartPage = lazy(() => import("./CartPage"));
-const ConfirmationPage = lazy(() => import("./ConfirmationPage"));
 
 const SIZE_OPTIONS = [
   { label: "S", weight: 50 },
@@ -58,7 +50,6 @@ const COLOR_CONFIG = [
 ];
 
 type FormStep = "landing" | "scent" | "color" | "quantity";
-type PageType = "form" | "cart" | "checkout" | "confirmation";
 
 const STEPS: FormStep[] = ["scent", "color", "quantity"];
 
@@ -112,15 +103,25 @@ const BotanicalLeafIcon: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
-export const SoapForm: React.FC = () => {
+interface SoapFormProps {
+  cart: { items: any[]; totalQuantity: number };
+  onAddToCart: (
+    scent: string,
+    price: number,
+    color: string,
+    quantity: string,
+    size: number,
+    hasLavenderPieces: boolean,
+    hasRosePieces: boolean,
+  ) => void;
+  onGoToCart: () => void;
+  onGoToCheckout: () => void;
+}
+
+export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCart, onGoToCheckout }) => {
   const [formData, setFormData] = useState<OrderFormState>(INITIAL_STATE);
   const [showAddedToast, setShowAddedToast] = useState(false);
-  const [justAddedToCart, setJustAddedToCart] = useState(false);
   const [currentStep, setCurrentStep] = useState<FormStep>("landing");
-  const { cart, addItem, removeItem, clearCart } = useCart();
-  const [page, setPage] = useState<PageType>("form");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [confirmationItemCount, setConfirmationItemCount] = useState(0);
 
   const { totalPrice } = useSoapPricing(
     formData.scent, formData.size, formData.hasLavenderPieces, formData.hasRosePieces,
@@ -128,7 +129,7 @@ export const SoapForm: React.FC = () => {
 
   const cartSubtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const { total: cartTotal } = calculateDiscount(cartSubtotal, cart.totalQuantity);
-  const { hasVisited: hasVisitedFn, restoreFormState, saveFormState, clearFormState } = useFormPersistence();
+  const { hasVisited: hasVisitedFn, restoreFormState, saveFormState } = useFormPersistence();
 
   const flavorSectionRef = useRef<HTMLDivElement>(null);
   const sizeSectionRef = useRef<HTMLDivElement>(null);
@@ -219,94 +220,15 @@ export const SoapForm: React.FC = () => {
 
   const handleAddToCart = () => {
     if (!isFormValid) return;
-    const success = addItem(
+    setShowAddedToast(true);
+    setTimeout(() => setShowAddedToast(false), 3500);
+    onAddToCart(
       formData.scent!, totalPrice, formData.color!, formData.quantity,
       formData.size, formData.hasLavenderPieces, formData.hasRosePieces,
     );
-
-    if (success) {
-      setShowAddedToast(true);
-      setTimeout(() => setShowAddedToast(false), 3500);
-      setFormData(INITIAL_STATE);
-      setCurrentStep("scent");
-      setJustAddedToCart(true);
-      setPage("cart");
-      setTimeout(() => {
-        document.getElementById("main-content")?.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 50);
-    }
-  };
-
-  const handleCheckout = async (customer: Customer) => {
-    setIsSubmitting(true);
-    try {
-      const result = await submitCartToWebhook(customer, cart.items);
-      if (result.success) {
-        setConfirmationItemCount(cart.totalQuantity);
-        clearCart();
-        clearFormState();
-        setFormData(INITIAL_STATE);
-        setCurrentStep("scent");
-        setPage("confirmation");
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleContinueAfterConfirmation = () => {
+    setFormData(INITIAL_STATE);
     setCurrentStep("scent");
-    setPage("form");
   };
-
-  const handleGoToForm = () => {
-    setJustAddedToCart(false);
-    setPage("form");
-    setTimeout(() => {
-      document.getElementById("main-content")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 50);
-  };
-
-  const currentStepIdx = STEPS.indexOf(currentStep);
-
-  if (page === "cart") {
-    return (
-      <Suspense fallback={<div className="min-h-screen bg-parchment-100" />}>
-        <CartPage
-          cart={cart}
-          onBackToForm={handleGoToForm}
-          onCheckout={() => setPage("checkout")}
-          onRemoveItem={removeItem}
-          onClearCart={clearCart}
-          justAdded={justAddedToCart}
-        />
-      </Suspense>
-    );
-  }
-
-  if (page === "checkout") {
-    return (
-      <Suspense fallback={<div className="min-h-screen bg-parchment-100" />}>
-        <CheckoutPage
-          cart={cart}
-          onBack={handleGoToForm}
-          onSubmit={handleCheckout}
-          isSubmitting={isSubmitting}
-        />
-      </Suspense>
-    );
-  }
-
-  if (page === "confirmation") {
-    return (
-      <Suspense fallback={<div className="min-h-screen bg-parchment-100" />}>
-        <ConfirmationPage
-          itemCount={confirmationItemCount}
-          onContinue={handleContinueAfterConfirmation}
-        />
-      </Suspense>
-    );
-  }
 
   return (
     <div>
@@ -368,14 +290,14 @@ export const SoapForm: React.FC = () => {
           {cart.totalQuantity > 0 && (
             <div className="flex items-center gap-3 p-4 bg-parchment-100 rounded-2xl border border-parchment-300 mb-6">
               <button
-                onClick={() => setPage("cart")}
+                onClick={onGoToCart}
                 className="btn-apothecary btn-secondary flex-1 text-sm py-3"
               >
                 <ShoppingCart className="w-4 h-4" />
                 Cart ({cart.totalQuantity})
               </button>
               <button
-                onClick={() => setPage("checkout")}
+                onClick={onGoToCheckout}
                 disabled={cart.totalQuantity === 0}
                 className="btn-apothecary btn-primary flex-1 text-sm py-3"
               >

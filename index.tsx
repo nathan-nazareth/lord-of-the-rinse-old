@@ -1,26 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import './index.css';
 import { ErrorBoundary } from './src/components/ErrorBoundary';
 import { LoadingState } from './src/components/LoadingState';
 import { setupGlobalErrorHandlers } from './src/utils/errorLogging';
-
-/**
- * Blank Screen Fix Implementation
- *
- * Root Cause Analysis:
- * - React.StrictMode causes double-rendering in development, potentially exposing side effects
- * - No error boundary to catch rendering errors
- * - No loading state during CDN resource loading
- * - No global error handlers for unhandled exceptions
- *
- * Fix Applied:
- * 1. Removed React.StrictMode to prevent double-render issues
- * 2. Wrapped App with ErrorBoundary to catch component errors
- * 3. Wrapped with LoadingState to show loading spinner during resource loading
- * 4. Added global error handlers for unhandled exceptions and promise rejections
- */
 
 setupGlobalErrorHandlers();
 
@@ -33,7 +18,9 @@ const root = ReactDOM.createRoot(rootElement);
 root.render(
   <ErrorBoundary>
     <LoadingState timeout={3000}>
-      <App />
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
     </LoadingState>
   </ErrorBoundary>
 );
