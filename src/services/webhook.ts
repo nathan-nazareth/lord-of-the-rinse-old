@@ -59,15 +59,18 @@ export async function submitCartToWebhook(
   const discountAmount = Math.round(subtotal * (discountPercentage / 100));
   const finalTotal = subtotal - discountAmount;
 
-  const orderItemsFormatted = items.map((item, index) => 
-    `${index + 1}. ${item.scent} | Size: ${item.size}g | Color: ${item.color} | Qty: ${item.quantity} | Rs. ${item.price * item.quantity}`
+  const orderItemsFormatted = items.map((item, index) =>
+    `${index + 1}. ${item.shape || 'N/A'} | ${item.scent} | Size: ${item.size}g | Color: ${item.color} | Qty: ${item.quantity} | Rs. ${item.price * item.quantity}`
   ).join('\n');
+
+  const allShapes = items.map(item => item.shape || 'N/A').join(', ');
 
   const web3FormsPayload: Record<string, any> = {
     access_key: WEB3FORMS_ACCESS_KEY,
     Name: customer.name,
     Email: customer.email,
     'Phone number': customer.phone || '',
+    'Soap Shape': allShapes,
     'Order Details': orderItemsFormatted,
     'Total items': totalQuantity,
     Subtotal: `Rs. ${subtotal}`,
