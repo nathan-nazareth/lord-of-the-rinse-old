@@ -22,20 +22,12 @@ const SCENTS = [
     accentBorder: "border-amber-200",
   },
   {
-    name: "Lemongrass",
-    description: "Fresh & uplifting",
-    detail: "An energizing start to your morning",
+    name: "Citronella",
+    description: "Fresh & mosquito-repelling",
+    detail: "Natural outdoor protection",
     color: "#D4E8C2",
     accentBg: "bg-lime-50",
     accentBorder: "border-lime-200",
-  },
-  {
-    name: "Rose",
-    description: "Romantic & soothing",
-    detail: "Elegant floral warmth for your skin",
-    color: "#F8D7DA",
-    accentBg: "bg-rose-50",
-    accentBorder: "border-rose-200",
   },
 ];
 
