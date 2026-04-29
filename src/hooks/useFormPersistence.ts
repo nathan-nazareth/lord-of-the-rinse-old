@@ -17,11 +17,19 @@ const FORM_STATE_KEY = "soap_form_state";
 const VISITED_KEY = "soap_visited";
 const SAVE_DEBOUNCE_MS = 500;
 
+function hasVisitedBefore(): boolean {
+  try {
+    return localStorage.getItem(VISITED_KEY) !== null;
+  } catch {
+    return false;
+  }
+}
+
 export function useFormPersistence() {
   const saveTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
   const hasVisited = useCallback((): boolean => {
-    return false;
+    return hasVisitedBefore();
   }, []);
 
   const restoreFormState = useCallback((): null => {
