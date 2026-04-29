@@ -147,7 +147,6 @@ interface SoapFormProps {
     quantity: string,
     size: number,
     hasLavenderPieces: boolean,
-    hasRosePieces: boolean,
   ) => void;
   onGoToCart: () => void;
   onGoToCheckout: () => void;
@@ -159,7 +158,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
   const [currentStep, setCurrentStep] = useState<FormStep>("landing");
 
   const { totalPrice } = useSoapPricing(
-    formData.scent, formData.size, formData.hasLavenderPieces, formData.hasRosePieces,
+    formData.scent, formData.size, formData.hasLavenderPieces,
   );
 
   const cartSubtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -187,7 +186,6 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
       quantity: restored.quantity ?? prev.quantity,
       size: restored.size ?? prev.size,
       hasLavenderPieces: restored.hasLavenderPieces ?? prev.hasLavenderPieces,
-      hasRosePieces: restored.hasRosePieces ?? prev.hasRosePieces,
     }));
     if (restored.currentStep && restored.currentStep !== "landing") {
       setCurrentStep(restored.currentStep);
@@ -197,7 +195,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
   useEffect(() => {
     saveFormState(
       formData.shape, formData.scent, formData.color, formData.quantity, formData.size,
-      formData.hasLavenderPieces, formData.hasRosePieces, currentStep,
+      formData.hasLavenderPieces, currentStep,
     );
   }, [formData, currentStep, saveFormState]);
 
@@ -215,7 +213,6 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
       ...prev,
       scent,
       hasLavenderPieces: false,
-      hasRosePieces: false,
     }));
     setTimeout(() => scrollToSection(sizeSectionRef), 300);
   };
@@ -268,7 +265,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
     setTimeout(() => setShowAddedToast(false), 3500);
     onAddToCart(
       formData.shape!, formData.scent!, totalPrice, formData.color!, formData.quantity,
-      formData.size, formData.hasLavenderPieces, formData.hasRosePieces,
+      formData.size, formData.hasLavenderPieces,
     );
     setFormData(INITIAL_STATE);
     setCurrentStep("shape");

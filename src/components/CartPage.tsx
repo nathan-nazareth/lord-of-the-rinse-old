@@ -86,13 +86,12 @@ const CartPage: React.FC<{
                   {cart.items.map((item) => (
                     <div key={item.id} className="cart-item">
                       <div className="flex-1 min-w-0">
-                        <p className="font-display font-semibold text-lg text-ink-700">{item.scent}</p>
+                        <p className="font-display font-semibold text-lg text-ink-700">{item.shape} · {item.scent}</p>
                         <p className="text-ink-400 text-sm">
                           {item.color} · {item.size}g · Qty {item.quantity}
                         </p>
                         <div className="flex gap-1 mt-1 flex-wrap">
                           {item.hasLavenderPieces && <span className="badge-tag">Lavender</span>}
-                          {item.hasRosePieces && <span className="badge-tag">Rose</span>}
                         </div>
                       </div>
                       <div className="flex items-center gap-3 flex-shrink-0">

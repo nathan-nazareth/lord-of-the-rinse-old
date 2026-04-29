@@ -1,12 +1,11 @@
 import { useMemo } from "react";
-import { SoapScent, SOAP_OPTIONS, LAVENDER_PIECES_PRICE, ROSE_PIECES_PRICE } from "../../types";
+import { SoapScent, SOAP_OPTIONS, LAVENDER_PIECES_PRICE } from "../../types";
 import { calculateDiscount } from "../utils/pricing";
 
 export function useSoapPricing(
   scent: SoapScent | null,
   size: number,
   hasLavenderPieces: boolean,
-  hasRosePieces: boolean,
 ) {
   const unitPrice = useMemo(() => {
     if (!scent) return 0;
@@ -18,9 +17,8 @@ export function useSoapPricing(
   const totalPrice = useMemo(() => {
     let total = unitPrice;
     if (hasLavenderPieces) total += LAVENDER_PIECES_PRICE;
-    if (hasRosePieces) total += ROSE_PIECES_PRICE;
     return total;
-  }, [unitPrice, hasLavenderPieces, hasRosePieces]);
+  }, [unitPrice, hasLavenderPieces]);
 
   return { unitPrice, totalPrice };
 }

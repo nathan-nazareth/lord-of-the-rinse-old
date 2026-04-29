@@ -61,7 +61,6 @@ export interface OrderFormState {
   quantity: string;
   size: number;
   hasLavenderPieces: boolean;
-  hasRosePieces: boolean;
   customerName: string;
   customerEmail: string;
   customerPhone: string;

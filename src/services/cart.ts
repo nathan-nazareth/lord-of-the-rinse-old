@@ -66,23 +66,23 @@ export function calculateTotal(items: CartItem[]): number {
 }
 
 export function createCartItem(
+  shape: string,
   scent: string,
   price: number,
   color: string,
   quantity: string,
   size: number,
   hasLavenderPieces: boolean,
-  hasRosePieces: boolean,
 ): CartItem {
   return {
     id: crypto.randomUUID(),
+    shape,
     scent,
     price,
     color,
     quantity: parseInt(quantity, 10),
     size,
     hasLavenderPieces,
-    hasRosePieces,
     addedAt: new Date().toISOString(),
   };
 }

@@ -234,7 +234,6 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
                       <p className="text-ink-400 text-sm truncate">{item.color} · {item.size}g · Qty {item.quantity}</p>
                       <div className="flex gap-1 mt-1 flex-wrap">
                         {item.hasLavenderPieces && <span className="badge-tag">Lavender</span>}
-                        {item.hasRosePieces && <span className="badge-tag">Rose</span>}
                       </div>
                     </div>
                     <div className="flex items-center gap-3 flex-shrink-0">
