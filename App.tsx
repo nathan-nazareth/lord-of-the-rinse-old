@@ -34,9 +34,8 @@ function App() {
     quantity: string,
     size: number,
     hasLavenderPieces: boolean,
-    hasRosePieces: boolean,
   ) => {
-    const success = addItem(shape, scent, price, color, quantity, size, hasLavenderPieces, hasRosePieces);
+    const success = addItem(shape, scent, price, color, quantity, size, hasLavenderPieces);
     if (success) {
       setJustAddedToCart(true);
       navigate('/cart');

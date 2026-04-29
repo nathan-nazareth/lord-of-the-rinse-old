@@ -1,15 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { SoapScent, SoapColor } from "../../types";
+import { SoapScent, SoapColor, SoapShape } from "../../types";
 
-type FormStep = "landing" | "scent" | "color" | "quantity";
+type FormStep = "landing" | "shape" | "scent" | "color" | "quantity";
 
 interface SavedFormState {
+  shape: string | null;
   scent: string | null;
   color: string | null;
   quantity: string;
   size: number;
   hasLavenderPieces: boolean;
-  hasRosePieces: boolean;
   currentStep: FormStep;
 }
 
@@ -29,12 +29,12 @@ export function useFormPersistence() {
   }, []);
 
   const restoreFormState = useCallback((): Partial<{
+    shape: SoapShape;
     scent: SoapScent;
     color: SoapColor;
     quantity: string;
     size: number;
     hasLavenderPieces: boolean;
-    hasRosePieces: boolean;
     currentStep: FormStep;
   }> | null => {
     try {
@@ -42,12 +42,12 @@ export function useFormPersistence() {
       if (!saved) return null;
       const parsed: SavedFormState = JSON.parse(saved);
       return {
+        shape: parsed.shape as SoapShape,
         scent: parsed.scent as SoapScent,
         color: parsed.color as SoapColor,
         quantity: parsed.quantity,
         size: parsed.size,
         hasLavenderPieces: parsed.hasLavenderPieces,
-        hasRosePieces: parsed.hasRosePieces ?? false,
         currentStep: parsed.currentStep,
       };
     } catch {
@@ -56,20 +56,20 @@ export function useFormPersistence() {
   }, []);
 
   const saveFormState = useCallback((
+    shape: SoapShape | null,
     scent: SoapScent | null,
     color: SoapColor | null,
     quantity: string,
     size: number,
     hasLavenderPieces: boolean,
-    hasRosePieces: boolean,
     currentStep: FormStep,
   ) => {
     clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => {
       try {
         const stateToSave: SavedFormState = {
-          scent, color, quantity, size,
-          hasLavenderPieces, hasRosePieces, currentStep,
+          shape, scent, color, quantity, size,
+          hasLavenderPieces, currentStep,
         };
         localStorage.setItem(FORM_STATE_KEY, JSON.stringify(stateToSave));
         localStorage.setItem(VISITED_KEY, "true");

@@ -13,13 +13,13 @@ import {
 interface UseCartReturn {
   cart: Cart;
   addItem: (
+    shape: string,
     scent: string,
     price: number,
     color: string,
     quantity: string,
     size: number,
     hasLavenderPieces: boolean,
-    hasRosePieces: boolean,
   ) => boolean;
   removeItem: (itemId: string) => void;
   clearCart: () => void;
@@ -55,13 +55,13 @@ export function useCart(): UseCartReturn {
 
   const addItem = useCallback(
     (
+      shape: string,
       scent: string,
       price: number,
       color: string,
       quantity: string,
       size: number,
       hasLavenderPieces: boolean,
-      hasRosePieces: boolean,
     ): boolean => {
       const current = cartRef.current;
       if (!canAddToCart(current.items)) {
@@ -70,13 +70,13 @@ export function useCart(): UseCartReturn {
       }
 
       const newItem = createCartItem(
+        shape,
         scent,
         price,
         color,
         quantity,
         size,
         hasLavenderPieces,
-        hasRosePieces,
       );
       const newItems = [...current.items, newItem];
 
