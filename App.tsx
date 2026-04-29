@@ -20,7 +20,6 @@ function App() {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmationItemCount, setConfirmationItemCount] = useState(0);
-  const [justAddedToCart, setJustAddedToCart] = useState(false);
 
   const handleShopClick = useCallback(() => {
     formSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -37,7 +36,6 @@ function App() {
   ) => {
     const success = addItem(shape, scent, price, color, quantity, size, hasLavenderPieces);
     if (success) {
-      setJustAddedToCart(true);
       navigate('/cart');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -120,10 +118,9 @@ function App() {
                 <CartPage
                   cart={cart}
                   onBackToForm={() => { navigate('/'); setTimeout(() => formSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100); }}
-                  onCheckout={() => { setJustAddedToCart(false); navigate('/checkout'); }}
+                  onCheckout={() => navigate('/checkout')}
                   onRemoveItem={removeItem}
                   onClearCart={clearCart}
-                  justAdded={justAddedToCart}
                 />
               </Suspense>
             } />
