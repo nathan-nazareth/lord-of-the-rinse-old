@@ -2,11 +2,12 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   SoapScent,
   SoapColor,
+  SoapShape,
   OrderFormState,
   SOAP_OPTIONS,
+  SHAPE_OPTIONS,
   DEFAULT_SIZE,
   LAVENDER_PIECES_PRICE,
-  ROSE_PIECES_PRICE,
 } from "../../types";
 import { useSoapPricing } from "../hooks/useSoapPricing";
 import { useFormPersistence } from "../hooks/useFormPersistence";
@@ -17,6 +18,9 @@ import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 import ArrowRight from "lucide-react/dist/esm/icons/arrow-right";
 import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
 import Leaf from "lucide-react/dist/esm/icons/leaf";
+import Heart from "lucide-react/dist/esm/icons/heart";
+import Circle from "lucide-react/dist/esm/icons/circle";
+import Square from "lucide-react/dist/esm/icons/square";
 
 const SIZE_OPTIONS = [
   { label: "S", weight: 50 },
@@ -25,12 +29,12 @@ const SIZE_OPTIONS = [
 ];
 
 const INITIAL_STATE: OrderFormState = {
+  shape: null,
   scent: null,
   color: null,
   quantity: "",
   size: DEFAULT_SIZE,
   hasLavenderPieces: false,
-  hasRosePieces: false,
   customerName: "",
   customerEmail: "",
   customerPhone: "",
@@ -39,8 +43,7 @@ const INITIAL_STATE: OrderFormState = {
 const SCENT_INFO: Record<string, { description: string; tagline: string }> = {
   Lavender: { description: "Calming & relaxing", tagline: "For a restful ritual" },
   Coconut: { description: "Tropical & hydrating", tagline: "Silky smooth finish" },
-  Lemongrass: { description: "Fresh & uplifting", tagline: "Morning invigoration" },
-  Rose: { description: "Romantic & soothing", tagline: "Elegant floral warmth" },
+  Citronella: { description: "Fresh & mosquito-repelling", tagline: "Outdoor protection" },
 };
 
 const COLOR_CONFIG = [
@@ -49,9 +52,9 @@ const COLOR_CONFIG = [
   { label: "Blush", value: SoapColor.PINK, hex: "#FCD5CE" },
 ];
 
-type FormStep = "landing" | "scent" | "color" | "quantity";
+type FormStep = "landing" | "shape" | "scent" | "color" | "quantity";
 
-const STEPS: FormStep[] = ["scent", "color", "quantity"];
+const STEPS: FormStep[] = ["shape", "scent", "color", "quantity"];
 
 const StepIndicator: React.FC<{ current: FormStep; onNavigate: (s: FormStep) => void }> = ({ current, onNavigate }) => {
   const currentIdx = STEPS.indexOf(current);
@@ -95,6 +98,32 @@ const StepIndicator: React.FC<{ current: FormStep; onNavigate: (s: FormStep) => 
   );
 };
 
+const ShapeIcon: React.FC<{ shape: SoapShape; className?: string }> = ({ shape, className }) => {
+  switch (shape) {
+    case SoapShape.SQUARE:
+      return <Square className={className} />;
+    case SoapShape.CIRCLE:
+      return <Circle className={className} />;
+    case SoapShape.HEART:
+      return <Heart className={className} />;
+    case SoapShape.OVAL_FLAT:
+      return (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <ellipse cx="12" cy="12" rx="10" ry="6" />
+        </svg>
+      );
+    case SoapShape.OVAL_DIP:
+      return (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <ellipse cx="12" cy="12" rx="10" ry="6" />
+          <path d="M8 12c2-1 6-1 8 0" opacity="0.5" />
+        </svg>
+      );
+    default:
+      return null;
+  }
+};
+
 const BotanicalLeafIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg className={className} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="20" cy="18" r="5" fill="#C4785A" opacity="0.6"/>
@@ -111,6 +140,7 @@ const BotanicalLeafIcon: React.FC<{ className?: string }> = ({ className }) => (
 interface SoapFormProps {
   cart: { items: any[]; totalQuantity: number };
   onAddToCart: (
+    shape: string,
     scent: string,
     price: number,
     color: string,
@@ -136,6 +166,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
   const { total: cartTotal } = calculateDiscount(cartSubtotal, cart.totalQuantity);
   const { hasVisited: hasVisitedFn, restoreFormState, saveFormState } = useFormPersistence();
 
+  const shapeSectionRef = useRef<HTMLDivElement>(null);
   const flavorSectionRef = useRef<HTMLDivElement>(null);
   const sizeSectionRef = useRef<HTMLDivElement>(null);
   const lavenderSectionRef = useRef<HTMLDivElement>(null);
@@ -150,6 +181,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
     if (!restored) return;
     setFormData((prev) => ({
       ...prev,
+      shape: restored.shape ?? prev.shape,
       scent: restored.scent ?? prev.scent,
       color: restored.color ?? prev.color,
       quantity: restored.quantity ?? prev.quantity,
@@ -164,13 +196,18 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
 
   useEffect(() => {
     saveFormState(
-      formData.scent, formData.color, formData.quantity, formData.size,
+      formData.shape, formData.scent, formData.color, formData.quantity, formData.size,
       formData.hasLavenderPieces, formData.hasRosePieces, currentStep,
     );
   }, [formData, currentStep, saveFormState]);
 
   const scrollToSection = (ref: React.RefObject<HTMLDivElement>) => {
     ref.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
+
+  const handleShapeChange = (shape: SoapShape) => {
+    setFormData((prev) => ({ ...prev, shape }));
+    setTimeout(() => scrollToSection(flavorSectionRef), 300);
   };
 
   const handleScentChange = (scent: SoapScent) => {
@@ -189,8 +226,8 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
   };
 
   const handleContinueFromLanding = () => {
-    setCurrentStep("scent");
-    setTimeout(() => scrollToSection(flavorSectionRef), 100);
+    setCurrentStep("shape");
+    setTimeout(() => scrollToSection(shapeSectionRef), 100);
   };
 
   const handleColorChange = (color: SoapColor) => {
@@ -204,6 +241,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
 
   const isScentStepValid = formData.scent && formData.size > 0;
   const isFormValid =
+    formData.shape &&
     formData.scent &&
     formData.color &&
     formData.size > 0 &&
@@ -216,6 +254,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
     if (stepIdx <= currentIdx) {
       setCurrentStep(step);
       setTimeout(() => {
+        if (step === "shape") scrollToSection(shapeSectionRef);
         if (step === "scent") scrollToSection(flavorSectionRef);
         if (step === "color") scrollToSection(colorSectionRef);
         if (step === "quantity") scrollToSection(quantitySectionRef);
@@ -228,11 +267,11 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
     setShowAddedToast(true);
     setTimeout(() => setShowAddedToast(false), 3500);
     onAddToCart(
-      formData.scent!, totalPrice, formData.color!, formData.quantity,
+      formData.shape!, formData.scent!, totalPrice, formData.color!, formData.quantity,
       formData.size, formData.hasLavenderPieces, formData.hasRosePieces,
     );
     setFormData(INITIAL_STATE);
-    setCurrentStep("scent");
+    setCurrentStep("shape");
   };
 
   return (
@@ -256,14 +295,15 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
           <p className="overline mb-5">Handcrafted with care</p>
           <h2 className="text-display mb-4">Your soap, your story</h2>
           <p className="text-ink-500 text-lg mb-10 max-w-sm mx-auto font-body leading-relaxed">
-            Choose from four botanical scents, three sizes, and natural additives to create your perfect organic soap.
+            Choose your shape, scent, size, and natural additives to create your perfect organic soap.
           </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
             {[
-              { num: "01", title: "Choose Scent", desc: "Four natural botanical fragrances" },
-              { num: "02", title: "Pick Color", desc: "Three beautiful natural tones" },
-              { num: "03", title: "Set Quantity", desc: "Bulk discounts available" },
+              { num: "01", title: "Pick Shape", desc: "Choose from five unique soap forms" },
+              { num: "02", title: "Select Scent", desc: "Four natural botanical fragrances" },
+              { num: "03", title: "Choose Color", desc: "Three beautiful natural tones" },
+              { num: "04", title: "Set Quantity", desc: "Bulk discounts available" },
             ].map((item) => (
               <div key={item.num} className="text-left p-5">
                  <p className="text-xs font-semibold text-terra-400 tracking-widest uppercase mb-2">{item.num}</p>
@@ -318,28 +358,28 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
 
           <div className="border-t border-parchment-300 mt-4 pt-6">
 
-            {/* ── SCENT STEP ── */}
-            <div ref={flavorSectionRef} className="space-y-5">
+            {/* ── SHAPE STEP ── */}
+            <div ref={shapeSectionRef} className="space-y-5">
               <div>
-                <p className="overline mb-1">Step 1 of 3</p>
-                <h2 className="font-display text-2xl font-semibold text-ink-700 mb-1">Choose your scent</h2>
-                <p className="text-ink-400 text-sm">Select the botanical fragrance for your soap</p>
+                <p className="overline mb-1">Step 1 of 4</p>
+                <h2 className="font-display text-2xl font-semibold text-ink-700 mb-1">Select your shape</h2>
+                <p className="text-ink-400 text-sm">Choose the form of your handcrafted soap</p>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                {SOAP_OPTIONS.map((option) => {
-                  const info = SCENT_INFO[option.scent];
-                  const isSelected = formData.scent === option.scent;
+                {SHAPE_OPTIONS.map((option) => {
+                  const isSelected = formData.shape === option.value;
                   return (
                     <button
-                      key={option.scent}
-                      onClick={() => handleScentChange(option.scent)}
+                      key={option.value}
+                      onClick={() => handleShapeChange(option.value as SoapShape)}
                       className={`selection-card ${isSelected ? "selection-card--selected" : ""}`}
                       aria-pressed={isSelected}
                     >
-                      <p className="font-display text-lg font-semibold text-ink-700 mb-0.5">{option.scent}</p>
-                      <p className="text-ink-400 text-xs mb-1">{info.description}</p>
-                      <p className="text-terra-500 text-xs italic">{info.tagline}</p>
+                      <div className="flex flex-col items-center justify-center p-2">
+                        <ShapeIcon shape={option.value as SoapShape} className="w-8 h-8 mb-2 text-ink-500" />
+                        <p className="font-display text-lg font-semibold text-ink-700 text-center">{option.label}</p>
+                      </div>
                       {isSelected && (
                         <div className="absolute top-2 right-2 w-5 h-5 bg-terra-400 rounded-full flex items-center justify-center">
                           <Check className="w-3 h-3 text-white" />
@@ -349,7 +389,55 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
                   );
                 })}
               </div>
+
+              {formData.shape && (
+                <button
+                  onClick={() => {
+                    setCurrentStep("scent");
+                    setTimeout(() => scrollToSection(flavorSectionRef), 100);
+                  }}
+                  className="btn-apothecary btn-primary btn-full mt-2"
+                >
+                  Choose Scent
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              )}
             </div>
+
+            {/* ── SCENT STEP ── */}
+            {formData.shape && (
+              <div ref={flavorSectionRef} className="mt-8 space-y-5">
+                <div className="border-t border-parchment-300 pt-6">
+                  <p className="overline mb-1">Step 2 of 4</p>
+                  <h2 className="font-display text-2xl font-semibold text-ink-700 mb-1">Choose your scent</h2>
+                  <p className="text-ink-400 text-sm">Select the botanical fragrance for your {formData.shape} soap</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  {SOAP_OPTIONS.map((option) => {
+                    const info = SCENT_INFO[option.scent];
+                    const isSelected = formData.scent === option.scent;
+                    return (
+                      <button
+                        key={option.scent}
+                        onClick={() => handleScentChange(option.scent)}
+                        className={`selection-card ${isSelected ? "selection-card--selected" : ""}`}
+                        aria-pressed={isSelected}
+                      >
+                        <p className="font-display text-lg font-semibold text-ink-700 mb-0.5">{option.scent}</p>
+                        <p className="text-ink-400 text-xs mb-1">{info.description}</p>
+                        <p className="text-terra-500 text-xs italic">{info.tagline}</p>
+                        {isSelected && (
+                          <div className="absolute top-2 right-2 w-5 h-5 bg-terra-400 rounded-full flex items-center justify-center">
+                            <Check className="w-3 h-3 text-white" />
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* ── SIZE + ADDONS STEP ── */}
             {formData.scent && (
@@ -360,7 +448,10 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
                       <p className="overline mb-0.5">Step 2a</p>
                       <h2 className="font-display text-xl font-semibold text-ink-700">Select size</h2>
                     </div>
-                    <span className="badge-tag">{formData.scent}</span>
+                    <div className="flex gap-2">
+                      <span className="badge-tag">{formData.shape}</span>
+                      <span className="badge-tag">{formData.scent}</span>
+                    </div>
                   </div>
 
                   <div className="flex gap-2">
@@ -396,33 +487,11 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
                     </button>
                   )}
 
-                  {(formData.scent === SoapScent.ROSE || formData.scent === SoapScent.COCONUT) && (
-                    <button
-                      onClick={() => setFormData((p) => ({ ...p, hasRosePieces: !p.hasRosePieces }))}
-                      className={`addon-toggle ${formData.hasRosePieces ? "addon-toggle--active" : ""}`}
-                      aria-pressed={formData.hasRosePieces}
-                    >
-                      <span className="flex items-center gap-3">
-                        <svg className="w-6 h-6 flex-shrink-0" viewBox="0 0 24 24" fill="none">
-                          <ellipse cx="12" cy="12" rx="4" ry="6" fill="#e8a0a0" opacity="0.7" transform="rotate(-15 12 12)"/>
-                          <ellipse cx="7" cy="9" rx="3" ry="4.5" fill="#f8bbd0" opacity="0.6" transform="rotate(-30 7 9)"/>
-                          <ellipse cx="17" cy="9" rx="3" ry="4.5" fill="#f8bbd0" opacity="0.6" transform="rotate(30 17 9)"/>
-                        </svg>
-                        <span>
-                          <span className="font-medium text-ink-700 block">Rose Petals</span>
-                          <span className="text-ink-400 text-sm">+Rs. {ROSE_PIECES_PRICE} — elegant florals</span>
-                        </span>
-                      </span>
-                      {formData.hasRosePieces && <Check className="w-5 h-5 text-botanical-500 flex-shrink-0" />}
-                    </button>
-                  )}
-
                   {/* Price summary */}
                   <div className="flex items-center justify-between p-4 bg-parchment-100 rounded-2xl border border-parchment-300">
                     <span className="text-ink-600 font-medium">
                       {formData.size}g {formData.scent}
                       {formData.hasLavenderPieces && " + Lavender"}
-                      {formData.hasRosePieces && " + Rose"}
                     </span>
                     <span className="font-display text-xl font-semibold text-terra-500">Rs. {totalPrice}</span>
                   </div>
@@ -443,13 +512,13 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
             )}
 
             {/* ── COLOR STEP ── */}
-            {currentStep === "color" && (
+            {currentStep === "color" && formData.shape && formData.scent && (
               <div ref={colorSectionRef} className="mt-8 space-y-5">
                 <div className="border-t border-parchment-300 pt-6">
-                  <p className="overline mb-1">Step 2b of 3</p>
+                  <p className="overline mb-1">Step 3 of 4</p>
                   <h2 className="font-display text-2xl font-semibold text-ink-700 mb-1">Choose a color</h2>
                   <p className="text-ink-400 text-sm">
-                    {formData.scent} · {formData.size}g · Rs. {totalPrice}
+                    {formData.shape} · {formData.scent} · {formData.size}g · Rs. {totalPrice}
                   </p>
                 </div>
 
@@ -500,13 +569,13 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
             )}
 
             {/* ── QUANTITY STEP ── */}
-            {currentStep === "quantity" && formData.scent && formData.color && (
+            {currentStep === "quantity" && formData.shape && formData.scent && formData.color && (
               <div ref={quantitySectionRef} className="mt-8 space-y-5">
                 <div className="border-t border-parchment-300 pt-6">
-                  <p className="overline mb-1">Step 3 of 3</p>
+                  <p className="overline mb-1">Step 4 of 4</p>
                   <h2 className="font-display text-2xl font-semibold text-ink-700 mb-1">How many soaps?</h2>
                   <p className="text-ink-400 text-sm">
-                    {formData.scent} · {formData.color} · {formData.size}g · Rs. {totalPrice} each
+                    {formData.shape} · {formData.scent} · {formData.color} · {formData.size}g · Rs. {totalPrice} each
                   </p>
                 </div>
 

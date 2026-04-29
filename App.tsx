@@ -1,5 +1,5 @@
 import React, { useRef, useCallback, useState, lazy, Suspense } from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import { Header } from './components/Header';
 import Hero from './src/components/Hero';
 import { SoapForm } from './src/components/SoapForm';
@@ -131,7 +131,7 @@ function App() {
 
             <Route path="/checkout" element={
               cart.totalQuantity === 0 ? (
-                <>{navigate('/cart', { replace: true })}</>
+                <Navigate to="/cart" replace />
               ) : (
                 <Suspense fallback={<div className="min-h-screen bg-parchment-100" />}>
                   <CheckoutPage
