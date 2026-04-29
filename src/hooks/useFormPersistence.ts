@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useRef, useCallback } from "react";
 import { SoapScent, SoapColor, SoapShape } from "../../types";
 
 type FormStep = "landing" | "shape" | "scent" | "color" | "quantity";
@@ -27,27 +27,38 @@ function isHardRefresh(): boolean {
       return entries[0].type === "reload";
     }
   } catch {
-    // Fallback for older browsers
+    // Fallback
   }
   return false;
 }
 
+function initState() {
+  const hardRefresh = isHardRefresh();
+  if (hardRefresh) {
+    try {
+      localStorage.removeItem(FORM_STATE_KEY);
+      localStorage.removeItem(VISITED_KEY);
+    } catch {
+      // Silently fail
+    }
+    return false;
+  }
+
+  try {
+    return localStorage.getItem(VISITED_KEY) !== null;
+  } catch {
+    return false;
+  }
+}
+
+const HAS_VISITED = initState();
+
 export function useFormPersistence() {
   const saveTimerRef = useRef<ReturnType<typeof setTimeout>>();
-  const [wasHardRefresh, setWasHardRefresh] = useState<boolean | null>(null);
 
-  useEffect(() => {
-    setWasHardRefresh(isHardRefresh());
+  const hasVisited = useCallback((): boolean => {
+    return HAS_VISITED;
   }, []);
-
-  const hasVisited = useCallback(() => {
-    if (wasHardRefresh === true) return false;
-    try {
-      return localStorage.getItem(VISITED_KEY) !== null;
-    } catch {
-      return false;
-    }
-  }, [wasHardRefresh]);
 
   const restoreFormState = useCallback((): Partial<{
     shape: SoapShape;
@@ -104,13 +115,10 @@ export function useFormPersistence() {
     clearTimeout(saveTimerRef.current);
     try {
       localStorage.removeItem(FORM_STATE_KEY);
+      localStorage.removeItem(VISITED_KEY);
     } catch {
       // Silently fail
     }
-  }, []);
-
-  useEffect(() => {
-    return () => clearTimeout(saveTimerRef.current);
   }, []);
 
   return { hasVisited, restoreFormState, saveFormState, clearFormState };
