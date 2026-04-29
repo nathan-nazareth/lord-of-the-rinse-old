@@ -17,74 +17,15 @@ const FORM_STATE_KEY = "soap_form_state";
 const VISITED_KEY = "soap_visited";
 const SAVE_DEBOUNCE_MS = 500;
 
-function isHardRefresh(): boolean {
-  try {
-    if (performance.navigation) {
-      return performance.navigation.type === 1;
-    }
-    const entries = performance.getEntriesByType("navigation") as PerformanceNavigation[];
-    if (entries.length > 0) {
-      return entries[0].type === "reload";
-    }
-  } catch {
-    // Fallback
-  }
-  return false;
-}
-
-function initState() {
-  const hardRefresh = isHardRefresh();
-  if (hardRefresh) {
-    try {
-      localStorage.removeItem(FORM_STATE_KEY);
-      localStorage.removeItem(VISITED_KEY);
-    } catch {
-      // Silently fail
-    }
-    return false;
-  }
-
-  try {
-    return localStorage.getItem(VISITED_KEY) !== null;
-  } catch {
-    return false;
-  }
-}
-
-const HAS_VISITED = initState();
-
 export function useFormPersistence() {
   const saveTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
   const hasVisited = useCallback((): boolean => {
-    return HAS_VISITED;
+    return false;
   }, []);
 
-  const restoreFormState = useCallback((): Partial<{
-    shape: SoapShape;
-    scent: SoapScent;
-    color: SoapColor;
-    quantity: string;
-    size: number;
-    hasLavenderPieces: boolean;
-    currentStep: FormStep;
-  }> | null => {
-    try {
-      const saved = localStorage.getItem(FORM_STATE_KEY);
-      if (!saved) return null;
-      const parsed: SavedFormState = JSON.parse(saved);
-      return {
-        shape: parsed.shape as SoapShape,
-        scent: parsed.scent as SoapScent,
-        color: parsed.color as SoapColor,
-        quantity: parsed.quantity,
-        size: parsed.size,
-        hasLavenderPieces: parsed.hasLavenderPieces,
-        currentStep: parsed.currentStep,
-      };
-    } catch {
-      return null;
-    }
+  const restoreFormState = useCallback((): null => {
+    return null;
   }, []);
 
   const saveFormState = useCallback((
