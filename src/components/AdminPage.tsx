@@ -1,23 +1,24 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Check from "lucide-react/dist/esm/icons/check";
-import X from "lucide-react/dist/esm/icons/x";
 import RefreshCw from "lucide-react/dist/esm/icons/refresh-cw";
 import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
 
+const ORDERS_KEY = "soap_orders";
+
 interface Order {
-  id: string;
+  order_id: string;
   customer_name: string;
   customer_email: string;
   customer_phone: string;
   items: string;
+  all_shapes: string;
   total_quantity: number;
   subtotal: number;
   discount_percent: number;
   discount_amount: number;
   final_total: number;
   status: string;
-  created_at: string;
   submitted_at: string;
 }
 
@@ -40,15 +41,13 @@ const AdminPage: React.FC = () => {
     await fetchOrders();
   };
 
-  const fetchOrders = async () => {
+  const fetchOrders = () => {
     setIsLoading(true);
     try {
-      const backendUrl = import.meta.env.VITE_ADMIN_BACKEND_URL;
-      const res = await fetch(`${backendUrl}/admin/orders`, {
-        headers: { "x-admin-key": "3984" }
-      });
-      const data = await res.json();
-      setOrders(data);
+      const stored = localStorage.getItem(ORDERS_KEY);
+      const allOrders: Order[] = stored ? JSON.parse(stored) : [];
+      const pending = allOrders.filter((o: Order) => o.status === "pending");
+      setOrders(pending);
     } catch {
       setOrders([]);
     } finally {
@@ -56,16 +55,17 @@ const AdminPage: React.FC = () => {
     }
   };
 
-  const closeOrder = async (id: string) => {
+  const closeOrder = (orderId: string) => {
     try {
-      const backendUrl = import.meta.env.VITE_ADMIN_BACKEND_URL;
-      await fetch(`${backendUrl}/admin/orders/${id}/close`, {
-        method: "PATCH",
-        headers: { "x-admin-key": "3984" }
-      });
-      setOrders(orders.filter(o => o.id !== id));
-    } catch {
-      console.error("Failed to close order");
+      const stored = localStorage.getItem(ORDERS_KEY);
+      const allOrders: Order[] = stored ? JSON.parse(stored) : [];
+      const updated = allOrders.map((o: Order) =>
+        o.order_id === orderId ? { ...o, status: "closed" } : o
+      );
+      localStorage.setItem(ORDERS_KEY, JSON.stringify(updated));
+      setOrders(orders.filter((o) => o.order_id !== orderId));
+    } catch (err) {
+      console.error("Failed to close order:", err);
     }
   };
 
@@ -124,16 +124,17 @@ const AdminPage: React.FC = () => {
         ) : (
           <div className="space-y-4">
             {orders.map((order) => (
-              <div key={order.id} className="card-apothecary p-6">
+              <div key={order.order_id} className="card-apothecary p-6">
                 <div className="flex justify-between items-start mb-4">
                   <div>
                     <p className="font-display font-semibold text-lg text-ink-700">{order.customer_name}</p>
                     <p className="text-ink-400 text-sm">{order.customer_email}</p>
                     {order.customer_phone && <p className="text-ink-400 text-sm">{order.customer_phone}</p>}
+                    {order.all_shapes && <p className="text-ink-400 text-sm mt-1">Shapes: {order.all_shapes}</p>}
                   </div>
                   <div className="text-right">
                     <p className="font-display text-xl font-semibold text-terra-500">Rs. {order.final_total}</p>
-                    <p className="text-ink-400 text-xs">Order #{order.id.slice(0, 8)}</p>
+                    <p className="text-ink-400 text-xs">Order #{order.order_id.slice(0, 8)}</p>
                   </div>
                 </div>
 
@@ -147,7 +148,7 @@ const AdminPage: React.FC = () => {
                     <p className="text-xs">Submitted: {new Date(order.submitted_at).toLocaleString()}</p>
                   </div>
                   <button
-                    onClick={() => closeOrder(order.id)}
+                    onClick={() => closeOrder(order.order_id)}
                     className="btn-apothecary btn-primary text-sm py-2 flex items-center gap-2"
                   >
                     <Check className="w-4 h-4" /> Close Order
