@@ -229,6 +229,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
 
   const handleColorChange = (color: SoapColor) => {
     setFormData((prev) => ({ ...prev, color }));
+    setTimeout(() => scrollToSection(quantitySectionRef), 100);
   };
 
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
