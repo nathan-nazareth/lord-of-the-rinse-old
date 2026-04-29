@@ -43,7 +43,7 @@ const AdminPage: React.FC = () => {
   const fetchOrders = async () => {
     setIsLoading(true);
     try {
-      const backendUrl = (window as any).__env__?.VITE_ADMIN_BACKEND_URL;
+      const backendUrl = import.meta.env.VITE_ADMIN_BACKEND_URL;
       const res = await fetch(`${backendUrl}/admin/orders`, {
         headers: { "x-admin-key": "3984" }
       });
@@ -58,7 +58,7 @@ const AdminPage: React.FC = () => {
 
   const closeOrder = async (id: string) => {
     try {
-      const backendUrl = (window as any).__env__?.VITE_ADMIN_BACKEND_URL;
+      const backendUrl = import.meta.env.VITE_ADMIN_BACKEND_URL;
       await fetch(`${backendUrl}/admin/orders/${id}/close`, {
         method: "PATCH",
         headers: { "x-admin-key": "3984" }
