@@ -11,6 +11,7 @@ import { logWeb3FormsRateLimit, logWeb3FormsError, logWeb3FormsSuccess } from '.
 
 const WEB3FORMS_ENDPOINT = import.meta.env.VITE_WEB3FORMS_ENDPOINT || 'https://api.web3forms.com/submit';
 const WEB3FORMS_ACCESS_KEY = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY?.trim();
+const ADMIN_BACKEND_URL = import.meta.env.VITE_ADMIN_BACKEND_URL;
 const TIMEOUT_MS = 10000;
 const MAX_RETRIES = 3;
 
@@ -125,6 +126,34 @@ export async function submitCartToWebhook(
         if (onStatusChange) {
           onStatusChange('submitted');
         }
+
+        if (ADMIN_BACKEND_URL) {
+          try {
+            await fetch(`${ADMIN_BACKEND_URL}/admin/orders`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'x-admin-key': '3984'
+              },
+              body: JSON.stringify({
+                order_id: orderId,
+                customer_name: customer.name,
+                customer_email: customer.email,
+                customer_phone: customer.phone || '',
+                items: orderItemsFormatted,
+                total_quantity: totalQuantity,
+                subtotal,
+                discount_percent: discountPercentage,
+                discount_amount: discountAmount,
+                final_total: finalTotal,
+                submitted_at: new Date().toISOString()
+              })
+            });
+          } catch (err) {
+            console.error('[Webhook] Failed to save to admin backend:', err);
+          }
+        }
+
         return { success: true, orderId };
       }
 

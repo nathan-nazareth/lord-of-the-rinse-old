@@ -11,6 +11,7 @@ import { Customer } from './src/types/webhook';
 const CartPage = lazy(() => import('./src/components/CartPage'));
 const CheckoutPage = lazy(() => import('./src/components/CheckoutPage'));
 const ConfirmationPage = lazy(() => import('./src/components/ConfirmationPage'));
+const AdminPage = lazy(() => import('./src/components/AdminPage'));
 
 function App() {
   const formSectionRef = useRef<HTMLDivElement>(null);
@@ -26,6 +27,7 @@ function App() {
   }, []);
 
   const handleAddToCart = useCallback((
+    shape: string,
     scent: string,
     price: number,
     color: string,
@@ -34,7 +36,7 @@ function App() {
     hasLavenderPieces: boolean,
     hasRosePieces: boolean,
   ) => {
-    const success = addItem(scent, price, color, quantity, size, hasLavenderPieces, hasRosePieces);
+    const success = addItem(shape, scent, price, color, quantity, size, hasLavenderPieces, hasRosePieces);
     if (success) {
       setJustAddedToCart(true);
       navigate('/cart');
@@ -148,6 +150,12 @@ function App() {
                   itemCount={confirmationItemCount}
                   onContinue={() => { navigate('/'); setTimeout(() => formSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100); }}
                 />
+              </Suspense>
+            } />
+
+            <Route path="/admin" element={
+              <Suspense fallback={<div className="min-h-screen bg-parchment-100" />}>
+                <AdminPage />
               </Suspense>
             } />
           </Routes>

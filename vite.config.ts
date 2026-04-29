@@ -37,7 +37,12 @@ export default defineConfig(({ mode }) => {
       ],
       define: {
         'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
+        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
+        '__env__': JSON.stringify({
+          VITE_WEB3FORMS_ACCESS_KEY: env.VITE_WEB3FORMS_ACCESS_KEY,
+          VITE_WEB3FORMS_ENDPOINT: env.VITE_WEB3FORMS_ENDPOINT,
+          VITE_ADMIN_BACKEND_URL: env.VITE_ADMIN_BACKEND_URL
+        })
       },
       resolve: {
         alias: {
