@@ -51,7 +51,11 @@ function App() {
         clearFormState();
         navigate('/confirmation');
         window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        console.error("Order submission failed");
       }
+    } catch (err) {
+      console.error("Order submission error:", err);
     } finally {
       setIsSubmitting(false);
     }
