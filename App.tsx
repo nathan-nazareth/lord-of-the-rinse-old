@@ -11,7 +11,6 @@ import { Customer } from './src/types/webhook';
 const CartPage = lazy(() => import('./src/components/CartPage'));
 const CheckoutPage = lazy(() => import('./src/components/CheckoutPage'));
 const ConfirmationPage = lazy(() => import('./src/components/ConfirmationPage'));
-const AdminPage = lazy(() => import('./src/components/AdminPage'));
 
 function App() {
   const formSectionRef = useRef<HTMLDivElement>(null);
@@ -152,11 +151,7 @@ function App() {
               </Suspense>
             } />
 
-            <Route path="/admin" element={
-              <Suspense fallback={<div className="min-h-screen bg-parchment-100" />}>
-                <AdminPage />
-              </Suspense>
-            } />
+            </Route>
           </Routes>
         </div>
       </div>
