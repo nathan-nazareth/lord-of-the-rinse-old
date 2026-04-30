@@ -7,7 +7,6 @@ export interface CartItem {
   quantity: number;
   size: number;
   hasLavenderPieces: boolean;
-  hasRosePieces: boolean;
   addedAt: string;
 }
 
