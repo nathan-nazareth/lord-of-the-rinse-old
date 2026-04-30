@@ -13,20 +13,9 @@ const WEB3FORMS_ENDPOINT = import.meta.env.VITE_WEB3FORMS_ENDPOINT || 'https://a
 const WEB3FORMS_ACCESS_KEY = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY?.trim();
 const TIMEOUT_MS = 10000;
 const MAX_RETRIES = 3;
-const ORDERS_KEY = 'soap_orders';
 
 function generateOrderId(): string {
   return crypto.randomUUID();
-}
-
-function saveOrderToLocalStorage(orderData: Record<string, any>) {
-  try {
-    const existing = JSON.parse(localStorage.getItem(ORDERS_KEY) || '[]');
-    existing.push(orderData);
-    localStorage.setItem(ORDERS_KEY, JSON.stringify(existing));
-  } catch (err) {
-    console.error('[Webhook] Failed to save order to localStorage:', err);
-  }
 }
 
 async function sleep(ms: number): Promise<void> {
@@ -136,22 +125,6 @@ export async function submitCartToWebhook(
         if (onStatusChange) {
           onStatusChange('submitted');
         }
-
-        saveOrderToLocalStorage({
-          order_id: orderId,
-          customer_name: customer.name,
-          customer_email: customer.email,
-          customer_phone: customer.phone || '',
-          items: orderItemsFormatted,
-          all_shapes: allShapes,
-          total_quantity: totalQuantity,
-          subtotal,
-          discount_percent: discountPercentage,
-          discount_amount: discountAmount,
-          final_total: finalTotal,
-          status: 'pending',
-          submitted_at: new Date().toISOString()
-        });
 
         return { success: true, orderId };
       }
