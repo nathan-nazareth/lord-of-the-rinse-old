@@ -150,8 +150,6 @@ function App() {
                 />
               </Suspense>
             } />
-
-            </Route>
           </Routes>
         </div>
       </div>
