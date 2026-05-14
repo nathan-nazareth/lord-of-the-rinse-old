@@ -98,6 +98,14 @@ const StepIndicator: React.FC<{ current: FormStep; onNavigate: (s: FormStep) => 
   );
 };
 
+const SIZE_LIMITS: Record<string, { min: number; max: number }> = {
+  [SoapShape.SQUARE]: { min: 1, max: 100 },
+  [SoapShape.OVAL_DIP]: { min: 1, max: 35 },
+  [SoapShape.HEART]: { min: 1, max: 75 },
+  [SoapShape.OVAL_FLAT]: { min: 1, max: 85 },
+  [SoapShape.CIRCLE]: { min: 1, max: 100 },
+};
+
 const ShapeIcon: React.FC<{ shape: SoapShape; className?: string }> = ({ shape, className }) => {
   switch (shape) {
     case SoapShape.SQUARE:
@@ -204,7 +212,9 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
   };
 
   const handleShapeChange = (shape: SoapShape) => {
-    setFormData((prev) => ({ ...prev, shape }));
+    const limits = SIZE_LIMITS[shape];
+    const clampedSize = Math.min(Math.max(DEFAULT_SIZE, limits.min), limits.max);
+    setFormData((prev) => ({ ...prev, shape, size: clampedSize }));
     setTimeout(() => scrollToSection(flavorSectionRef), 300);
   };
 
@@ -452,19 +462,40 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
                     </div>
                   </div>
 
-                  <div className="flex gap-2">
-                    {SIZE_OPTIONS.map((opt) => (
-                      <button
-                        key={opt.label}
-                        onClick={() => handleSizeChange(opt.weight)}
-                        className={`size-btn ${formData.size === opt.weight ? "size-btn--selected" : ""}`}
-                        aria-pressed={formData.size === opt.weight}
-                      >
-                        {opt.label}
-                        <span className="block text-xs opacity-70 mt-0.5">{opt.weight}g</span>
-                      </button>
-                    ))}
-                  </div>
+                  {formData.shape && (
+                    <div>
+                      <p className="text-ink-400 text-sm mb-3">
+                        Enter weight in grams ({SIZE_LIMITS[formData.shape].min}–{SIZE_LIMITS[formData.shape].max}g for {formData.shape})
+                      </p>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          value={formData.size === 0 ? "" : String(formData.size)}
+                          onChange={(e) => {
+                            const raw = e.target.value.replace(/[^0-9]/g, "");
+                            const num = raw === "" ? 0 : parseInt(raw, 10);
+                            const limits = SIZE_LIMITS[formData.shape!];
+                            const clamped = Math.min(Math.max(num, limits.min), limits.max);
+                            handleSizeChange(clamped);
+                          }}
+                          placeholder={`${SIZE_LIMITS[formData.shape].min}–${SIZE_LIMITS[formData.shape].max}g`}
+                          className="input-apothecary w-32 text-center text-2xl font-display font-semibold py-3"
+                          autoFocus
+                        />
+                        <span className="flex items-center text-ink-400 font-display text-lg">g</span>
+                      </div>
+                      <input
+                        type="range"
+                        min={SIZE_LIMITS[formData.shape].min}
+                        max={SIZE_LIMITS[formData.shape].max}
+                        value={formData.size}
+                        onChange={(e) => handleSizeChange(parseInt(e.target.value, 10))}
+                        className="w-full h-2 rounded-lg appearance-none cursor-pointer"
+                        style={{ accentColor: '#C4785A' }}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div ref={lavenderSectionRef} className="space-y-3">
