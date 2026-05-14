@@ -50,6 +50,7 @@ const COLOR_CONFIG = [
   { label: "Ivory", value: SoapColor.WHITE, hex: "#FFFFFF" },
   { label: "Honey", value: SoapColor.YELLOW, hex: "#FDE68A" },
   { label: "Blush", value: SoapColor.PINK, hex: "#FCD5CE" },
+  { label: "Sage", value: SoapColor.GREEN, hex: "#A7C4A0" },
 ];
 
 type FormStep = "landing" | "shape" | "scent" | "color" | "quantity";
@@ -474,6 +475,19 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
                           value={formData.size === 0 ? "" : String(formData.size)}
                           onChange={(e) => {
                             const raw = e.target.value.replace(/[^0-9]/g, "");
+                            if (raw === "") {
+                              handleSizeChange(0);
+                              return;
+                            }
+                            const num = parseInt(raw, 10);
+                            if (isNaN(num)) {
+                              handleSizeChange(0);
+                              return;
+                            }
+                            handleSizeChange(num);
+                          }}
+                          onBlur={(e) => {
+                            const raw = e.target.value.replace(/[^0-9]/g, "");
                             const num = raw === "" ? 0 : parseInt(raw, 10);
                             const limits = SIZE_LIMITS[formData.shape!];
                             const clamped = Math.min(Math.max(num, limits.min), limits.max);
@@ -481,7 +495,6 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
                           }}
                           placeholder={`${SIZE_LIMITS[formData.shape].min}–${SIZE_LIMITS[formData.shape].max}g`}
                           className="input-apothecary w-32 text-center text-2xl font-display font-semibold py-3"
-                          autoFocus
                         />
                         <span className="flex items-center text-ink-400 font-display text-lg">g</span>
                       </div>
