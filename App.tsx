@@ -14,11 +14,12 @@ const ConfirmationPage = lazy(() => import('./src/components/ConfirmationPage'))
 
 function App() {
   const formSectionRef = useRef<HTMLDivElement>(null);
-  const { cart, addItem, removeItem, clearCart } = useCart();
+  const { cart, addItem, removeItem, updateQuantity, clearCart } = useCart();
   const { clearFormState } = useFormPersistence();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmationItemCount, setConfirmationItemCount] = useState(0);
+  const [justOrdered, setJustOrdered] = useState(false);
 
   const handleShopClick = useCallback(() => {
     formSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -46,6 +47,7 @@ function App() {
       const result = await submitCartToWebhook(customer, cart.items);
       if (result.success) {
         setConfirmationItemCount(cart.totalQuantity);
+        setJustOrdered(true);
         clearCart();
         clearFormState();
         navigate('/confirmation');
@@ -59,6 +61,10 @@ function App() {
       setIsSubmitting(false);
     }
   }, [cart, clearCart, clearFormState, navigate]);
+
+  const handleDismissOrdered = useCallback(() => {
+    setJustOrdered(false);
+  }, []);
 
   return (
     <div className="apothecary-bg">
@@ -123,6 +129,10 @@ function App() {
                   onCheckout={() => navigate('/checkout')}
                   onRemoveItem={removeItem}
                   onClearCart={clearCart}
+                  onUpdateQuantity={updateQuantity}
+                  justOrdered={justOrdered}
+                  orderedItemCount={confirmationItemCount}
+                  onDismissOrdered={handleDismissOrdered}
                 />
               </Suspense>
             } />

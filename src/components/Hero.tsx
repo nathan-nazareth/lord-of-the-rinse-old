@@ -76,7 +76,7 @@ const Hero: React.FC<{ onShopClick: () => void }> = ({ onShopClick }) => {
           </h1>
           <p className="text-ink-500 text-base md:text-lg max-w-lg mx-auto leading-relaxed font-body">
             Four botanical scents, three sizes, and natural add-ins —
-            build your perfect bar starting at <span className="font-semibold text-ink-700">Rs. 50</span>.
+            build your perfect bar starting at <span className="font-semibold text-ink-700">Rs. 35</span>.
           </p>
         </div>
 

@@ -12,10 +12,54 @@ const CartPage: React.FC<{
   onCheckout: () => void;
   onRemoveItem: (id: string) => void;
   onClearCart: () => void;
+  onUpdateQuantity?: (id: string, quantity: number) => void;
   justAdded?: boolean;
-}> = ({ cart, onBackToForm, onCheckout, onRemoveItem, onClearCart, justAdded }) => {
+  justOrdered?: boolean;
+  orderedItemCount?: number;
+  onDismissOrdered?: () => void;
+}> = ({ cart, onBackToForm, onCheckout, onRemoveItem, onClearCart, onUpdateQuantity, justAdded, justOrdered, orderedItemCount, onDismissOrdered }) => {
   const subtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const { discountPercentage, discountAmount, total } = calculateDiscount(subtotal, cart.totalQuantity);
+
+  if (justOrdered && cart.items.length === 0) {
+    return (
+      <div className="min-h-screen bg-parchment-100">
+        <div className="max-w-md mx-auto px-4 pt-6">
+          <button
+            onClick={() => { onDismissOrdered?.(); onBackToForm(); }}
+            className="flex items-center gap-2 text-terra-500 hover:text-terra-600 font-medium mb-6 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span className="text-sm">Back to form</span>
+          </button>
+
+          <div className="card-apothecary overflow-hidden">
+            <div className="text-center py-16 px-6">
+              <div className="w-28 h-28 bg-botanical-100 rounded-full flex items-center justify-center mx-auto mb-8 animate-float">
+                <div className="relative">
+                  <Check className="w-16 h-16 text-botanical-500" />
+                  <div className="absolute -top-1 -right-1">
+                    <Sparkles className="w-5 h-5 text-terra-400 animate-pulse-soft" />
+                  </div>
+                </div>
+              </div>
+              <h2 className="font-display text-3xl font-semibold text-botanical-700 mb-3">Order placed!</h2>
+              <p className="text-ink-500 text-lg mb-2">Thank you for your order.</p>
+              <p className="text-ink-400 mb-10">
+                {orderedItemCount} soap{orderedItemCount !== 1 ? "s" : ""} confirmed — we&apos;ll begin crafting them soon.
+              </p>
+              <button
+                onClick={() => { onDismissOrdered?.(); onBackToForm(); }}
+                className="btn-apothecary btn-primary btn-full text-base py-4"
+              >
+                Craft More Soaps
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (justAdded) {
     return (
@@ -88,7 +132,7 @@ const CartPage: React.FC<{
                       <div className="flex-1 min-w-0">
                         <p className="font-display font-semibold text-lg text-ink-700">{item.shape} · {item.scent}</p>
                         <p className="text-ink-400 text-sm">
-                          {item.color} · {item.size}g · Qty {item.quantity}
+                          {item.color} · {item.size}g
                         </p>
                         <div className="flex gap-1 mt-1 flex-wrap">
                           {item.hasLavenderPieces && <span className="badge-tag">Lavender</span>}
@@ -96,13 +140,33 @@ const CartPage: React.FC<{
                       </div>
                       <div className="flex items-center gap-3 flex-shrink-0">
                         <span className="font-display font-semibold text-terra-500">Rs. {item.price * item.quantity}</span>
-                        <button
-                          onClick={() => onRemoveItem(item.id)}
-                          className="p-2.5 bg-red-50 text-red-400 rounded-full hover:bg-red-100 transition-colors"
-                          aria-label="Remove item"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        {onUpdateQuantity ? (
+                          <div className="flex items-center gap-1 bg-parchment-100 rounded-full px-1 py-0.5">
+                            <button
+                              onClick={() => item.quantity > 1 ? onUpdateQuantity(item.id, item.quantity - 1) : onRemoveItem(item.id)}
+                              className="w-8 h-8 flex items-center justify-center rounded-full bg-white shadow-sm hover:bg-parchment-50 text-ink-600 font-semibold text-lg"
+                              aria-label="Decrease quantity"
+                            >
+                              −
+                            </button>
+                            <span className="w-8 text-center font-semibold text-ink-700">{item.quantity}</span>
+                            <button
+                              onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
+                              className="w-8 h-8 flex items-center justify-center rounded-full bg-white shadow-sm hover:bg-parchment-50 text-ink-600 font-semibold text-lg"
+                              aria-label="Increase quantity"
+                            >
+                              +
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => onRemoveItem(item.id)}
+                            className="p-2.5 bg-red-50 text-red-400 rounded-full hover:bg-red-100 transition-colors"
+                            aria-label="Remove item"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))}

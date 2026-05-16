@@ -24,6 +24,7 @@ interface CartProps {
   onClose: () => void;
   onRemoveItem: (id: string) => void;
   onClearCart: () => void;
+  onUpdateQuantity?: (id: string, quantity: number) => void;
 }
 
 const CheckoutForm: React.FC<{
@@ -120,7 +121,7 @@ const OrderConfirmation: React.FC<{ itemCount: number; onContinue: () => void }>
   </div>
 );
 
-export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem, onClearCart }) => {
+export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem, onClearCart, onUpdateQuantity }) => {
   const [showCheckout, setShowCheckout] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -231,17 +232,37 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
                   <div key={item.id} className="cart-item">
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-ink-700 truncate">{item.scent}</p>
-                      <p className="text-ink-400 text-sm truncate">{item.color} · {item.size}g · Qty {item.quantity}</p>
+                      <p className="text-ink-400 text-sm truncate">{item.color} · {item.size}g</p>
                       <div className="flex gap-1 mt-1 flex-wrap">
                         {item.hasLavenderPieces && <span className="badge-tag">Lavender</span>}
                       </div>
                     </div>
                     <div className="flex items-center gap-3 flex-shrink-0">
                       <span className="font-display font-semibold text-ink-700">Rs. {item.price * item.quantity}</span>
-                      <button onClick={() => onRemoveItem(item.id)}
-                        className="p-2 text-red-400 hover:bg-red-50 rounded-full transition-colors" aria-label="Remove item">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      {onUpdateQuantity ? (
+                        <div className="flex items-center gap-1 bg-parchment-100 rounded-full px-1 py-0.5">
+                          <button
+                            onClick={() => item.quantity > 1 ? onUpdateQuantity(item.id, item.quantity - 1) : onRemoveItem(item.id)}
+                            className="w-7 h-7 flex items-center justify-center rounded-full bg-white shadow-sm hover:bg-parchment-50 text-ink-600 font-semibold text-lg"
+                            aria-label="Decrease quantity"
+                          >
+                            −
+                          </button>
+                          <span className="w-6 text-center font-semibold text-ink-700">{item.quantity}</span>
+                          <button
+                            onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
+                            className="w-7 h-7 flex items-center justify-center rounded-full bg-white shadow-sm hover:bg-parchment-50 text-ink-600 font-semibold text-lg"
+                            aria-label="Increase quantity"
+                          >
+                            +
+                          </button>
+                        </div>
+                      ) : (
+                        <button onClick={() => onRemoveItem(item.id)}
+                          className="p-2 text-red-400 hover:bg-red-50 rounded-full transition-colors" aria-label="Remove item">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))

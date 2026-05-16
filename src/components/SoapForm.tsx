@@ -51,6 +51,8 @@ const COLOR_CONFIG = [
   { label: "Honey", value: SoapColor.YELLOW, hex: "#FDE68A" },
   { label: "Blush", value: SoapColor.PINK, hex: "#FCD5CE" },
   { label: "Sage", value: SoapColor.GREEN, hex: "#A7C4A0" },
+  { label: "Sky", value: SoapColor.BLUE, hex: "#A8D8EA" },
+  { label: "Lilac", value: SoapColor.PURPLE, hex: "#D4A5E0" },
 ];
 
 type FormStep = "landing" | "shape" | "scent" | "color" | "quantity";
@@ -311,7 +313,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
             {[
               { num: "01", title: "Pick Shape", desc: "Choose from five unique soap forms" },
               { num: "02", title: "Select Scent", desc: "Four natural botanical fragrances" },
-              { num: "03", title: "Choose Color", desc: "Three beautiful natural tones" },
+              { num: "03", title: "Choose Color", desc: "Five beautiful natural tones" },
               { num: "04", title: "Set Quantity", desc: "Bulk discounts available" },
             ].map((item) => (
               <div key={item.num} className="text-left p-5">
