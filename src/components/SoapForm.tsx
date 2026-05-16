@@ -102,11 +102,11 @@ const StepIndicator: React.FC<{ current: FormStep; onNavigate: (s: FormStep) => 
 };
 
 const SIZE_LIMITS: Record<string, { min: number; max: number }> = {
-  [SoapShape.SQUARE]: { min: 1, max: 100 },
-  [SoapShape.OVAL_DIP]: { min: 1, max: 35 },
-  [SoapShape.HEART]: { min: 1, max: 75 },
-  [SoapShape.OVAL_FLAT]: { min: 1, max: 85 },
-  [SoapShape.CIRCLE]: { min: 1, max: 100 },
+  [SoapShape.SQUARE]: { min: 50, max: 100 },
+  [SoapShape.OVAL_DIP]: { min: 35, max: 50 },
+  [SoapShape.HEART]: { min: 50, max: 75 },
+  [SoapShape.OVAL_FLAT]: { min: 50, max: 85 },
+  [SoapShape.CIRCLE]: { min: 50, max: 100 },
 };
 
 const ShapeIcon: React.FC<{ shape: SoapShape; className?: string }> = ({ shape, className }) => {
