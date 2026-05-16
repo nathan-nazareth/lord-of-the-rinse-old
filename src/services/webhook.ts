@@ -60,7 +60,7 @@ export async function submitCartToWebhook(
   const finalTotal = subtotal - discountAmount;
 
   const orderItemsFormatted = items.map((item, index) =>
-    `${index + 1}. ${item.shape || 'N/A'} | ${item.scent} | Size: ${item.size}g | Color: ${item.color} | Qty: ${item.quantity} | Rs. ${item.price * item.quantity}`
+    `${index + 1}. ${item.shape || 'N/A'} | ${item.scent}${item.hasLavenderPieces ? ' w/ Lavender Pieces' : ''} | Size: ${item.size}g | Color: ${item.color} | Qty: ${item.quantity} | Rs. ${item.price * item.quantity}`
   ).join('\n');
 
   const allShapes = items.map(item => item.shape || 'N/A').join(', ');

@@ -22,6 +22,7 @@ interface UseCartReturn {
     hasLavenderPieces: boolean,
   ) => boolean;
   removeItem: (itemId: string) => void;
+  updateQuantity: (itemId: string, quantity: number) => void;
   clearCart: () => void;
   isCartOpen: boolean;
   setIsCartOpen: (open: boolean) => void;
@@ -104,6 +105,25 @@ export function useCart(): UseCartReturn {
     [],
   );
 
+  const updateQuantity = useCallback(
+    (itemId: string, quantity: number) => {
+      const current = cartRef.current;
+      if (quantity < 1) {
+        removeItemById(itemId);
+        return;
+      }
+      const updatedItems = current.items.map((item) =>
+        item.id === itemId ? { ...item, quantity } : item
+      );
+      setCart({
+        items: updatedItems,
+        totalQuantity: calculateTotal(updatedItems),
+        updatedAt: new Date().toISOString(),
+      });
+    },
+    [removeItemById],
+  );
+
   const clearCartState = useCallback(() => {
     setCart({
       items: [],
@@ -117,6 +137,7 @@ export function useCart(): UseCartReturn {
     cart,
     addItem,
     removeItem: removeItemById,
+    updateQuantity,
     clearCart: clearCartState,
     isCartOpen,
     setIsCartOpen,

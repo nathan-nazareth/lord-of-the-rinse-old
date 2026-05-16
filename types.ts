@@ -41,6 +41,8 @@ export enum SoapColor {
   YELLOW = "Yellow",
   PINK = "Pink",
   GREEN = "Green",
+  BLUE = "Blue",
+  PURPLE = "Purple",
 }
 
 export interface OrderItem {
