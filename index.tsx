@@ -1,15 +1,14 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
-import App from './App';
-import './index.css';
-import { ErrorBoundary } from './src/components/ErrorBoundary';
-import { LoadingState } from './src/components/LoadingState';
-import { setupGlobalErrorHandlers } from './src/utils/errorLogging';
+import ReactDOM from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
+import App from "./App";
+import "./index.css";
+import { ErrorBoundary } from "./src/components/ErrorBoundary";
+import { LoadingState } from "./src/components/LoadingState";
+import { setupGlobalErrorHandlers } from "./src/utils/errorLogging";
 
 setupGlobalErrorHandlers();
 
-const rootElement = document.getElementById('root');
+const rootElement = document.getElementById("root");
 if (!rootElement) {
   throw new Error("Could not find root element to mount to");
 }
@@ -22,5 +21,5 @@ root.render(
         <App />
       </BrowserRouter>
     </LoadingState>
-  </ErrorBoundary>
+  </ErrorBoundary>,
 );

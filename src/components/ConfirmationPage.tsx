@@ -1,4 +1,4 @@
-import React from "react";
+import type React from "react";
 import Check from "lucide-react/dist/esm/icons/check";
 import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 
@@ -25,6 +25,7 @@ const ConfirmationPage: React.FC<{
       </p>
 
       <button
+        type="button"
         onClick={onContinue}
         className="btn-apothecary btn-primary btn-full text-base py-4"
       >

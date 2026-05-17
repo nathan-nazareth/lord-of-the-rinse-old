@@ -1,4 +1,4 @@
-import React from "react";
+import type React from "react";
 import Leaf from "lucide-react/dist/esm/icons/leaf";
 import Droplets from "lucide-react/dist/esm/icons/droplets";
 import Sparkles from "lucide-react/dist/esm/icons/sparkles";
@@ -29,6 +29,14 @@ const SCENTS = [
     accentBg: "bg-lime-50",
     accentBorder: "border-lime-200",
   },
+  {
+    name: "Lemongrass",
+    description: "Zesty & uplifting",
+    detail: "Invigorating citrus aroma for a fresh start",
+    color: "#C8E6C9",
+    accentBg: "bg-green-50",
+    accentBorder: "border-green-200",
+  },
 ];
 
 const Hero: React.FC<{ onShopClick: () => void }> = ({ onShopClick }) => {
@@ -40,25 +48,27 @@ const Hero: React.FC<{ onShopClick: () => void }> = ({ onShopClick }) => {
           className="absolute -left-16 top-10 w-48 h-48 opacity-[0.06] animate-float"
           viewBox="0 0 200 200"
           fill="none"
+          aria-hidden="true"
         >
-          <circle cx="100" cy="80" r="25" fill="#C4785A" opacity="0.6"/>
-          <circle cx="75" cy="60" r="18" fill="#7AA07F" opacity="0.5"/>
-          <circle cx="125" cy="60" r="18" fill="#7AA07F" opacity="0.5"/>
-          <circle cx="65" cy="85" r="18" fill="#7AA07F" opacity="0.5"/>
-          <circle cx="135" cy="85" r="18" fill="#7AA07F" opacity="0.5"/>
-          <circle cx="100" cy="80" r="12" fill="#FDE68A" opacity="0.7"/>
+          <circle cx="100" cy="80" r="25" fill="#C4785A" opacity="0.6" />
+          <circle cx="75" cy="60" r="18" fill="#7AA07F" opacity="0.5" />
+          <circle cx="125" cy="60" r="18" fill="#7AA07F" opacity="0.5" />
+          <circle cx="65" cy="85" r="18" fill="#7AA07F" opacity="0.5" />
+          <circle cx="135" cy="85" r="18" fill="#7AA07F" opacity="0.5" />
+          <circle cx="100" cy="80" r="12" fill="#FDE68A" opacity="0.7" />
         </svg>
         <svg
           className="absolute -right-12 bottom-20 w-40 h-40 opacity-[0.05]"
           viewBox="0 0 200 200"
           fill="none"
+          aria-hidden="true"
         >
-          <circle cx="100" cy="100" r="20" fill="#C4785A" opacity="0.5"/>
-          <circle cx="80" cy="85" r="14" fill="#7AA07F" opacity="0.4"/>
-          <circle cx="120" cy="85" r="14" fill="#7AA07F" opacity="0.4"/>
-          <circle cx="80" cy="115" r="14" fill="#7AA07F" opacity="0.4"/>
-          <circle cx="120" cy="115" r="14" fill="#7AA07F" opacity="0.4"/>
-          <circle cx="100" cy="100" r="9" fill="#FDE68A" opacity="0.6"/>
+          <circle cx="100" cy="100" r="20" fill="#C4785A" opacity="0.5" />
+          <circle cx="80" cy="85" r="14" fill="#7AA07F" opacity="0.4" />
+          <circle cx="120" cy="85" r="14" fill="#7AA07F" opacity="0.4" />
+          <circle cx="80" cy="115" r="14" fill="#7AA07F" opacity="0.4" />
+          <circle cx="120" cy="115" r="14" fill="#7AA07F" opacity="0.4" />
+          <circle cx="100" cy="100" r="9" fill="#FDE68A" opacity="0.6" />
         </svg>
       </div>
 
@@ -75,8 +85,8 @@ const Hero: React.FC<{ onShopClick: () => void }> = ({ onShopClick }) => {
             <span className="italic text-botanical-600">crafted for your skin</span>
           </h1>
           <p className="text-ink-500 text-base md:text-lg max-w-lg mx-auto leading-relaxed font-body">
-            Four botanical scents, three sizes, and natural add-ins —
-            build your perfect bar starting at <span className="font-semibold text-ink-700">Rs. 35</span>.
+            Four botanical scents, three sizes, and natural add-ins — build your perfect bar
+            starting at <span className="font-semibold text-ink-700">Rs. 35</span>.
           </p>
         </div>
 
@@ -111,12 +121,8 @@ const Hero: React.FC<{ onShopClick: () => void }> = ({ onShopClick }) => {
               <h3 className="font-display text-lg font-semibold text-ink-700 mb-0.5">
                 {scent.name}
               </h3>
-              <p className="text-ink-500 text-xs font-medium mb-1">
-                {scent.description}
-              </p>
-              <p className="text-ink-400 text-[0.7rem] leading-snug">
-                {scent.detail}
-              </p>
+              <p className="text-ink-500 text-xs font-medium mb-1">{scent.description}</p>
+              <p className="text-ink-400 text-[0.7rem] leading-snug">{scent.detail}</p>
             </div>
           ))}
         </div>
@@ -124,6 +130,7 @@ const Hero: React.FC<{ onShopClick: () => void }> = ({ onShopClick }) => {
         {/* CTA */}
         <div className="text-center animate-enter delay-5">
           <button
+            type="button"
             onClick={onShopClick}
             className="btn-apothecary btn-primary text-base px-10 py-4"
           >

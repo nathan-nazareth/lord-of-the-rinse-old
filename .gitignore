@@ -9,6 +9,11 @@ lerna-debug.log*
 
 node_modules
 dist
+bun.lock
+package-lock.json
+debug-*.js
+test-*.js
+quick-test.js
 dist-ssr
 *.local
 

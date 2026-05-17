@@ -10,6 +10,7 @@ export enum SoapScent {
   LAVENDER = "Lavender",
   CITRONELLA = "Citronella",
   COCONUT = "Coconut",
+  LEMONGRASS = "Lemongrass",
 }
 
 export interface SoapOption {
@@ -21,6 +22,7 @@ export const SOAP_OPTIONS: SoapOption[] = [
   { scent: SoapScent.LAVENDER, price: 110 },
   { scent: SoapScent.COCONUT, price: 100 },
   { scent: SoapScent.CITRONELLA, price: 100 },
+  { scent: SoapScent.LEMONGRASS, price: 100 },
 ];
 
 export const SHAPE_OPTIONS = [

@@ -1,7 +1,7 @@
-import { Component } from 'react';
-import { FallbackUI } from './FallbackUI';
+import { Component } from "react";
+import { FallbackUI } from "./FallbackUI";
 
-type EBProps = { children: import('react').ReactNode };
+type EBProps = { children: import("react").ReactNode };
 type EBState = { hasError: boolean; error: Error | null };
 
 export class ErrorBoundary extends Component<EBProps, EBState> {
@@ -11,8 +11,8 @@ export class ErrorBoundary extends Component<EBProps, EBState> {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: import('react').ErrorInfo) {
-    console.error('[ErrorBoundary] Render error:', {
+  componentDidCatch(error: Error, errorInfo: import("react").ErrorInfo) {
+    console.error("[ErrorBoundary] Render error:", {
       message: error.message,
       stack: error.stack,
       componentStack: errorInfo.componentStack,
@@ -25,8 +25,9 @@ export class ErrorBoundary extends Component<EBProps, EBState> {
     window.location.reload();
   };
 
-  render(): import('react').ReactNode {
+  render(): import("react").ReactNode {
     if (this.state.hasError) {
+      // biome-ignore lint/style/noNonNullAssertion: error is non-null because hasError was checked above
       return <FallbackUI error={this.state.error!} onRetry={this.handleRetry} />;
     }
     return this.props.children;

@@ -1,7 +1,7 @@
-import React from 'react';
-import Leaf from 'lucide-react/dist/esm/icons/leaf';
-import Droplets from 'lucide-react/dist/esm/icons/droplets';
-import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
+import type React from "react";
+import Leaf from "lucide-react/dist/esm/icons/leaf";
+import Droplets from "lucide-react/dist/esm/icons/droplets";
+import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 
 export const Header: React.FC = () => (
   <header className="text-center py-8 px-4">

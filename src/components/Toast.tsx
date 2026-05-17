@@ -1,18 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import Check from 'lucide-react/dist/esm/icons/check';
+import type React from "react";
+import { useState, useEffect } from "react";
+import Check from "lucide-react/dist/esm/icons/check";
 
 interface ToastProps {
   message: string;
-  type?: 'success' | 'error' | 'info';
+  type?: "success" | "error" | "info";
   duration?: number;
   onClose?: () => void;
 }
 
 export const Toast: React.FC<ToastProps> = ({
   message,
-  type = 'success',
+  type = "success",
   duration = 3000,
-  onClose
+  onClose,
 }) => {
   const [isVisible, setIsVisible] = useState(true);
   const [isExiting, setIsExiting] = useState(false);
@@ -30,15 +31,16 @@ export const Toast: React.FC<ToastProps> = ({
 
   if (!isVisible) return null;
 
-  const bgColor = type === 'success' ? 'bg-botanical-500' : type === 'error' ? 'bg-red-500' : 'bg-ink-600';
+  const bgColor =
+    type === "success" ? "bg-botanical-500" : type === "error" ? "bg-red-500" : "bg-ink-600";
 
   return (
     <div
       role="status"
       aria-live="polite"
-      className={`toast-apothecary ${bgColor} ${isExiting ? 'opacity-0' : ''} transition-all duration-300`}
+      className={`toast-apothecary ${bgColor} ${isExiting ? "opacity-0" : ""} transition-all duration-300`}
     >
-      {type === 'success' && (
+      {type === "success" && (
         <div className="w-7 h-7 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
           <Check className="w-4 h-4" />
         </div>

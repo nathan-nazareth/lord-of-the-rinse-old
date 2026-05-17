@@ -22,7 +22,7 @@ export interface WebhookPayload {
   finalTotal: number;
 }
 
-export type WebhookStatus = 'idle' | 'pending' | 'submitting' | 'submitted' | 'failed';
+export type WebhookStatus = "idle" | "pending" | "submitting" | "submitted" | "failed";
 
 export interface WebhookLogEntry {
   orderId: string;
@@ -33,7 +33,7 @@ export interface WebhookLogEntry {
   error?: string;
 }
 
-export type SubmissionState = 'pending' | 'submitting' | 'sent' | 'failed';
+export type SubmissionState = "pending" | "submitting" | "sent" | "failed";
 
 export interface LocalStorageSubmission {
   orderId: string;
