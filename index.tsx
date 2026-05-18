@@ -1,10 +1,7 @@
-
 import ReactDOM from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
-import App from './App';
+import { RouterProvider } from '@tanstack/react-router';
+import { router } from './src/router';
 import './index.css';
-import { ErrorBoundary } from './src/components/ErrorBoundary';
-import { LoadingState } from './src/components/LoadingState';
 import { setupGlobalErrorHandlers } from './src/utils/errorLogging';
 
 setupGlobalErrorHandlers();
@@ -15,12 +12,4 @@ if (!rootElement) {
 }
 
 const root = ReactDOM.createRoot(rootElement);
-root.render(
-  <ErrorBoundary>
-    <LoadingState timeout={3000}>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </LoadingState>
-  </ErrorBoundary>
-);
+root.render(<RouterProvider router={router} />);
