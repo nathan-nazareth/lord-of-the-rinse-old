@@ -45,6 +45,7 @@ const SCENT_INFO: Record<string, { description: string; tagline: string }> = {
   Lavender: { description: "Calming & relaxing", tagline: "For a restful ritual" },
   Coconut: { description: "Tropical & hydrating", tagline: "Silky smooth finish" },
   Citronella: { description: "Fresh & mosquito-repelling", tagline: "Outdoor protection" },
+  Lemongrass: { description: "Invigorating & cleansing", tagline: "Natural energy boost" },
 };
 
 const COLOR_CONFIG = [
