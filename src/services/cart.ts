@@ -1,6 +1,6 @@
 import {
-  Cart,
-  CartItem,
+  type Cart,
+  type CartItem,
   CART_KEY,
   CART_EXPIRY_MS,
   MAX_CART_ITEMS,

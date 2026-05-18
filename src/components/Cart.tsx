@@ -8,8 +8,8 @@ import MailIcon from "lucide-react/dist/esm/icons/mail";
 import Loader2 from "lucide-react/dist/esm/icons/loader-2";
 import Check from "lucide-react/dist/esm/icons/check";
 import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import { CartItem as CartItemType } from "../types/cart";
-import { Customer } from "../types/webhook";
+import type { CartItem as CartItemType } from "../types/cart";
+import type { Customer } from "../types/webhook";
 import { submitCartToWebhook } from "../services/webhook";
 import { useFormRateLimit } from "../hooks/useFormRateLimit";
 import { calculateDiscount } from "../utils/pricing";
@@ -117,7 +117,7 @@ const OrderConfirmation: React.FC<{ itemCount: number; onContinue: () => void }>
       <p className="text-ink-400 text-sm mb-1">Thank you for your order</p>
       <p className="text-ink-600 font-medium">{itemCount} soap{itemCount > 1 ? "s" : ""} confirmed</p>
     </div>
-    <button onClick={onContinue} className="btn-apothecary btn-primary btn-full">Continue Shopping</button>
+    <button type="button" onClick={onContinue} className="btn-apothecary btn-primary btn-full">Continue Shopping</button>
   </div>
 );
 
@@ -180,6 +180,8 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
 
   return (
     <>
+      {/** biome-ignore lint/a11y/noStaticElementInteractions: backdrop overlay */}
+      {/** biome-ignore lint/a11y/useKeyWithClickEvents: backdrop closes on click */}
       <div className="fixed inset-0 bg-ink-800/20 z-40" onClick={onClose} />
       <div className="fixed right-0 top-0 bottom-0 w-full max-w-sm bg-parchment-50 shadow-lift z-50 flex flex-col">
         <div className="flex items-center justify-between p-5 border-b border-parchment-300 bg-terra-400">
@@ -193,7 +195,7 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
             )}
           </div>
           {!showConfirmation && !showAddedToCart && !showCheckout && (
-            <button ref={closeButtonRef} onClick={onClose}
+            <button type="button" ref={closeButtonRef} onClick={onClose}
               className="px-3 py-1.5 bg-white/15 hover:bg-white/25 rounded-full text-sm text-white font-medium transition-colors"
               aria-label="Close cart">Close</button>
           )}
@@ -213,8 +215,8 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
                 <p className="text-ink-600 font-medium mt-1">{cart.totalQuantity} soap{cart.totalQuantity > 1 ? "s" : ""} in cart</p>
               </div>
               <div className="space-y-2">
-                <button onClick={() => { setShowAddedToCart(false); setShowCheckout(true); }} className="btn-apothecary btn-primary btn-full">Proceed to Checkout</button>
-                <button onClick={onClose} className="btn-apothecary btn-secondary btn-full">+ Order Another</button>
+                <button type="button" onClick={() => { setShowAddedToCart(false); setShowCheckout(true); }} className="btn-apothecary btn-primary btn-full">Proceed to Checkout</button>
+                <button type="button" onClick={onClose} className="btn-apothecary btn-secondary btn-full">+ Order Another</button>
               </div>
             </div>
           ) : showCheckout ? (
@@ -242,6 +244,7 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
                       {onUpdateQuantity ? (
                         <div className="flex items-center gap-1 bg-parchment-100 rounded-full px-1 py-0.5">
                           <button
+                            type="button"
                             onClick={() => item.quantity > 1 ? onUpdateQuantity(item.id, item.quantity - 1) : onRemoveItem(item.id)}
                             className="w-7 h-7 flex items-center justify-center rounded-full bg-white shadow-sm hover:bg-parchment-50 text-ink-600 font-semibold text-lg"
                             aria-label="Decrease quantity"
@@ -250,6 +253,7 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
                           </button>
                           <span className="w-6 text-center font-semibold text-ink-700">{item.quantity}</span>
                           <button
+                            type="button"
                             onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
                             className="w-7 h-7 flex items-center justify-center rounded-full bg-white shadow-sm hover:bg-parchment-50 text-ink-600 font-semibold text-lg"
                             aria-label="Increase quantity"
@@ -258,7 +262,7 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
                           </button>
                         </div>
                       ) : (
-                        <button onClick={() => onRemoveItem(item.id)}
+                        <button type="button" onClick={() => onRemoveItem(item.id)}
                           className="p-2 text-red-400 hover:bg-red-50 rounded-full transition-colors" aria-label="Remove item">
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -299,10 +303,10 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
               </div>
             </div>
             <div className="space-y-2">
-              <button onClick={() => setShowCheckout(true)} className="btn-apothecary btn-primary btn-full">
+              <button type="button" onClick={() => setShowCheckout(true)} className="btn-apothecary btn-primary btn-full">
                 <ShoppingCart className="w-4 h-4" />Checkout — Rs. {total}
               </button>
-              <button onClick={handleClearCart}
+              <button type="button" onClick={handleClearCart}
                 className={`btn-apothecary btn-full text-sm py-3 ${showClearConfirm ? "border-red-400 text-red-500 bg-red-50 hover:bg-red-100" : "btn-secondary"}`}>
                 {showClearConfirm ? "Confirm clear all?" : "Clear Cart"}
               </button>
@@ -318,7 +322,7 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
               </div>
               <h3 className="font-display text-xl font-semibold text-ink-700 mb-2">Rate limit reached</h3>
               <p className="text-ink-400 text-sm mb-6">Maximum 10 orders per 5 minutes. Please wait before placing another order.</p>
-              <button onClick={() => setShowRateLimitModal(false)} className="btn-apothecary btn-primary btn-full">Understood</button>
+              <button type="button" onClick={() => setShowRateLimitModal(false)} className="btn-apothecary btn-primary btn-full">Understood</button>
             </div>
           </div>
         )}

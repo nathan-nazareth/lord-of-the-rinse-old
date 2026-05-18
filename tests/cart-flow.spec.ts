@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 
 test('step by step debug', async ({ page }) => {
   await page.goto('https://soap-selling.vercel.app');

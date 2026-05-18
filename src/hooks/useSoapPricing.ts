@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { SoapScent, SOAP_OPTIONS, LAVENDER_PIECES_PRICE } from "../../types";
+import { type SoapScent, SOAP_OPTIONS, LAVENDER_PIECES_PRICE } from "../../types";
 import { calculateDiscount } from "../utils/pricing";
 
 export function useSoapPricing(

@@ -1,12 +1,12 @@
 import { useRef, useCallback } from "react";
-import { SoapScent, SoapColor, SoapShape } from "../../types";
+import type { SoapScent, SoapColor, SoapShape } from "../../types";
 
 type FormStep = "landing" | "shape" | "scent" | "color" | "quantity";
 
 interface SavedFormState {
-  shape: string | null;
-  scent: string | null;
-  color: string | null;
+  shape: SoapShape | null;
+  scent: SoapScent | null;
+  color: SoapColor | null;
   quantity: string;
   size: number;
   hasLavenderPieces: boolean;
@@ -26,13 +26,13 @@ function hasVisitedBefore(): boolean {
 }
 
 export function useFormPersistence() {
-  const saveTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const hasVisited = useCallback((): boolean => {
     return hasVisitedBefore();
   }, []);
 
-  const restoreFormState = useCallback((): null => {
+  const restoreFormState = useCallback((): SavedFormState | null => {
     return null;
   }, []);
 

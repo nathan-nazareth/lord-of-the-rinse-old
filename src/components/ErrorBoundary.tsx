@@ -27,6 +27,7 @@ export class ErrorBoundary extends Component<EBProps, EBState> {
 
   render(): import('react').ReactNode {
     if (this.state.hasError) {
+      // biome-ignore lint/style/noNonNullAssertion: error is set when hasError is true
       return <FallbackUI error={this.state.error!} onRetry={this.handleRetry} />;
     }
     return this.props.children;

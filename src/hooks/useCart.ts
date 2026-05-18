@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Cart, CartItem } from "../types/cart";
+import type { Cart, } from "../types/cart";
 import {
   saveCart,
   loadCart,

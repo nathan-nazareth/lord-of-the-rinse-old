@@ -1,13 +1,14 @@
-import React from "react";
+import type React from "react";
 import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
 import Check from "lucide-react/dist/esm/icons/check";
 import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
 import Trash2 from "lucide-react/dist/esm/icons/trash-2";
 import { calculateDiscount } from "../utils/pricing";
+import type { CartItem } from "../types/cart";
 
 const CartPage: React.FC<{
-  cart: { items: any[]; totalQuantity: number };
+  cart: { items: CartItem[]; totalQuantity: number };
   onBackToForm: () => void;
   onCheckout: () => void;
   onRemoveItem: (id: string) => void;
@@ -26,6 +27,7 @@ const CartPage: React.FC<{
       <div className="min-h-screen bg-parchment-100">
         <div className="max-w-md mx-auto px-4 pt-6">
           <button
+            type="button"
             onClick={() => { onDismissOrdered?.(); onBackToForm(); }}
             className="flex items-center gap-2 text-terra-500 hover:text-terra-600 font-medium mb-6 transition-colors"
           >
@@ -49,6 +51,7 @@ const CartPage: React.FC<{
                 {orderedItemCount} soap{orderedItemCount !== 1 ? "s" : ""} confirmed — we&apos;ll begin crafting them soon.
               </p>
               <button
+                type="button"
                 onClick={() => { onDismissOrdered?.(); onBackToForm(); }}
                 className="btn-apothecary btn-primary btn-full text-base py-4"
               >
@@ -66,6 +69,7 @@ const CartPage: React.FC<{
       <div className="min-h-screen bg-parchment-100">
         <div className="max-w-md mx-auto px-4 pt-6">
           <button
+            type="button"
             onClick={onBackToForm}
             className="flex items-center gap-2 text-terra-500 hover:text-terra-600 font-medium mb-6 transition-colors"
           >
@@ -81,10 +85,10 @@ const CartPage: React.FC<{
               <h2 className="font-display text-3xl font-semibold text-botanical-700 mb-3">Soap added!</h2>
               <p className="text-ink-500 text-lg mb-10">Your soap has been added to your order.</p>
               <div className="space-y-3">
-                <button onClick={onCheckout} className="btn-apothecary btn-primary btn-full text-base py-4">
+                <button type="button" onClick={onCheckout} className="btn-apothecary btn-primary btn-full text-base py-4">
                   Proceed to Checkout
                 </button>
-                <button onClick={onBackToForm} className="btn-apothecary btn-secondary btn-full text-sm py-3">
+                <button type="button" onClick={onBackToForm} className="btn-apothecary btn-secondary btn-full text-sm py-3">
                   + Add Another Soap
                 </button>
               </div>
@@ -98,16 +102,17 @@ const CartPage: React.FC<{
   return (
     <div className="min-h-screen bg-parchment-100">
       <div className="max-w-md mx-auto px-4 pt-6">
-        <button
-          onClick={onBackToForm}
-          className="flex items-center gap-2 text-terra-500 hover:text-terra-600 font-medium mb-6 transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          <span className="text-sm">Back to form</span>
-        </button>
+          <button
+            type="button"
+            onClick={onBackToForm}
+            className="flex items-center gap-2 text-terra-500 hover:text-terra-600 font-medium mb-6 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span className="text-sm">Back to form</span>
+          </button>
 
-        <div className="card-apothecary overflow-hidden">
-          <div className="bg-terra-400 p-6 text-white text-center">
+          <div className="card-apothecary overflow-hidden">
+            <div className="bg-terra-400 p-6 text-white text-center">
             <h1 className="font-display text-2xl font-semibold">Your Cart</h1>
             <p className="text-white/75 mt-1 text-sm">
               {cart.totalQuantity} soap{cart.totalQuantity !== 1 ? "s" : ""} in your order
@@ -120,7 +125,7 @@ const CartPage: React.FC<{
                 <ShoppingCart className="w-16 h-16 text-parchment-400 mx-auto mb-5" />
                 <p className="text-xl text-ink-500 font-display mb-2">Nothing here yet</p>
                 <p className="text-ink-300 text-sm mb-8">Start crafting your soaps above</p>
-                <button onClick={onBackToForm} className="btn-apothecary btn-primary">
+                <button type="button" onClick={onBackToForm} className="btn-apothecary btn-primary">
                   Start Ordering
                 </button>
               </div>
@@ -143,6 +148,7 @@ const CartPage: React.FC<{
                         {onUpdateQuantity ? (
                           <div className="flex items-center gap-1 bg-parchment-100 rounded-full px-1 py-0.5">
                             <button
+                              type="button"
                               onClick={() => item.quantity > 1 ? onUpdateQuantity(item.id, item.quantity - 1) : onRemoveItem(item.id)}
                               className="w-8 h-8 flex items-center justify-center rounded-full bg-white shadow-sm hover:bg-parchment-50 text-ink-600 font-semibold text-lg"
                               aria-label="Decrease quantity"
@@ -151,6 +157,7 @@ const CartPage: React.FC<{
                             </button>
                             <span className="w-8 text-center font-semibold text-ink-700">{item.quantity}</span>
                             <button
+                              type="button"
                               onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
                               className="w-8 h-8 flex items-center justify-center rounded-full bg-white shadow-sm hover:bg-parchment-50 text-ink-600 font-semibold text-lg"
                               aria-label="Increase quantity"
@@ -160,6 +167,7 @@ const CartPage: React.FC<{
                           </div>
                         ) : (
                           <button
+                            type="button"
                             onClick={() => onRemoveItem(item.id)}
                             className="p-2.5 bg-red-50 text-red-400 rounded-full hover:bg-red-100 transition-colors"
                             aria-label="Remove item"
@@ -205,13 +213,14 @@ const CartPage: React.FC<{
                 </div>
 
                 <div className="space-y-2">
-                  <button onClick={onCheckout} className="btn-apothecary btn-primary btn-full text-base py-4">
+                  <button type="button" onClick={onCheckout} className="btn-apothecary btn-primary btn-full text-base py-4">
                     Checkout — Rs. {total}
                   </button>
-                  <button onClick={onBackToForm} className="btn-apothecary btn-secondary btn-full text-sm py-3">
+                  <button type="button" onClick={onBackToForm} className="btn-apothecary btn-secondary btn-full text-sm py-3">
                     + Add Another Soap
                   </button>
                   <button
+                    type="button"
                     onClick={onClearCart}
                     className="btn-apothecary btn-ghost btn-full text-sm py-3 text-red-400 hover:text-red-500 hover:bg-red-50"
                   >

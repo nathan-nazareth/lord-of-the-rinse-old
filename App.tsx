@@ -1,12 +1,11 @@
-import React, { useRef, useCallback, useState, lazy, Suspense } from 'react';
+import { useRef, useCallback, useState, lazy, Suspense } from 'react';
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
-import { Header } from './components/Header';
 import Hero from './src/components/Hero';
 import { SoapForm } from './src/components/SoapForm';
 import { useCart } from './src/hooks/useCart';
 import { submitCartToWebhook } from './src/services/webhook';
 import { useFormPersistence } from './src/hooks/useFormPersistence';
-import { Customer } from './src/types/webhook';
+import type { Customer } from './src/types/webhook';
 
 const CartPage = lazy(() => import('./src/components/CartPage'));
 const CheckoutPage = lazy(() => import('./src/components/CheckoutPage'));
@@ -80,7 +79,7 @@ function App() {
 
                 {/* Botanical divider */}
                 <div className="botanical-divider">
-                  <svg viewBox="0 0 40 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <svg viewBox="0 0 40 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                     <circle cx="20" cy="10" r="4" fill="#C4785A" opacity="0.6"/>
                     <circle cx="14" cy="6" r="3" fill="#7AA07F" opacity="0.5"/>
                     <circle cx="26" cy="6" r="3" fill="#7AA07F" opacity="0.5"/>
@@ -91,7 +90,7 @@ function App() {
                 </div>
 
                 {/* Form section */}
-                <main id="main-content" ref={formSectionRef} role="main" aria-label="Build your soap" className="page-enter relative animate-enter delay-2">
+                <main id="main-content" ref={formSectionRef} aria-label="Build your soap" className="page-enter relative animate-enter delay-2">
                   <div className="card-apothecary p-6 md:p-10">
                     <SoapForm
                       cart={cart}
@@ -104,7 +103,7 @@ function App() {
 
                 <footer className="mt-14 text-center animate-enter delay-3">
                   <div className="botanical-divider">
-                    <svg viewBox="0 0 40 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <svg viewBox="0 0 40 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                       <circle cx="20" cy="10" r="4" fill="#C4785A" opacity="0.5"/>
                       <circle cx="14" cy="6" r="3" fill="#7AA07F" opacity="0.4"/>
                       <circle cx="26" cy="6" r="3" fill="#7AA07F" opacity="0.4"/>

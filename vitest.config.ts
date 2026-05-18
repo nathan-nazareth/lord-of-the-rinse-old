@@ -1,0 +1,16 @@
+import path from 'node:path';
+import { defineConfig } from 'vitest/config';
+
+export default defineConfig({
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, '.'),
+    },
+  },
+  test: {
+    environment: 'happy-dom',
+    include: ['**/*.test.ts', '**/*.test.tsx'],
+    exclude: ['tests/**', 'node_modules/**', 'dist/**', '.opencode/**'],
+    passWithNoTests: true,
+  },
+});

@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 import Leaf from 'lucide-react/dist/esm/icons/leaf';
 import Droplets from 'lucide-react/dist/esm/icons/droplets';
 import Sparkles from 'lucide-react/dist/esm/icons/sparkles';

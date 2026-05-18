@@ -1,4 +1,4 @@
-import React from "react";
+import type React from "react";
 import Leaf from "lucide-react/dist/esm/icons/leaf";
 import Droplets from "lucide-react/dist/esm/icons/droplets";
 import Sparkles from "lucide-react/dist/esm/icons/sparkles";
@@ -40,6 +40,7 @@ const Hero: React.FC<{ onShopClick: () => void }> = ({ onShopClick }) => {
           className="absolute -left-16 top-10 w-48 h-48 opacity-[0.06] animate-float"
           viewBox="0 0 200 200"
           fill="none"
+          aria-hidden="true"
         >
           <circle cx="100" cy="80" r="25" fill="#C4785A" opacity="0.6"/>
           <circle cx="75" cy="60" r="18" fill="#7AA07F" opacity="0.5"/>
@@ -52,6 +53,7 @@ const Hero: React.FC<{ onShopClick: () => void }> = ({ onShopClick }) => {
           className="absolute -right-12 bottom-20 w-40 h-40 opacity-[0.05]"
           viewBox="0 0 200 200"
           fill="none"
+          aria-hidden="true"
         >
           <circle cx="100" cy="100" r="20" fill="#C4785A" opacity="0.5"/>
           <circle cx="80" cy="85" r="14" fill="#7AA07F" opacity="0.4"/>
@@ -124,6 +126,7 @@ const Hero: React.FC<{ onShopClick: () => void }> = ({ onShopClick }) => {
         {/* CTA */}
         <div className="text-center animate-enter delay-5">
           <button
+            type="button"
             onClick={onShopClick}
             className="btn-apothecary btn-primary text-base px-10 py-4"
           >

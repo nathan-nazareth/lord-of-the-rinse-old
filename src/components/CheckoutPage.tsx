@@ -1,13 +1,15 @@
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
 import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 import Loader2 from "lucide-react/dist/esm/icons/loader-2";
-import { Customer } from "../types/webhook";
+import type { Customer } from "../types/webhook";
 import { calculateDiscount } from "../utils/pricing";
 import { validateEmail, validatePhone, validateName } from "../utils/validators";
+import type { CartItem } from "../types/cart";
 
 const CheckoutPage: React.FC<{
-  cart: { items: any[]; totalQuantity: number };
+  cart: { items: CartItem[]; totalQuantity: number };
   onBack: () => void;
   onSubmit: (customer: Customer) => Promise<void>;
   isSubmitting: boolean;
@@ -32,6 +34,7 @@ const CheckoutPage: React.FC<{
     <div className="min-h-screen bg-parchment-100">
       <div className="max-w-md mx-auto px-4 pt-6">
         <button
+          type="button"
           onClick={onBack}
           className="flex items-center gap-2 text-terra-500 hover:text-terra-600 font-medium mb-6 transition-colors"
         >
@@ -74,8 +77,8 @@ const CheckoutPage: React.FC<{
 
             <form onSubmit={handleSubmit} noValidate className="space-y-5">
               <div>
-                <label className="block text-ink-700 font-medium mb-1.5">Your Name</label>
-                <input type="text" value={formData.name}
+                <label htmlFor="checkout-name" className="block text-ink-700 font-medium mb-1.5">Your Name</label>
+                <input id="checkout-name" type="text" value={formData.name}
                   onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
                   onFocus={() => setErrors((p) => ({ ...p, name: undefined }))}
                   placeholder="Enter your full name"
@@ -83,8 +86,8 @@ const CheckoutPage: React.FC<{
                 {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
               </div>
               <div>
-                <label className="block text-ink-700 font-medium mb-1.5">Email Address</label>
-                <input type="email" value={formData.email}
+                <label htmlFor="checkout-email" className="block text-ink-700 font-medium mb-1.5">Email Address</label>
+                <input id="checkout-email" type="email" value={formData.email}
                   onChange={(e) => setFormData((p) => ({ ...p, email: e.target.value }))}
                   onFocus={() => setErrors((p) => ({ ...p, email: undefined }))}
                   placeholder="Enter your email"
@@ -92,8 +95,8 @@ const CheckoutPage: React.FC<{
                 {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
               </div>
               <div>
-                <label className="block text-ink-700 font-medium mb-1.5">Phone Number</label>
-                <input type="tel" value={formData.phone}
+                <label htmlFor="checkout-phone" className="block text-ink-700 font-medium mb-1.5">Phone Number</label>
+                <input id="checkout-phone" type="tel" value={formData.phone}
                   onChange={(e) => setFormData((p) => ({ ...p, phone: e.target.value }))}
                   onFocus={() => setErrors((p) => ({ ...p, phone: undefined }))}
                   placeholder="Enter your phone number"

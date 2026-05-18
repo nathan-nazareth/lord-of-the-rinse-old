@@ -1,12 +1,11 @@
 /// <reference types="vite/client" />
 
-import {
-  WebhookPayload,
+import type {
   WebhookLogEntry,
   WebhookStatus,
   Customer
 } from '../types/webhook';
-import { CartItem } from '../types/cart';
+import type { CartItem } from '../types/cart';
 import { logWeb3FormsRateLimit, logWeb3FormsError, logWeb3FormsSuccess } from '../utils/errorLogging';
 
 const WEB3FORMS_ENDPOINT = import.meta.env.VITE_WEB3FORMS_ENDPOINT || 'https://api.web3forms.com/submit';
@@ -23,7 +22,7 @@ async function sleep(ms: number): Promise<void> {
 }
 
 function getRetryDelay(attempt: number): number {
-  return Math.pow(2, attempt - 1) * 1000;
+  return 2 ** (attempt - 1) * 1000;
 }
 
 interface Web3FormsResponse {
@@ -65,7 +64,7 @@ export async function submitCartToWebhook(
 
   const allShapes = items.map(item => item.shape || 'N/A').join(', ');
 
-  const web3FormsPayload: Record<string, any> = {
+  const web3FormsPayload: Record<string, string | number | undefined> = {
     access_key: WEB3FORMS_ACCESS_KEY,
     Name: customer.name,
     Email: customer.email,
