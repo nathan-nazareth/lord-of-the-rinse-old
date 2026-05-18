@@ -85,7 +85,7 @@ function App() {
               animation: 'fadeIn 0.5s ease-out'
             }}
           />
-          <div className="absolute inset-0 bg-black/30" />
+          <div className="absolute inset-0 bg-black/10" />
           <div className="relative z-10 flex flex-col items-center justify-center h-full">
             <button
               type="button"
