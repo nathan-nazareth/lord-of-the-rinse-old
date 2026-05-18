@@ -11,7 +11,7 @@ import Sparkles from "lucide-react/dist/esm/icons/sparkles";
 import type { CartItem as CartItemType } from "../types/cart";
 import type { Customer } from "../types/webhook";
 import { submitCartToWebhook } from "../services/webhook";
-import { useFormRateLimit } from "../hooks/useFormRateLimit";
+import { useRateLimitStore } from "../stores/useRateLimitStore";
 import { calculateDiscount } from "../utils/pricing";
 import { validateEmail, validatePhone, validateName } from "../utils/validators";
 
@@ -131,11 +131,22 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showRateLimitModal, setShowRateLimitModal] = useState(false);
   const closeButtonRef = React.useRef<HTMLButtonElement>(null);
-  const rateLimit = useFormRateLimit({ maxSubmissions: 10, windowMs: 300000, cooldownMs: 300000 });
+  const rateLimitStore = useRateLimitStore();
+  const maxSubmissions = 10;
+  const windowMs = 300000;
+  const isAllowed = rateLimitStore.isAllowed(maxSubmissions, windowMs);
+  const cooldownRemaining = (() => {
+    const now = Date.now();
+    const windowExpired = rateLimitStore.windowStart === 0 || now - rateLimitStore.windowStart >= windowMs;
+    if (rateLimitStore.count >= maxSubmissions && !windowExpired) {
+      return Math.ceil((windowMs - (now - rateLimitStore.windowStart)) / 1000);
+    }
+    return null;
+  })();
 
   React.useEffect(() => {
-    if (rateLimit.cooldownRemaining !== null && !showRateLimitModal) setShowRateLimitModal(true);
-  }, [rateLimit.cooldownRemaining, showRateLimitModal]);
+    if (cooldownRemaining !== null && !showRateLimitModal) setShowRateLimitModal(true);
+  }, [cooldownRemaining, showRateLimitModal]);
 
   React.useEffect(() => {
     if (isOpen && !showConfirmation && !showCheckout && !showAddedToCart) {
@@ -159,12 +170,12 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
   };
 
   const handleCheckout = async (customer: Customer) => {
-    if (!rateLimit.isAllowed) { setShowRateLimitModal(true); setIsSubmitting(false); return; }
+    if (!isAllowed) { setShowRateLimitModal(true); setIsSubmitting(false); return; }
     setIsSubmitting(true); setErrorMessage(null);
     try {
       const result = await submitCartToWebhook(customer, cart.items);
       if (result.success) {
-        rateLimit.recordSubmission();
+        rateLimitStore.recordSubmission(windowMs);
         const itemsOrdered = cart.totalQuantity;
         setOrderItemCount(itemsOrdered);
         setShowConfirmation(true);
