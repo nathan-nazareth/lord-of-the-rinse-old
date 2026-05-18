@@ -86,11 +86,12 @@ function App() {
           <div className="absolute inset-0 hidden md:block bg-cover bg-center bg-no-repeat transition-opacity duration-300"
             style={{ 
               backgroundImage: "url('https://i.postimg.cc/vZ8HvbFP/Gemini-Generated-Image-iz8f8oiz8f8oiz8f.png')",
+              backgroundPosition: 'center 40%',
               animation: 'fadeIn 0.5s ease-out'
             }}
           />
           <div className="absolute inset-0 bg-black/10" />
-          <div className="relative z-10 flex flex-col items-center justify-end h-full pb-16 md:pb-0 md:justify-center">
+          <div className="relative z-10 flex flex-col items-center justify-start h-full pt-16 md:pt-0 md:justify-center">
             <button
               type="button"
               onClick={handleShopClick}
