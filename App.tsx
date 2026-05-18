@@ -1,5 +1,6 @@
 import { useRef, useCallback, useState, lazy, Suspense } from 'react';
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
+import ArrowDown from 'lucide-react/dist/esm/icons/arrow-down';
 import Hero from './src/components/Hero';
 import { SoapForm } from './src/components/SoapForm';
 import { useCart } from './src/hooks/useCart';
@@ -19,9 +20,13 @@ function App() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmationItemCount, setConfirmationItemCount] = useState(0);
   const [justOrdered, setJustOrdered] = useState(false);
+  const [showLanding, setShowLanding] = useState(true);
 
   const handleShopClick = useCallback(() => {
-    formSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setShowLanding(false);
+    setTimeout(() => {
+      formSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 300);
   }, []);
 
   const handleAddToCart = useCallback((
@@ -67,101 +72,130 @@ function App() {
 
   return (
     <div className="apothecary-bg">
-      <div className="relative z-base min-h-screen py-8 px-4">
-        <div className="max-w-5xl mx-auto">
-          <Routes>
-            <Route path="/" element={
-              <>
-                {/* Hero section */}
-                <div className="mb-12 py-6">
-                  <Hero onShopClick={handleShopClick} />
-                </div>
-
-                {/* Botanical divider */}
-                <div className="botanical-divider">
-                  <svg viewBox="0 0 40 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <circle cx="20" cy="10" r="4" fill="#C4785A" opacity="0.6"/>
-                    <circle cx="14" cy="6" r="3" fill="#7AA07F" opacity="0.5"/>
-                    <circle cx="26" cy="6" r="3" fill="#7AA07F" opacity="0.5"/>
-                    <circle cx="12" cy="12" r="3" fill="#7AA07F" opacity="0.5"/>
-                    <circle cx="28" cy="12" r="3" fill="#7AA07F" opacity="0.5"/>
-                    <circle cx="20" cy="10" r="2" fill="#FDE68A" opacity="0.8"/>
-                  </svg>
-                </div>
-
-                {/* Form section */}
-                <main id="main-content" ref={formSectionRef} aria-label="Build your soap" className="page-enter relative animate-enter delay-2">
-                  <div className="card-apothecary p-6 md:p-10">
-                    <SoapForm
-                      cart={cart}
-                      onAddToCart={handleAddToCart}
-                      onGoToCart={() => navigate('/cart')}
-                      onGoToCheckout={() => navigate('/checkout')}
-                    />
+      {showLanding ? (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center animate-enter"
+          style={{ animationDuration: '0.5s' }}
+        >
+          <div 
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-300"
+            style={{ 
+              backgroundImage: "url('https://i.postimg.cc/vZ8HvbFP/Gemini-Generated-Image-iz8f8oiz8f8oiz8f.png')",
+              animation: 'fadeIn 0.5s ease-out'
+            }}
+          />
+          <div className="absolute inset-0 bg-black/30" />
+          <div className="relative z-10 flex flex-col items-center justify-center h-full">
+            <button
+              type="button"
+              onClick={handleShopClick}
+              className="btn-apothecary btn-primary text-base px-10 py-4 animate-enter delay-5"
+            >
+              Shop Now
+              <ArrowDown className="w-4 h-4 ml-1" />
+            </button>
+            <p className="text-white/80 text-sm mt-4 font-accent tracking-wider">
+              Bulk discounts available — order 3+ and save up to 15%
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div className="relative z-base min-h-screen py-8 px-4">
+          <div className="max-w-5xl mx-auto">
+            <Routes>
+              <Route path="/" element={
+                <>
+                  {/* Hero section */}
+                  <div className="mb-12 py-6">
+                    <Hero onShopClick={handleShopClick} />
                   </div>
-                </main>
 
-                <footer className="mt-14 text-center animate-enter delay-3">
+                  {/* Botanical divider */}
                   <div className="botanical-divider">
                     <svg viewBox="0 0 40 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <circle cx="20" cy="10" r="4" fill="#C4785A" opacity="0.5"/>
-                      <circle cx="14" cy="6" r="3" fill="#7AA07F" opacity="0.4"/>
-                      <circle cx="26" cy="6" r="3" fill="#7AA07F" opacity="0.4"/>
-                      <circle cx="12" cy="12" r="3" fill="#7AA07F" opacity="0.4"/>
-                      <circle cx="28" cy="12" r="3" fill="#7AA07F" opacity="0.4"/>
-                      <circle cx="20" cy="10" r="2" fill="#FDE68A" opacity="0.7"/>
+                      <circle cx="20" cy="10" r="4" fill="#C4785A" opacity="0.6"/>
+                      <circle cx="14" cy="6" r="3" fill="#7AA07F" opacity="0.5"/>
+                      <circle cx="26" cy="6" r="3" fill="#7AA07F" opacity="0.5"/>
+                      <circle cx="12" cy="12" r="3" fill="#7AA07F" opacity="0.5"/>
+                      <circle cx="28" cy="12" r="3" fill="#7AA07F" opacity="0.5"/>
+                      <circle cx="20" cy="10" r="2" fill="#FDE68A" opacity="0.8"/>
                     </svg>
                   </div>
-                  <p className="font-display italic text-ink-500 text-lg mb-4">
-                    &ldquo;Made with love and nature&apos;s botanicals&rdquo;
-                  </p>
-                  <p className="overline">Crafted by hand, delivered with care</p>
-                </footer>
-              </>
-            } />
 
-            <Route path="/cart" element={
-              <Suspense fallback={<div className="min-h-screen bg-parchment-100" />}>
-                <CartPage
-                  cart={cart}
-                  onBackToForm={() => { navigate('/'); setTimeout(() => formSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100); }}
-                  onCheckout={() => navigate('/checkout')}
-                  onRemoveItem={removeItem}
-                  onClearCart={clearCart}
-                  onUpdateQuantity={updateQuantity}
-                  justOrdered={justOrdered}
-                  orderedItemCount={confirmationItemCount}
-                  onDismissOrdered={handleDismissOrdered}
-                />
-              </Suspense>
-            } />
+                  {/* Form section */}
+                  <main id="main-content" ref={formSectionRef} aria-label="Build your soap" className="page-enter relative animate-enter delay-2">
+                    <div className="card-apothecary p-6 md:p-10">
+                      <SoapForm
+                        cart={cart}
+                        onAddToCart={handleAddToCart}
+                        onGoToCart={() => navigate('/cart')}
+                        onGoToCheckout={() => navigate('/checkout')}
+                      />
+                    </div>
+                  </main>
 
-            <Route path="/checkout" element={
-              cart.totalQuantity === 0 ? (
-                <Navigate to="/cart" replace />
-              ) : (
+                  <footer className="mt-14 text-center animate-enter delay-3">
+                    <div className="botanical-divider">
+                      <svg viewBox="0 0 40 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <circle cx="20" cy="10" r="4" fill="#C4785A" opacity="0.5"/>
+                        <circle cx="14" cy="6" r="3" fill="#7AA07F" opacity="0.4"/>
+                        <circle cx="26" cy="6" r="3" fill="#7AA07F" opacity="0.4"/>
+                        <circle cx="12" cy="12" r="3" fill="#7AA07F" opacity="0.4"/>
+                        <circle cx="28" cy="12" r="3" fill="#7AA07F" opacity="0.4"/>
+                        <circle cx="20" cy="10" r="2" fill="#FDE68A" opacity="0.7"/>
+                      </svg>
+                    </div>
+                    <p className="font-display italic text-ink-500 text-lg mb-4">
+                      &ldquo;Made with love and nature&apos;s botanicals&rdquo;
+                    </p>
+                    <p className="overline">Crafted by hand, delivered with care</p>
+                  </footer>
+                </>
+              } />
+
+              <Route path="/cart" element={
                 <Suspense fallback={<div className="min-h-screen bg-parchment-100" />}>
-                  <CheckoutPage
+                  <CartPage
                     cart={cart}
-                    onBack={() => navigate('/cart')}
-                    onSubmit={handleCheckout}
-                    isSubmitting={isSubmitting}
+                    onBackToForm={() => { navigate('/'); setTimeout(() => formSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100); }}
+                    onCheckout={() => navigate('/checkout')}
+                    onRemoveItem={removeItem}
+                    onClearCart={clearCart}
+                    onUpdateQuantity={updateQuantity}
+                    justOrdered={justOrdered}
+                    orderedItemCount={confirmationItemCount}
+                    onDismissOrdered={handleDismissOrdered}
                   />
                 </Suspense>
-              )
-            } />
+              } />
 
-            <Route path="/confirmation" element={
-              <Suspense fallback={<div className="min-h-screen bg-parchment-100" />}>
-                <ConfirmationPage
-                  itemCount={confirmationItemCount}
-                  onContinue={() => { navigate('/'); setTimeout(() => formSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100); }}
-                />
-              </Suspense>
-            } />
-          </Routes>
+              <Route path="/checkout" element={
+                cart.totalQuantity === 0 ? (
+                  <Navigate to="/cart" replace />
+                ) : (
+                  <Suspense fallback={<div className="min-h-screen bg-parchment-100" />}>
+                    <CheckoutPage
+                      cart={cart}
+                      onBack={() => navigate('/cart')}
+                      onSubmit={handleCheckout}
+                      isSubmitting={isSubmitting}
+                    />
+                  </Suspense>
+                )
+              } />
+
+              <Route path="/confirmation" element={
+                <Suspense fallback={<div className="min-h-screen bg-parchment-100" />}>
+                  <ConfirmationPage
+                    itemCount={confirmationItemCount}
+                    onContinue={() => { navigate('/'); setTimeout(() => formSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100); }}
+                  />
+                </Suspense>
+              } />
+            </Routes>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
