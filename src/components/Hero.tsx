@@ -2,7 +2,6 @@ import type React from "react";
 import Leaf from "lucide-react/dist/esm/icons/leaf";
 import Droplets from "lucide-react/dist/esm/icons/droplets";
 import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import ArrowDown from "lucide-react/dist/esm/icons/arrow-down";
 
 const SCENTS = [
   {
@@ -65,15 +64,6 @@ const Hero: React.FC<{ onShopClick: () => void }> = ({ onShopClick }) => {
       </div>
 
       <div className="relative z-above">
-        {/* Hero Image */}
-        <div className="text-center mb-10 animate-enter delay-1">
-          <img
-            src="https://i.postimg.cc/vZ8HvbFP/Gemini-Generated-Image-iz8f8oiz8f8oiz8f.png"
-            alt="Handcrafted organic soaps"
-            className="w-full max-w-2xl mx-auto rounded-2xl shadow-lift"
-          />
-        </div>
-
         {/* Trust signals */}
         <div className="flex flex-wrap justify-center gap-3 mb-10 animate-enter delay-3">
           <span className="inline-flex items-center gap-1.5 text-xs font-accent uppercase tracking-wider text-botanical-600 bg-botanical-100 border border-botanical-300 rounded-full px-3.5 py-1.5">
@@ -123,7 +113,6 @@ const Hero: React.FC<{ onShopClick: () => void }> = ({ onShopClick }) => {
             className="btn-apothecary btn-primary text-base px-10 py-4"
           >
             Shop Now
-            <ArrowDown className="w-4 h-4 ml-1" />
           </button>
           <p className="text-ink-400 text-xs mt-3 font-accent">
             Bulk discounts available — order 3+ and save up to 15%

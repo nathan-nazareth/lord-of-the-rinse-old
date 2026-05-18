@@ -1,6 +1,5 @@
 import { useRef, useCallback, useState, lazy, Suspense } from 'react';
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
-import ArrowDown from 'lucide-react/dist/esm/icons/arrow-down';
 import Hero from './src/components/Hero';
 import { SoapForm } from './src/components/SoapForm';
 import { useCart } from './src/hooks/useCart';
@@ -81,6 +80,8 @@ function App() {
             className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-300"
             style={{ 
               backgroundImage: "url('https://i.postimg.cc/vZ8HvbFP/Gemini-Generated-Image-iz8f8oiz8f8oiz8f.png')",
+              backgroundSize: '85%',
+              backgroundPosition: 'center',
               animation: 'fadeIn 0.5s ease-out'
             }}
           />
@@ -92,7 +93,6 @@ function App() {
               className="btn-apothecary btn-primary text-base px-10 py-4 animate-enter delay-5"
             >
               Shop Now
-              <ArrowDown className="w-4 h-4 ml-1" />
             </button>
             <p className="text-white/80 text-sm mt-4 font-accent tracking-wider">
               Bulk discounts available — order 3+ and save up to 15%
