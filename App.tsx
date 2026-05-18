@@ -79,7 +79,7 @@ function App() {
             className="absolute inset-0 bg-cover bg-no-repeat transition-opacity duration-300 md:bg-contain"
             style={{ 
               backgroundImage: "url('https://i.postimg.cc/vZ8HvbFP/Gemini-Generated-Image-iz8f8oiz8f8oiz8f.png')",
-              backgroundPosition: 'left center',
+              backgroundPosition: '20% center',
               animation: 'fadeIn 0.5s ease-out'
             }}
           />
