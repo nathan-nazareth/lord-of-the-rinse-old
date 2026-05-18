@@ -120,7 +120,6 @@ function App() {
                     <p className="font-display italic text-ink-500 text-lg mb-4">
                       &ldquo;Made with love and nature&apos;s botanicals&rdquo;
                     </p>
-                    <p className="overline">Crafted by hand, delivered with care</p>
                   </footer>
                 </>
               } />
