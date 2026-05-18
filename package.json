@@ -8,8 +8,10 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "biome lint .",
-    "test": "playwright test",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
     "test:ui": "playwright test --ui",
+    "test:watch": "vitest --watch",
     "start": "node server/index.js"
   },
   "dependencies": {

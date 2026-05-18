@@ -9,6 +9,7 @@ export default defineConfig({
   },
   test: {
     environment: 'happy-dom',
+    globals: true,
     include: ['**/*.test.ts', '**/*.test.tsx'],
     exclude: ['tests/**', 'node_modules/**', 'dist/**', '.opencode/**'],
     passWithNoTests: true,
