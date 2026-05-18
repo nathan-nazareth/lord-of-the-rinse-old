@@ -1,6 +1,5 @@
 import { useRef, useCallback, useState, lazy, Suspense } from 'react';
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
-import Hero from './src/components/Hero';
 import { SoapForm } from './src/components/SoapForm';
 import { useCart } from './src/hooks/useCart';
 import { submitCartToWebhook } from './src/services/webhook';
@@ -25,7 +24,7 @@ function App() {
     setShowLanding(false);
     setTimeout(() => {
       formSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 300);
+    }, 100);
   }, []);
 
   const handleAddToCart = useCallback((
@@ -105,11 +104,6 @@ function App() {
             <Routes>
               <Route path="/" element={
                 <>
-                  {/* Hero section */}
-                  <div className="mb-12 py-6">
-                    <Hero onShopClick={handleShopClick} />
-                  </div>
-
                   {/* Botanical divider */}
                   <div className="botanical-divider">
                     <svg viewBox="0 0 40 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
