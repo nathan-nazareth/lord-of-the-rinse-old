@@ -65,20 +65,13 @@ const Hero: React.FC<{ onShopClick: () => void }> = ({ onShopClick }) => {
       </div>
 
       <div className="relative z-above">
-        {/* Overline */}
-        <div className="text-center mb-6 animate-enter delay-1">
-          <p className="overline">Handcrafted Organic Soaps</p>
-        </div>
-
-        {/* Headline */}
-        <div className="text-center mb-6 animate-enter delay-2">
-          <h1 className="text-display mb-3">
-            Lord of the <span className="italic text-botanical-600">Rinse</span>
-          </h1>
-          <p className="text-ink-500 text-base md:text-lg max-w-lg mx-auto leading-relaxed font-body">
-            Four botanical scents, three sizes, and natural add-ins —
-            build your perfect bar starting at <span className="font-semibold text-ink-700">Rs. 35</span>.
-          </p>
+        {/* Hero Image */}
+        <div className="text-center mb-10 animate-enter delay-1">
+          <img
+            src="https://i.postimg.cc/vZ8HvbFP/Gemini-Generated-Image-iz8f8oiz8f8oiz8f.png"
+            alt="Handcrafted organic soaps"
+            className="w-full max-w-2xl mx-auto rounded-2xl shadow-lift"
+          />
         </div>
 
         {/* Trust signals */}
