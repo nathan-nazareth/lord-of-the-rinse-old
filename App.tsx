@@ -94,7 +94,7 @@ function App() {
             >
               Shop Now
             </button>
-            <p className="text-white/80 text-sm mt-4 font-accent tracking-wider">
+            <p className="text-white/90 text-sm mt-4 font-accent tracking-wider border border-white/30 bg-black/20 rounded px-4 py-2">
               Bulk discounts available — order 3+ and save up to 15%
             </p>
           </div>
