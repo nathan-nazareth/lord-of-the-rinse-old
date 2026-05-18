@@ -24,7 +24,7 @@ function App() {
     setShowLanding(false);
     setTimeout(() => {
       formSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 100);
+    }, 50);
   }, []);
 
   const handleAddToCart = useCallback((
@@ -104,18 +104,6 @@ function App() {
             <Routes>
               <Route path="/" element={
                 <>
-                  {/* Botanical divider */}
-                  <div className="botanical-divider">
-                    <svg viewBox="0 0 40 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <circle cx="20" cy="10" r="4" fill="#C4785A" opacity="0.6"/>
-                      <circle cx="14" cy="6" r="3" fill="#7AA07F" opacity="0.5"/>
-                      <circle cx="26" cy="6" r="3" fill="#7AA07F" opacity="0.5"/>
-                      <circle cx="12" cy="12" r="3" fill="#7AA07F" opacity="0.5"/>
-                      <circle cx="28" cy="12" r="3" fill="#7AA07F" opacity="0.5"/>
-                      <circle cx="20" cy="10" r="2" fill="#FDE68A" opacity="0.8"/>
-                    </svg>
-                  </div>
-
                   {/* Form section */}
                   <main id="main-content" ref={formSectionRef} aria-label="Build your soap" className="page-enter relative animate-enter delay-2">
                     <div className="card-apothecary p-6 md:p-10">
@@ -129,16 +117,6 @@ function App() {
                   </main>
 
                   <footer className="mt-14 text-center animate-enter delay-3">
-                    <div className="botanical-divider">
-                      <svg viewBox="0 0 40 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                        <circle cx="20" cy="10" r="4" fill="#C4785A" opacity="0.5"/>
-                        <circle cx="14" cy="6" r="3" fill="#7AA07F" opacity="0.4"/>
-                        <circle cx="26" cy="6" r="3" fill="#7AA07F" opacity="0.4"/>
-                        <circle cx="12" cy="12" r="3" fill="#7AA07F" opacity="0.4"/>
-                        <circle cx="28" cy="12" r="3" fill="#7AA07F" opacity="0.4"/>
-                        <circle cx="20" cy="10" r="2" fill="#FDE68A" opacity="0.7"/>
-                      </svg>
-                    </div>
                     <p className="font-display italic text-ink-500 text-lg mb-4">
                       &ldquo;Made with love and nature&apos;s botanicals&rdquo;
                     </p>
