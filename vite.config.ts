@@ -19,7 +19,7 @@ export default defineConfig(({ mode }) => {
         }),
         VitePWA({
           registerType: 'autoUpdate',
-          includeAssets: ['favicon.ico', 'logo.svg'],
+          includeAssets: ['favicon.ico', 'logo.png'],
           manifest: {
             name: 'Organic Soap Builder',
             short_name: 'Soap Builder',
@@ -32,9 +32,9 @@ export default defineConfig(({ mode }) => {
             start_url: '/',
             icons: [
               {
-                src: '/logo.svg',
-                sizes: 'any',
-                type: 'image/svg+xml'
+                src: '/logo.png',
+                sizes: '512x512',
+                type: 'image/png'
               }
             ]
           }

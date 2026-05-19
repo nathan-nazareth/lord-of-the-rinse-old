@@ -7,7 +7,14 @@ export const Header: React.FC = () => (
   <header className="text-center py-8 px-4">
     <div className="max-w-xl mx-auto">
       <p className="overline mb-4">Handcrafted with care</p>
-      <h2 className="text-display mb-3">100% Organic Soaps</h2>
+      <div className="flex items-center justify-center gap-4 mb-3">
+        <img
+          src="/logo.png"
+          alt="Lord of the Rinse"
+          className="w-12 h-12 object-contain flex-shrink-0"
+        />
+        <h2 className="text-display">Lord of the Rinse</h2>
+      </div>
 
       <div className="inline-flex items-center justify-center gap-3 bg-parchment-50 border border-parchment-300 rounded-2xl p-4 shadow-card">
         <div className="flex items-center gap-2">

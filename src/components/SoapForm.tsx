@@ -309,10 +309,14 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
       {currentStep === "landing" && !hasVisited ? (
         <div className="text-center">
           <div className="inline-flex items-center justify-center mb-6 animate-float">
-            <BotanicalLeafIcon className="w-20 h-20" />
+            <img
+              src="/logo.png"
+              alt="Lord of the Rinse"
+              className="w-20 h-20 object-contain"
+            />
           </div>
           <p className="overline mb-5">Handcrafted with care</p>
-          <h2 className="text-display mb-4">Your soap, your story</h2>
+          <h2 className="text-display mb-4">Lord of the Rinse</h2>
           <p className="text-ink-500 text-lg mb-10 max-w-sm mx-auto font-body leading-relaxed">
             Choose your shape, scent, size, and natural additives to create your perfect organic soap.
           </p>
