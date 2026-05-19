@@ -1,16 +1,16 @@
 export enum SoapShape {
-  SQUARE = "Square",
-  CIRCLE = "Circle",
-  HEART = "Heart",
-  OVAL_FLAT = "Oval Flat",
-  OVAL_DIP = "Oval with Dip",
+  SQUARE = 'Square',
+  CIRCLE = 'Circle',
+  HEART = 'Heart',
+  OVAL_FLAT = 'Oval Flat',
+  OVAL_DIP = 'Oval with Dip',
 }
 
 export enum SoapScent {
-  LAVENDER = "Lavender",
-  CITRONELLA = "Citronella",
-  COCONUT = "Coconut",
-  LEMONGRASS = "Lemongrass",
+  LAVENDER = 'Lavender',
+  CITRONELLA = 'Citronella',
+  COCONUT = 'Coconut',
+  LEMONGRASS = 'Lemongrass',
 }
 
 export interface SoapOption {
@@ -26,11 +26,11 @@ export const SOAP_OPTIONS: SoapOption[] = [
 ];
 
 export const SHAPE_OPTIONS = [
-  { label: "Square", value: SoapShape.SQUARE },
-  { label: "Circle", value: SoapShape.CIRCLE },
-  { label: "Heart", value: SoapShape.HEART },
-  { label: "Oval Flat", value: SoapShape.OVAL_FLAT },
-  { label: "Oval with Dip", value: SoapShape.OVAL_DIP },
+  { label: 'Square', value: SoapShape.SQUARE },
+  { label: 'Circle', value: SoapShape.CIRCLE },
+  { label: 'Heart', value: SoapShape.HEART },
+  { label: 'Oval Flat', value: SoapShape.OVAL_FLAT },
+  { label: 'Oval with Dip', value: SoapShape.OVAL_DIP },
 ];
 
 export const DEFAULT_SIZE = 100;
@@ -39,12 +39,12 @@ export const BASE_SIZE = 100;
 export const LAVENDER_PIECES_PRICE = 5;
 
 export enum SoapColor {
-  WHITE = "White",
-  YELLOW = "Yellow",
-  PINK = "Pink",
-  GREEN = "Green",
-  BLUE = "Blue",
-  PURPLE = "Purple",
+  WHITE = 'White',
+  YELLOW = 'Yellow',
+  PINK = 'Pink',
+  GREEN = 'Green',
+  BLUE = 'Blue',
+  PURPLE = 'Purple',
 }
 
 export interface OrderItem {

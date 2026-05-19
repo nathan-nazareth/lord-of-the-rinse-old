@@ -12,7 +12,7 @@ const LoadingSpinner: React.FC<{ message?: string }> = ({ message = 'Loading...'
 
 export const LoadingState: React.FC<{ children: React.ReactNode; timeout?: number }> = ({
   children,
-  timeout = 3000
+  timeout = 3000,
 }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [timedOut, setTimedOut] = useState(false);
@@ -23,8 +23,13 @@ export const LoadingState: React.FC<{ children: React.ReactNode; timeout?: numbe
       else window.addEventListener('load', () => setIsLoading(false), { once: true });
     };
     checkLoaded();
-    const timeoutId = setTimeout(() => { setTimedOut(true); setIsLoading(false); }, timeout);
-    return () => { clearTimeout(timeoutId); };
+    const timeoutId = setTimeout(() => {
+      setTimedOut(true);
+      setIsLoading(false);
+    }, timeout);
+    return () => {
+      clearTimeout(timeoutId);
+    };
   }, [timeout]);
 
   if (isLoading && !timedOut) return <LoadingSpinner message="Preparing your soap experience..." />;

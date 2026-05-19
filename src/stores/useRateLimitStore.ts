@@ -48,6 +48,6 @@ export const useRateLimitStore = create<RateLimitState & RateLimitActions>()(
         set({ count: 0, windowStart: 0, lastSubmission: 0 });
       },
     }),
-    { name: 'soap:v1:formRateLimit' }
-  )
+    { name: 'soap:v1:formRateLimit' },
+  ),
 );

@@ -1,6 +1,6 @@
-import type React from "react";
-import Check from "lucide-react/dist/esm/icons/check";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
+import type React from 'react';
+import Check from 'lucide-react/dist/esm/icons/check';
+import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
 
 const ConfirmationPage: React.FC<{
   itemCount: number;
@@ -21,7 +21,7 @@ const ConfirmationPage: React.FC<{
       <h1 className="font-display text-3xl font-semibold text-ink-700 mb-3">Thank you!</h1>
       <p className="text-ink-500 text-lg mb-2">Your order has been submitted.</p>
       <p className="text-ink-400 mb-10">
-        {itemCount} soap{itemCount !== 1 ? "s" : ""} — we&apos;ll begin crafting them soon.
+        {itemCount} soap{itemCount !== 1 ? 's' : ''} — we&apos;ll begin crafting them soon.
       </p>
 
       <button

@@ -19,7 +19,10 @@ function CartContent() {
   return (
     <CartPage
       cart={cart}
-      onBackToForm={() => { setShowLanding(false); navigate({ to: '/' }); }}
+      onBackToForm={() => {
+        setShowLanding(false);
+        navigate({ to: '/' });
+      }}
       onCheckout={() => navigate({ to: '/checkout' })}
       onRemoveItem={removeItem}
       onClearCart={clearCart}

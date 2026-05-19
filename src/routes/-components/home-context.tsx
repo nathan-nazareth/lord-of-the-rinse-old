@@ -41,15 +41,15 @@ export function useHomeContext(): HomeContextValue {
 
 export function HomeProvider({ children }: { children: React.ReactNode }) {
   const formSectionRef = useRef<HTMLDivElement>(null);
-  const items = useCartStore(s => s.items);
-  const totalQuantity = useCartStore(s => s.totalQuantity);
+  const items = useCartStore((s) => s.items);
+  const totalQuantity = useCartStore((s) => s.totalQuantity);
   const cart = useMemo(() => ({ items, totalQuantity }), [items, totalQuantity]);
-  const addItem = useCartStore(s => s.addItem);
-  const removeItem = useCartStore(s => s.removeItem);
-  const updateQuantity = useCartStore(s => s.updateQuantity);
-  const clearCart = useCartStore(s => s.clearCart);
-  const clearFormState = useFormStore(s => s.clear);
-  const setVisited = useFormStore(s => s.setVisited);
+  const addItem = useCartStore((s) => s.addItem);
+  const removeItem = useCartStore((s) => s.removeItem);
+  const updateQuantity = useCartStore((s) => s.updateQuantity);
+  const clearCart = useCartStore((s) => s.clearCart);
+  const clearFormState = useFormStore((s) => s.clear);
+  const setVisited = useFormStore((s) => s.setVisited);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmationItemCount, setConfirmationItemCount] = useState(0);
   const [justOrdered, setJustOrdered] = useState(false);
@@ -63,40 +63,46 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
     }, 50);
   }, [setVisited]);
 
-  const handleAddToCart = useCallback((
-    shape: string,
-    scent: string,
-    price: number,
-    color: string,
-    quantity: string,
-    size: number,
-    hasLavenderPieces: boolean,
-  ) => {
-    const success = addItem(shape, scent, price, color, quantity, size, hasLavenderPieces);
-    if (success) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  }, [addItem]);
-
-  const handleCheckout = useCallback(async (customer: Customer) => {
-    setIsSubmitting(true);
-    try {
-      const result = await submitCartToWebhook(customer, cart.items);
-      if (result.success) {
-        setConfirmationItemCount(cart.totalQuantity);
-        setJustOrdered(true);
-        clearCart();
-        clearFormState();
+  const handleAddToCart = useCallback(
+    (
+      shape: string,
+      scent: string,
+      price: number,
+      color: string,
+      quantity: string,
+      size: number,
+      hasLavenderPieces: boolean,
+    ) => {
+      const success = addItem(shape, scent, price, color, quantity, size, hasLavenderPieces);
+      if (success) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else {
-        console.error('Order submission failed');
       }
-    } catch (err) {
-      console.error('Order submission error:', err);
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [cart, clearCart, clearFormState]);
+    },
+    [addItem],
+  );
+
+  const handleCheckout = useCallback(
+    async (customer: Customer) => {
+      setIsSubmitting(true);
+      try {
+        const result = await submitCartToWebhook(customer, cart.items);
+        if (result.success) {
+          setConfirmationItemCount(cart.totalQuantity);
+          setJustOrdered(true);
+          clearCart();
+          clearFormState();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+          console.error('Order submission failed');
+        }
+      } catch (err) {
+        console.error('Order submission error:', err);
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [cart, clearCart, clearFormState],
+  );
 
   const handleDismissOrdered = useCallback(() => {
     setJustOrdered(false);

@@ -1,14 +1,15 @@
 /// <reference types="vite/client" />
 
-import type {
-  WebhookLogEntry,
-  WebhookStatus,
-  Customer
-} from '../types/webhook';
+import type { WebhookLogEntry, WebhookStatus, Customer } from '../types/webhook';
 import type { CartItem } from '../types/cart';
-import { logWeb3FormsRateLimit, logWeb3FormsError, logWeb3FormsSuccess } from '../utils/errorLogging';
+import {
+  logWeb3FormsRateLimit,
+  logWeb3FormsError,
+  logWeb3FormsSuccess,
+} from '../utils/errorLogging';
 
-const WEB3FORMS_ENDPOINT = import.meta.env.VITE_WEB3FORMS_ENDPOINT || 'https://api.web3forms.com/submit';
+const WEB3FORMS_ENDPOINT =
+  import.meta.env.VITE_WEB3FORMS_ENDPOINT || 'https://api.web3forms.com/submit';
 const WEB3FORMS_ACCESS_KEY = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY?.trim();
 const TIMEOUT_MS = 10000;
 const MAX_RETRIES = 3;
@@ -18,7 +19,7 @@ function generateOrderId(): string {
 }
 
 async function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function getRetryDelay(attempt: number): number {
@@ -41,28 +42,33 @@ export async function submitCartToWebhook(
   customer: Customer,
   items: CartItem[],
   onStatusChange?: (status: WebhookStatus) => void,
-  onLog?: (log: WebhookLogEntry) => void
+  onLog?: (log: WebhookLogEntry) => void,
 ): Promise<{ success: boolean; orderId: string }> {
   const orderId = generateOrderId();
-  
-   // Validate access key
+
+  // Validate access key
   if (!WEB3FORMS_ACCESS_KEY || WEB3FORMS_ACCESS_KEY.trim() === '') {
-    console.error('[Webhook] ERROR: VITE_WEB3FORMS_ACCESS_KEY is not set. Please add it to your .env file and Vercel environment variables.');
+    console.error(
+      '[Webhook] ERROR: VITE_WEB3FORMS_ACCESS_KEY is not set. Please add it to your .env file and Vercel environment variables.',
+    );
     if (onStatusChange) onStatusChange('failed');
     return { success: false, orderId };
   }
-  
+
   const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
-  const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const discountPercentage = totalQuantity >= 4 ? 15 : totalQuantity >= 2 ? 10 : 0;
   const discountAmount = Math.round(subtotal * (discountPercentage / 100));
   const finalTotal = subtotal - discountAmount;
 
-  const orderItemsFormatted = items.map((item, index) =>
-    `${index + 1}. ${item.shape || 'N/A'} | ${item.scent}${item.hasLavenderPieces ? ' w/ Lavender Pieces' : ''} | Size: ${item.size}g | Color: ${item.color} | Qty: ${item.quantity} | Rs. ${item.price * item.quantity}`
-  ).join('\n');
+  const orderItemsFormatted = items
+    .map(
+      (item, index) =>
+        `${index + 1}. ${item.shape || 'N/A'} | ${item.scent}${item.hasLavenderPieces ? ' w/ Lavender Pieces' : ''} | Size: ${item.size}g | Color: ${item.color} | Qty: ${item.quantity} | Rs. ${item.price * item.quantity}`,
+    )
+    .join('\n');
 
-  const allShapes = items.map(item => item.shape || 'N/A').join(', ');
+  const allShapes = items.map((item) => item.shape || 'N/A').join(', ');
 
   const web3FormsPayload: Record<string, string | number | undefined> = {
     access_key: WEB3FORMS_ACCESS_KEY,
@@ -78,10 +84,10 @@ export async function submitCartToWebhook(
     order_id: orderId,
     submission_timestamp: new Date().toISOString(),
     from_name: customer.name,
-    subject: `New Soap Order from ${customer.name}`
+    subject: `New Soap Order from ${customer.name}`,
   };
 
-   console.log('[Webhook] Submitting order to Web3Forms');
+  console.log('[Webhook] Submitting order to Web3Forms');
 
   let lastError: Error | null = null;
 
@@ -140,7 +146,12 @@ export async function submitCartToWebhook(
       if (response.status === 401) {
         logWeb3FormsError(orderId, 'unauthorized', 'Invalid Web3Forms access key', attempt);
       } else if (response.status === 400) {
-        logWeb3FormsError(orderId, 'validation', responseData.message || 'Validation failed', attempt);
+        logWeb3FormsError(
+          orderId,
+          'validation',
+          responseData.message || 'Validation failed',
+          attempt,
+        );
       } else if (response.status >= 500) {
         logWeb3FormsError(orderId, 'server_error', responseData.message || 'Server error', attempt);
       } else {
@@ -176,7 +187,10 @@ export async function submitCartToWebhook(
     onStatusChange('failed');
   }
 
-  console.error(`[Webhook] Order ${orderId} failed after ${MAX_RETRIES} attempts:`, lastError?.message);
+  console.error(
+    `[Webhook] Order ${orderId} failed after ${MAX_RETRIES} attempts:`,
+    lastError?.message,
+  );
 
   return { success: false, orderId };
 }

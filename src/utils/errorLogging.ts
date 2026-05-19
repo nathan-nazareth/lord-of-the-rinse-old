@@ -13,7 +13,11 @@ interface StructuredError {
   type: 'runtime' | 'promise' | 'resource' | 'render';
 }
 
-export const logError = (error: Error, type: 'render' | 'runtime' = 'render', info?: ErrorInfo): void => {
+export const logError = (
+  error: Error,
+  type: 'render' | 'runtime' = 'render',
+  info?: ErrorInfo,
+): void => {
   const structuredError: StructuredError = {
     message: error.message,
     timestamp: new Date().toISOString(),
@@ -31,7 +35,7 @@ export const logError = (error: Error, type: 'render' | 'runtime' = 'render', in
 export const logResourceError = (event: Event): void => {
   const target = event.target as HTMLElement;
   let src = 'unknown';
-  
+
   if (target instanceof HTMLScriptElement) {
     src = target.src;
   } else if (target instanceof HTMLLinkElement) {
@@ -39,7 +43,7 @@ export const logResourceError = (event: Event): void => {
   } else if (target instanceof HTMLImageElement) {
     src = target.src;
   }
-  
+
   const error: StructuredError = {
     message: `Failed to load resource: ${src}`,
     timestamp: new Date().toISOString(),
@@ -88,7 +92,11 @@ export interface Web3FormsErrorLog {
   maxRetries?: number;
 }
 
-export const logWeb3FormsRateLimit = (orderId: string, attempt: number, maxRetries: number): void => {
+export const logWeb3FormsRateLimit = (
+  orderId: string,
+  attempt: number,
+  maxRetries: number,
+): void => {
   const errorLog: Web3FormsErrorLog = {
     message: 'Web3Forms API rate limit exceeded',
     timestamp: new Date().toISOString(),
@@ -104,7 +112,7 @@ export const logWeb3FormsError = (
   orderId: string,
   errorType: Web3FormsErrorLog['errorType'],
   message: string,
-  attempt?: number
+  attempt?: number,
 ): void => {
   const errorLog: Web3FormsErrorLog = {
     message,

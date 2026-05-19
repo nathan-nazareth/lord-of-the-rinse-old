@@ -8,7 +8,12 @@ function findFilesWithContent(dir: string, pattern: RegExp): string[] {
     const fullPath = join(dir, entry.name);
     if (entry.isDirectory()) {
       results.push(...findFilesWithContent(fullPath, pattern));
-    } else if (entry.isFile() && /\.(ts|tsx|js|jsx)$/.test(entry.name) && !entry.name.endsWith('.test.ts') && !entry.name.endsWith('.test.tsx')) {
+    } else if (
+      entry.isFile() &&
+      /\.(ts|tsx|js|jsx)$/.test(entry.name) &&
+      !entry.name.endsWith('.test.ts') &&
+      !entry.name.endsWith('.test.tsx')
+    ) {
       const content = readFileSync(fullPath, 'utf-8');
       if (pattern.test(content)) {
         results.push(fullPath);

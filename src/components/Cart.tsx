@@ -1,19 +1,19 @@
-import React, { useState } from "react";
-import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
-import Trash2 from "lucide-react/dist/esm/icons/trash-2";
-import Send from "lucide-react/dist/esm/icons/send";
-import User from "lucide-react/dist/esm/icons/user";
-import Phone from "lucide-react/dist/esm/icons/phone";
-import MailIcon from "lucide-react/dist/esm/icons/mail";
-import Loader2 from "lucide-react/dist/esm/icons/loader-2";
-import Check from "lucide-react/dist/esm/icons/check";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import type { CartItem as CartItemType } from "../types/cart";
-import type { Customer } from "../types/webhook";
-import { submitCartToWebhook } from "../services/webhook";
-import { useRateLimitStore } from "../stores/useRateLimitStore";
-import { calculateDiscount } from "../utils/pricing";
-import { validateEmail, validatePhone, validateName } from "../utils/validators";
+import React, { useState } from 'react';
+import ShoppingCart from 'lucide-react/dist/esm/icons/shopping-cart';
+import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
+import Send from 'lucide-react/dist/esm/icons/send';
+import User from 'lucide-react/dist/esm/icons/user';
+import Phone from 'lucide-react/dist/esm/icons/phone';
+import MailIcon from 'lucide-react/dist/esm/icons/mail';
+import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
+import Check from 'lucide-react/dist/esm/icons/check';
+import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
+import type { CartItem as CartItemType } from '../types/cart';
+import type { Customer } from '../types/webhook';
+import { submitCartToWebhook } from '../services/webhook';
+import { useRateLimitStore } from '../stores/useRateLimitStore';
+import { calculateDiscount } from '../utils/pricing';
+import { validateEmail, validatePhone, validateName } from '../utils/validators';
 
 interface CartProps {
   cart: {
@@ -33,17 +33,21 @@ const CheckoutForm: React.FC<{
   isSubmitting: boolean;
   errorMessage?: string | null;
 }> = ({ onSubmit, onCancel, isSubmitting, errorMessage }) => {
-  const [formData, setFormData] = useState({ name: "", email: "", phone: "" });
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '' });
   const [errors, setErrors] = useState<{ name?: string; email?: string; phone?: string }>({});
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     e.stopPropagation();
     const newErrors: { name?: string; email?: string; phone?: string } = {};
-    if (!validateName(formData.name)) newErrors.name = "Please enter your name (at least 2 characters)";
-    if (!validateEmail(formData.email)) newErrors.email = "Please enter a valid email address";
-    if (!validatePhone(formData.phone)) newErrors.phone = "Please enter a valid phone number";
-    if (Object.keys(newErrors).length > 0) { setErrors(newErrors); return; }
+    if (!validateName(formData.name))
+      newErrors.name = 'Please enter your name (at least 2 characters)';
+    if (!validateEmail(formData.email)) newErrors.email = 'Please enter a valid email address';
+    if (!validatePhone(formData.phone)) newErrors.phone = 'Please enter a valid phone number';
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
     onSubmit({ name: formData.name, email: formData.email, phone: formData.phone });
   };
 
@@ -54,52 +58,103 @@ const CheckoutForm: React.FC<{
         <h3 className="font-display text-xl font-semibold text-ink-700">Your details</h3>
       </div>
       {errorMessage && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm flex items-start gap-2" role="alert">
+        <div
+          className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm flex items-start gap-2"
+          role="alert"
+        >
           <span className="text-red-500 mt-0.5">!</span>
           <span>{errorMessage}</span>
         </div>
       )}
       <form onSubmit={handleSubmit} noValidate className="space-y-4">
         <div>
-          <label htmlFor="sidebar-name" className="flex items-center gap-2 text-sm text-ink-500 mb-1.5 font-medium">
-            <User className="w-4 h-4" />Full Name
+          <label
+            htmlFor="sidebar-name"
+            className="flex items-center gap-2 text-sm text-ink-500 mb-1.5 font-medium"
+          >
+            <User className="w-4 h-4" />
+            Full Name
           </label>
-          <input id="sidebar-name" type="text" value={formData.name}
+          <input
+            id="sidebar-name"
+            type="text"
+            value={formData.name}
             onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
             onFocus={() => setErrors((p) => ({ ...p, name: undefined }))}
             placeholder="Your full name"
-            className={`input-apothecary ${errors.name ? "border-red-400" : ""}`}
-            disabled={isSubmitting} autoComplete="name" />
+            className={`input-apothecary ${errors.name ? 'border-red-400' : ''}`}
+            disabled={isSubmitting}
+            autoComplete="name"
+          />
           {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
         </div>
         <div>
-          <label htmlFor="sidebar-email" className="flex items-center gap-2 text-sm text-ink-500 mb-1.5 font-medium">
-            <MailIcon className="w-4 h-4" />Email Address
+          <label
+            htmlFor="sidebar-email"
+            className="flex items-center gap-2 text-sm text-ink-500 mb-1.5 font-medium"
+          >
+            <MailIcon className="w-4 h-4" />
+            Email Address
           </label>
-          <input id="sidebar-email" type="email" value={formData.email}
+          <input
+            id="sidebar-email"
+            type="email"
+            value={formData.email}
             onChange={(e) => setFormData((p) => ({ ...p, email: e.target.value }))}
             onFocus={() => setErrors((p) => ({ ...p, email: undefined }))}
             placeholder="you@example.com"
-            className={`input-apothecary ${errors.email ? "border-red-400" : ""}`}
-            disabled={isSubmitting} autoComplete="email" />
+            className={`input-apothecary ${errors.email ? 'border-red-400' : ''}`}
+            disabled={isSubmitting}
+            autoComplete="email"
+          />
           {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
         </div>
         <div>
-          <label htmlFor="sidebar-phone" className="flex items-center gap-2 text-sm text-ink-500 mb-1.5 font-medium">
-            <Phone className="w-4 h-4" />Phone Number
+          <label
+            htmlFor="sidebar-phone"
+            className="flex items-center gap-2 text-sm text-ink-500 mb-1.5 font-medium"
+          >
+            <Phone className="w-4 h-4" />
+            Phone Number
           </label>
-          <input id="sidebar-phone" type="tel" value={formData.phone}
+          <input
+            id="sidebar-phone"
+            type="tel"
+            value={formData.phone}
             onChange={(e) => setFormData((p) => ({ ...p, phone: e.target.value }))}
             onFocus={() => setErrors((p) => ({ ...p, phone: undefined }))}
             placeholder="(555) 123-4567"
-            className={`input-apothecary ${errors.phone ? "border-red-400" : ""}`}
-            disabled={isSubmitting} autoComplete="tel" />
+            className={`input-apothecary ${errors.phone ? 'border-red-400' : ''}`}
+            disabled={isSubmitting}
+            autoComplete="tel"
+          />
           {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
         </div>
         <div className="flex gap-3 pt-3">
-          <button type="button" onClick={onCancel} disabled={isSubmitting} className="btn-apothecary btn-secondary flex-1 text-sm py-3">Cancel</button>
-          <button type="submit" disabled={isSubmitting} className="btn-apothecary btn-primary flex-1 text-sm py-3">
-            {isSubmitting ? <><Loader2 className="w-4 h-4 animate-spin" />Sending</> : <><Send className="w-4 h-4" />Submit</>}
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={isSubmitting}
+            className="btn-apothecary btn-secondary flex-1 text-sm py-3"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="btn-apothecary btn-primary flex-1 text-sm py-3"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Sending
+              </>
+            ) : (
+              <>
+                <Send className="w-4 h-4" />
+                Submit
+              </>
+            )}
           </button>
         </div>
       </form>
@@ -107,7 +162,10 @@ const CheckoutForm: React.FC<{
   );
 };
 
-const OrderConfirmation: React.FC<{ itemCount: number; onContinue: () => void }> = ({ itemCount, onContinue }) => (
+const OrderConfirmation: React.FC<{ itemCount: number; onContinue: () => void }> = ({
+  itemCount,
+  onContinue,
+}) => (
   <div className="p-8 text-center space-y-5">
     <div className="w-16 h-16 bg-botanical-100 rounded-full flex items-center justify-center mx-auto">
       <Check className="w-8 h-8 text-botanical-600" />
@@ -115,13 +173,24 @@ const OrderConfirmation: React.FC<{ itemCount: number; onContinue: () => void }>
     <div>
       <h3 className="font-display text-2xl font-semibold text-ink-700 mb-2">Order placed!</h3>
       <p className="text-ink-400 text-sm mb-1">Thank you for your order</p>
-      <p className="text-ink-600 font-medium">{itemCount} soap{itemCount > 1 ? "s" : ""} confirmed</p>
+      <p className="text-ink-600 font-medium">
+        {itemCount} soap{itemCount > 1 ? 's' : ''} confirmed
+      </p>
     </div>
-    <button type="button" onClick={onContinue} className="btn-apothecary btn-primary btn-full">Continue Shopping</button>
+    <button type="button" onClick={onContinue} className="btn-apothecary btn-primary btn-full">
+      Continue Shopping
+    </button>
   </div>
 );
 
-export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem, onClearCart, onUpdateQuantity }) => {
+export const Cart: React.FC<CartProps> = ({
+  cart,
+  isOpen,
+  onClose,
+  onRemoveItem,
+  onClearCart,
+  onUpdateQuantity,
+}) => {
   const [showCheckout, setShowCheckout] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -137,7 +206,8 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
   const isAllowed = rateLimitStore.isAllowed(maxSubmissions, windowMs);
   const cooldownRemaining = (() => {
     const now = Date.now();
-    const windowExpired = rateLimitStore.windowStart === 0 || now - rateLimitStore.windowStart >= windowMs;
+    const windowExpired =
+      rateLimitStore.windowStart === 0 || now - rateLimitStore.windowStart >= windowMs;
     if (rateLimitStore.count >= maxSubmissions && !windowExpired) {
       return Math.ceil((windowMs - (now - rateLimitStore.windowStart)) / 1000);
     }
@@ -156,22 +226,36 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
 
   React.useEffect(() => {
     if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
   const subtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const { discountPercentage, discountAmount, total } = calculateDiscount(subtotal, cart.totalQuantity);
+  const { discountPercentage, discountAmount, total } = calculateDiscount(
+    subtotal,
+    cart.totalQuantity,
+  );
 
   const handleClearCart = () => {
-    if (showClearConfirm) { onClearCart(); setShowClearConfirm(false); }
-    else { setShowClearConfirm(true); }
+    if (showClearConfirm) {
+      onClearCart();
+      setShowClearConfirm(false);
+    } else {
+      setShowClearConfirm(true);
+    }
   };
 
   const handleCheckout = async (customer: Customer) => {
-    if (!isAllowed) { setShowRateLimitModal(true); setIsSubmitting(false); return; }
-    setIsSubmitting(true); setErrorMessage(null);
+    if (!isAllowed) {
+      setShowRateLimitModal(true);
+      setIsSubmitting(false);
+      return;
+    }
+    setIsSubmitting(true);
+    setErrorMessage(null);
     try {
       const result = await submitCartToWebhook(customer, cart.items);
       if (result.success) {
@@ -181,10 +265,13 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
         setShowConfirmation(true);
         onClearCart();
       } else {
-        setErrorMessage("Failed to send order. Please try again.");
+        setErrorMessage('Failed to send order. Please try again.');
       }
-    } catch { setErrorMessage("An error occurred. Please try again."); }
-    finally { setIsSubmitting(false); }
+    } catch {
+      setErrorMessage('An error occurred. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -199,16 +286,30 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
           <div className="flex items-center gap-2">
             <ShoppingCart className="w-5 h-5 text-white" />
             <h2 className="text-lg font-display font-semibold text-white">
-              {showConfirmation ? "Thank you!" : showAddedToCart ? "Added to cart" : showCheckout ? "Checkout" : "Your Cart"}
+              {showConfirmation
+                ? 'Thank you!'
+                : showAddedToCart
+                  ? 'Added to cart'
+                  : showCheckout
+                    ? 'Checkout'
+                    : 'Your Cart'}
             </h2>
             {!showConfirmation && !showAddedToCart && !showCheckout && cart.totalQuantity > 0 && (
-              <span className="bg-white text-terra-500 text-xs px-2 py-0.5 rounded-full font-semibold">{cart.totalQuantity}</span>
+              <span className="bg-white text-terra-500 text-xs px-2 py-0.5 rounded-full font-semibold">
+                {cart.totalQuantity}
+              </span>
             )}
           </div>
           {!showConfirmation && !showAddedToCart && !showCheckout && (
-            <button type="button" ref={closeButtonRef} onClick={onClose}
+            <button
+              type="button"
+              ref={closeButtonRef}
+              onClick={onClose}
               className="px-3 py-1.5 bg-white/15 hover:bg-white/25 rounded-full text-sm text-white font-medium transition-colors"
-              aria-label="Close cart">Close</button>
+              aria-label="Close cart"
+            >
+              Close
+            </button>
           )}
         </div>
 
@@ -221,17 +322,44 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
                 <Check className="w-8 h-8 text-botanical-600" />
               </div>
               <div>
-                <h3 className="font-display text-2xl font-semibold text-ink-700 mb-2">Added to cart!</h3>
+                <h3 className="font-display text-2xl font-semibold text-ink-700 mb-2">
+                  Added to cart!
+                </h3>
                 <p className="text-ink-400 text-sm">Your soap has been added.</p>
-                <p className="text-ink-600 font-medium mt-1">{cart.totalQuantity} soap{cart.totalQuantity > 1 ? "s" : ""} in cart</p>
+                <p className="text-ink-600 font-medium mt-1">
+                  {cart.totalQuantity} soap{cart.totalQuantity > 1 ? 's' : ''} in cart
+                </p>
               </div>
               <div className="space-y-2">
-                <button type="button" onClick={() => { setShowAddedToCart(false); setShowCheckout(true); }} className="btn-apothecary btn-primary btn-full">Proceed to Checkout</button>
-                <button type="button" onClick={onClose} className="btn-apothecary btn-secondary btn-full">+ Order Another</button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAddedToCart(false);
+                    setShowCheckout(true);
+                  }}
+                  className="btn-apothecary btn-primary btn-full"
+                >
+                  Proceed to Checkout
+                </button>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="btn-apothecary btn-secondary btn-full"
+                >
+                  + Order Another
+                </button>
               </div>
             </div>
           ) : showCheckout ? (
-            <CheckoutForm onSubmit={handleCheckout} onCancel={() => { setShowCheckout(false); setErrorMessage(null); }} isSubmitting={isSubmitting} errorMessage={errorMessage} />
+            <CheckoutForm
+              onSubmit={handleCheckout}
+              onCancel={() => {
+                setShowCheckout(false);
+                setErrorMessage(null);
+              }}
+              isSubmitting={isSubmitting}
+              errorMessage={errorMessage}
+            />
           ) : (
             <div className="p-4 space-y-3">
               {cart.items.length === 0 ? (
@@ -245,24 +373,34 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
                   <div key={item.id} className="cart-item">
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-ink-700 truncate">{item.scent}</p>
-                      <p className="text-ink-400 text-sm truncate">{item.color} · {item.size}g</p>
+                      <p className="text-ink-400 text-sm truncate">
+                        {item.color} · {item.size}g
+                      </p>
                       <div className="flex gap-1 mt-1 flex-wrap">
                         {item.hasLavenderPieces && <span className="badge-tag">Lavender</span>}
                       </div>
                     </div>
                     <div className="flex items-center gap-3 flex-shrink-0">
-                      <span className="font-display font-semibold text-ink-700">Rs. {item.price * item.quantity}</span>
+                      <span className="font-display font-semibold text-ink-700">
+                        Rs. {item.price * item.quantity}
+                      </span>
                       {onUpdateQuantity ? (
                         <div className="flex items-center gap-1 bg-parchment-100 rounded-full px-1 py-0.5">
                           <button
                             type="button"
-                            onClick={() => item.quantity > 1 ? onUpdateQuantity(item.id, item.quantity - 1) : onRemoveItem(item.id)}
+                            onClick={() =>
+                              item.quantity > 1
+                                ? onUpdateQuantity(item.id, item.quantity - 1)
+                                : onRemoveItem(item.id)
+                            }
                             className="w-7 h-7 flex items-center justify-center rounded-full bg-white shadow-sm hover:bg-parchment-50 text-ink-600 font-semibold text-lg"
                             aria-label="Decrease quantity"
                           >
                             −
                           </button>
-                          <span className="w-6 text-center font-semibold text-ink-700">{item.quantity}</span>
+                          <span className="w-6 text-center font-semibold text-ink-700">
+                            {item.quantity}
+                          </span>
                           <button
                             type="button"
                             onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
@@ -273,8 +411,12 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
                           </button>
                         </div>
                       ) : (
-                        <button type="button" onClick={() => onRemoveItem(item.id)}
-                          className="p-2 text-red-400 hover:bg-red-50 rounded-full transition-colors" aria-label="Remove item">
+                        <button
+                          type="button"
+                          onClick={() => onRemoveItem(item.id)}
+                          className="p-2 text-red-400 hover:bg-red-50 rounded-full transition-colors"
+                          aria-label="Remove item"
+                        >
                           <Trash2 className="w-4 h-4" />
                         </button>
                       )}
@@ -292,34 +434,53 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
               <div className="bg-botanical-100 rounded-xl p-3 border border-botanical-300">
                 <div className="flex items-center gap-2 text-botanical-700 font-semibold text-sm mb-1">
                   <Sparkles className="w-4 h-4" />
-                  <span className="uppercase text-xs tracking-widest font-accent">Bulk Discount</span>
+                  <span className="uppercase text-xs tracking-widest font-accent">
+                    Bulk Discount
+                  </span>
                   <Sparkles className="w-4 h-4" />
                 </div>
-                <p className="text-botanical-600 text-sm"><span className="font-semibold">{discountPercentage}% off</span> on {cart.totalQuantity} soaps</p>
+                <p className="text-botanical-600 text-sm">
+                  <span className="font-semibold">{discountPercentage}% off</span> on{' '}
+                  {cart.totalQuantity} soaps
+                </p>
                 <p className="text-botanical-500 text-xs">Mix & match any combination</p>
               </div>
             )}
             <div className="space-y-1.5 text-sm">
               <div className="flex justify-between text-ink-500">
-                <span>{cart.items.length} unique type{cart.items.length > 1 ? "s" : ""}</span>
-                <span className="font-medium">{cart.totalQuantity} soap{cart.totalQuantity > 1 ? "s" : ""}</span>
+                <span>
+                  {cart.items.length} unique type{cart.items.length > 1 ? 's' : ''}
+                </span>
+                <span className="font-medium">
+                  {cart.totalQuantity} soap{cart.totalQuantity > 1 ? 's' : ''}
+                </span>
               </div>
               {discountPercentage > 0 && (
                 <div className="flex justify-between text-botanical-600 font-medium">
-                  <span>Discount ({discountPercentage}%)</span><span>- Rs. {discountAmount}</span>
+                  <span>Discount ({discountPercentage}%)</span>
+                  <span>- Rs. {discountAmount}</span>
                 </div>
               )}
               <div className="flex justify-between text-lg font-display font-semibold text-ink-700 pt-2 border-t border-parchment-300">
-                <span>Total</span><span className="text-terra-500">Rs. {total}</span>
+                <span>Total</span>
+                <span className="text-terra-500">Rs. {total}</span>
               </div>
             </div>
             <div className="space-y-2">
-              <button type="button" onClick={() => setShowCheckout(true)} className="btn-apothecary btn-primary btn-full">
-                <ShoppingCart className="w-4 h-4" />Checkout — Rs. {total}
+              <button
+                type="button"
+                onClick={() => setShowCheckout(true)}
+                className="btn-apothecary btn-primary btn-full"
+              >
+                <ShoppingCart className="w-4 h-4" />
+                Checkout — Rs. {total}
               </button>
-              <button type="button" onClick={handleClearCart}
-                className={`btn-apothecary btn-full text-sm py-3 ${showClearConfirm ? "border-red-400 text-red-500 bg-red-50 hover:bg-red-100" : "btn-secondary"}`}>
-                {showClearConfirm ? "Confirm clear all?" : "Clear Cart"}
+              <button
+                type="button"
+                onClick={handleClearCart}
+                className={`btn-apothecary btn-full text-sm py-3 ${showClearConfirm ? 'border-red-400 text-red-500 bg-red-50 hover:bg-red-100' : 'btn-secondary'}`}
+              >
+                {showClearConfirm ? 'Confirm clear all?' : 'Clear Cart'}
               </button>
             </div>
           </div>
@@ -331,9 +492,19 @@ export const Cart: React.FC<CartProps> = ({ cart, isOpen, onClose, onRemoveItem,
               <div className="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-red-500 text-2xl font-bold">!</span>
               </div>
-              <h3 className="font-display text-xl font-semibold text-ink-700 mb-2">Rate limit reached</h3>
-              <p className="text-ink-400 text-sm mb-6">Maximum 10 orders per 5 minutes. Please wait before placing another order.</p>
-              <button type="button" onClick={() => setShowRateLimitModal(false)} className="btn-apothecary btn-primary btn-full">Understood</button>
+              <h3 className="font-display text-xl font-semibold text-ink-700 mb-2">
+                Rate limit reached
+              </h3>
+              <p className="text-ink-400 text-sm mb-6">
+                Maximum 10 orders per 5 minutes. Please wait before placing another order.
+              </p>
+              <button
+                type="button"
+                onClick={() => setShowRateLimitModal(false)}
+                className="btn-apothecary btn-primary btn-full"
+              >
+                Understood
+              </button>
             </div>
           </div>
         )}

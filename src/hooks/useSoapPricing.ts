@@ -1,12 +1,8 @@
-import { useMemo } from "react";
-import { type SoapScent, SOAP_OPTIONS, LAVENDER_PIECES_PRICE } from "../../types";
-import { calculateDiscount } from "../utils/pricing";
+import { useMemo } from 'react';
+import { type SoapScent, SOAP_OPTIONS, LAVENDER_PIECES_PRICE } from '../../types';
+import { calculateDiscount } from '../utils/pricing';
 
-export function useSoapPricing(
-  scent: SoapScent | null,
-  size: number,
-  hasLavenderPieces: boolean,
-) {
+export function useSoapPricing(scent: SoapScent | null, size: number, hasLavenderPieces: boolean) {
   const unitPrice = useMemo(() => {
     if (!scent) return 0;
     const option = SOAP_OPTIONS.find((o) => o.scent === scent);

@@ -8,10 +8,7 @@ function ConfirmationContent() {
   const { confirmationItemCount } = useHomeContext();
 
   return (
-    <ConfirmationPage
-      itemCount={confirmationItemCount}
-      onContinue={() => navigate({ to: '/' })}
-    />
+    <ConfirmationPage itemCount={confirmationItemCount} onContinue={() => navigate({ to: '/' })} />
   );
 }
 

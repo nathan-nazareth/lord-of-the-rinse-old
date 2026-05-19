@@ -25,7 +25,14 @@ describe('SoapForm component', () => {
   });
 
   it('renders initial state correctly', () => {
-    render(<SoapForm cart={{ items: [], totalQuantity: 0 }} onAddToCart={() => {}} onGoToCart={() => {}} onGoToCheckout={() => {}} />);
+    render(
+      <SoapForm
+        cart={{ items: [], totalQuantity: 0 }}
+        onAddToCart={() => {}}
+        onGoToCart={() => {}}
+        onGoToCheckout={() => {}}
+      />,
+    );
 
     // Check that initial form state renders correctly from the store
     expect(screen.getByText('Begin Creating')).toBeTruthy(); // Landing page button
@@ -33,7 +40,14 @@ describe('SoapForm component', () => {
   });
 
   it('transitions from landing to shape step when Begin Creating is clicked', async () => {
-    render(<SoapForm cart={{ items: [], totalQuantity: 0 }} onAddToCart={() => {}} onGoToCart={() => {}} onGoToCheckout={() => {}} />);
+    render(
+      <SoapForm
+        cart={{ items: [], totalQuantity: 0 }}
+        onAddToCart={() => {}}
+        onGoToCart={() => {}}
+        onGoToCheckout={() => {}}
+      />,
+    );
 
     // Initially on landing page
     expect(screen.getByText('Begin Creating')).toBeTruthy();
@@ -54,7 +68,14 @@ describe('SoapForm component', () => {
     useFormStore.getState().setCurrentStep('shape');
     useFormStore.getState().setVisited();
 
-    render(<SoapForm cart={{ items: [], totalQuantity: 0 }} onAddToCart={() => {}} onGoToCart={() => {}} onGoToCheckout={() => {}} />);
+    render(
+      <SoapForm
+        cart={{ items: [], totalQuantity: 0 }}
+        onAddToCart={() => {}}
+        onGoToCart={() => {}}
+        onGoToCheckout={() => {}}
+      />,
+    );
 
     // Click on first shape option (Square)
     const shapeButtons = screen.getAllByRole('button', { pressed: false });
@@ -82,7 +103,7 @@ describe('SoapForm component', () => {
         onAddToCart={mockAddToCart}
         onGoToCart={() => {}}
         onGoToCheckout={() => {}}
-      />
+      />,
     );
 
     // Click Add to Cart

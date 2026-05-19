@@ -97,7 +97,10 @@ export const useCartStore = create<CartState>()(
             return {
               state: {
                 items: parsed.items,
-                totalQuantity: parsed.items.reduce((sum: number, item: CartItem) => sum + item.quantity, 0),
+                totalQuantity: parsed.items.reduce(
+                  (sum: number, item: CartItem) => sum + item.quantity,
+                  0,
+                ),
               },
               version: 0,
             };

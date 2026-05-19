@@ -58,6 +58,6 @@ export const useFormStore = create<FormState & FormActions>()(
           localStorage.removeItem(name);
         },
       },
-    }
-  )
+    },
+  ),
 );

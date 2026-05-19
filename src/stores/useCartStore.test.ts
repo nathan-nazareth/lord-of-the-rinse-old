@@ -39,7 +39,9 @@ describe('useCartStore', () => {
     }
     expect(useCartStore.getState().items).toHaveLength(20);
 
-    const result = useCartStore.getState().addItem('square', 'lavender', 12.99, 'blue', '1', 75, false);
+    const result = useCartStore
+      .getState()
+      .addItem('square', 'lavender', 12.99, 'blue', '1', 75, false);
     expect(result).toBe(false);
     expect(useCartStore.getState().items).toHaveLength(20);
   });
@@ -104,7 +106,17 @@ describe('useCartStore', () => {
     const persistedData = {
       state: {
         items: [
-          { id: 'test-1', shape: 'circle', scent: 'citrus', price: 9.99, color: 'yellow', quantity: 3, size: 50, hasLavenderPieces: false, addedAt: '2024-01-01T00:00:00.000Z' },
+          {
+            id: 'test-1',
+            shape: 'circle',
+            scent: 'citrus',
+            price: 9.99,
+            color: 'yellow',
+            quantity: 3,
+            size: 50,
+            hasLavenderPieces: false,
+            addedAt: '2024-01-01T00:00:00.000Z',
+          },
         ],
         totalQuantity: 3,
       },
@@ -122,11 +134,21 @@ describe('useCartStore', () => {
   });
 
   it('discards expired cart on hydration', async () => {
-    const thirtyOneDaysAgo = Date.now() - (31 * 24 * 60 * 60 * 1000);
+    const thirtyOneDaysAgo = Date.now() - 31 * 24 * 60 * 60 * 1000;
     const expiredData = {
       state: {
         items: [
-          { id: 'old-1', shape: 'square', scent: 'lavender', price: 12.99, color: 'blue', quantity: 2, size: 75, hasLavenderPieces: false, addedAt: '2024-01-01T00:00:00.000Z' },
+          {
+            id: 'old-1',
+            shape: 'square',
+            scent: 'lavender',
+            price: 12.99,
+            color: 'blue',
+            quantity: 2,
+            size: 75,
+            hasLavenderPieces: false,
+            addedAt: '2024-01-01T00:00:00.000Z',
+          },
         ],
         totalQuantity: 2,
         updatedAt: thirtyOneDaysAgo,
@@ -146,7 +168,17 @@ describe('useCartStore', () => {
   it('migrates old flat-format localStorage data', async () => {
     const oldFormatData = {
       items: [
-        { id: 'old-1', shape: 'heart', scent: 'rose', price: 14.99, color: 'pink', quantity: 4, size: 100, hasLavenderPieces: true, addedAt: '2024-06-01T00:00:00.000Z' },
+        {
+          id: 'old-1',
+          shape: 'heart',
+          scent: 'rose',
+          price: 14.99,
+          color: 'pink',
+          quantity: 4,
+          size: 100,
+          hasLavenderPieces: true,
+          addedAt: '2024-06-01T00:00:00.000Z',
+        },
       ],
       updatedAt: Date.now(),
     };

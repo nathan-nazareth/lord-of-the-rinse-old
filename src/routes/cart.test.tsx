@@ -79,10 +79,13 @@ describe('cart route', () => {
       addedAt: new Date().toISOString(),
     };
 
-    mockStorage.setItem(CART_KEY, JSON.stringify({
-      items: [testItem],
-      updatedAt: Date.now(),
-    }));
+    mockStorage.setItem(
+      CART_KEY,
+      JSON.stringify({
+        items: [testItem],
+        updatedAt: Date.now(),
+      }),
+    );
 
     useCartStore.persist.rehydrate();
     await new Promise((r) => setTimeout(r, 10));

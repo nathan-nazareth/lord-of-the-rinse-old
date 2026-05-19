@@ -13,7 +13,7 @@ export const Toast: React.FC<ToastProps> = ({
   message,
   type = 'success',
   duration = 3000,
-  onClose
+  onClose,
 }) => {
   const [isVisible, setIsVisible] = useState(true);
   const [isExiting, setIsExiting] = useState(false);
@@ -31,7 +31,8 @@ export const Toast: React.FC<ToastProps> = ({
 
   if (!isVisible) return null;
 
-  const bgColor = type === 'success' ? 'bg-botanical-500' : type === 'error' ? 'bg-red-500' : 'bg-ink-600';
+  const bgColor =
+    type === 'success' ? 'bg-botanical-500' : type === 'error' ? 'bg-red-500' : 'bg-ink-600';
 
   return (
     <div

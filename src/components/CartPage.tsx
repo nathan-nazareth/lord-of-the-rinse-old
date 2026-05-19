@@ -1,11 +1,11 @@
-import type React from "react";
-import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
-import Check from "lucide-react/dist/esm/icons/check";
-import Sparkles from "lucide-react/dist/esm/icons/sparkles";
-import ArrowLeft from "lucide-react/dist/esm/icons/arrow-left";
-import Trash2 from "lucide-react/dist/esm/icons/trash-2";
-import { calculateDiscount } from "../utils/pricing";
-import type { CartItem } from "../types/cart";
+import type React from 'react';
+import ShoppingCart from 'lucide-react/dist/esm/icons/shopping-cart';
+import Check from 'lucide-react/dist/esm/icons/check';
+import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
+import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
+import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
+import { calculateDiscount } from '../utils/pricing';
+import type { CartItem } from '../types/cart';
 
 const CartPage: React.FC<{
   cart: { items: CartItem[]; totalQuantity: number };
@@ -18,9 +18,23 @@ const CartPage: React.FC<{
   justOrdered?: boolean;
   orderedItemCount?: number;
   onDismissOrdered?: () => void;
-}> = ({ cart, onBackToForm, onCheckout, onRemoveItem, onClearCart, onUpdateQuantity, justAdded, justOrdered, orderedItemCount, onDismissOrdered }) => {
+}> = ({
+  cart,
+  onBackToForm,
+  onCheckout,
+  onRemoveItem,
+  onClearCart,
+  onUpdateQuantity,
+  justAdded,
+  justOrdered,
+  orderedItemCount,
+  onDismissOrdered,
+}) => {
   const subtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const { discountPercentage, discountAmount, total } = calculateDiscount(subtotal, cart.totalQuantity);
+  const { discountPercentage, discountAmount, total } = calculateDiscount(
+    subtotal,
+    cart.totalQuantity,
+  );
 
   if (justOrdered && cart.items.length === 0) {
     return (
@@ -28,7 +42,10 @@ const CartPage: React.FC<{
         <div className="max-w-md mx-auto px-4 pt-6">
           <button
             type="button"
-            onClick={() => { onDismissOrdered?.(); onBackToForm(); }}
+            onClick={() => {
+              onDismissOrdered?.();
+              onBackToForm();
+            }}
             className="flex items-center gap-2 text-terra-500 hover:text-terra-600 font-medium mb-6 transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
@@ -45,14 +62,20 @@ const CartPage: React.FC<{
                   </div>
                 </div>
               </div>
-              <h2 className="font-display text-3xl font-semibold text-botanical-700 mb-3">Order placed!</h2>
+              <h2 className="font-display text-3xl font-semibold text-botanical-700 mb-3">
+                Order placed!
+              </h2>
               <p className="text-ink-500 text-lg mb-2">Thank you for your order.</p>
               <p className="text-ink-400 mb-10">
-                {orderedItemCount} soap{orderedItemCount !== 1 ? "s" : ""} confirmed — we&apos;ll begin crafting them soon.
+                {orderedItemCount} soap{orderedItemCount !== 1 ? 's' : ''} confirmed — we&apos;ll
+                begin crafting them soon.
               </p>
               <button
                 type="button"
-                onClick={() => { onDismissOrdered?.(); onBackToForm(); }}
+                onClick={() => {
+                  onDismissOrdered?.();
+                  onBackToForm();
+                }}
                 className="btn-apothecary btn-primary btn-full text-base py-4"
               >
                 Craft More Soaps
@@ -82,13 +105,23 @@ const CartPage: React.FC<{
               <div className="w-28 h-28 bg-botanical-100 rounded-full flex items-center justify-center mx-auto mb-8 animate-float">
                 <Check className="w-16 h-16 text-botanical-500" />
               </div>
-              <h2 className="font-display text-3xl font-semibold text-botanical-700 mb-3">Soap added!</h2>
+              <h2 className="font-display text-3xl font-semibold text-botanical-700 mb-3">
+                Soap added!
+              </h2>
               <p className="text-ink-500 text-lg mb-10">Your soap has been added to your order.</p>
               <div className="space-y-3">
-                <button type="button" onClick={onCheckout} className="btn-apothecary btn-primary btn-full text-base py-4">
+                <button
+                  type="button"
+                  onClick={onCheckout}
+                  className="btn-apothecary btn-primary btn-full text-base py-4"
+                >
                   Proceed to Checkout
                 </button>
-                <button type="button" onClick={onBackToForm} className="btn-apothecary btn-secondary btn-full text-sm py-3">
+                <button
+                  type="button"
+                  onClick={onBackToForm}
+                  className="btn-apothecary btn-secondary btn-full text-sm py-3"
+                >
                   + Add Another Soap
                 </button>
               </div>
@@ -102,20 +135,20 @@ const CartPage: React.FC<{
   return (
     <div className="min-h-screen bg-parchment-100">
       <div className="max-w-md mx-auto px-4 pt-6">
-          <button
-            type="button"
-            onClick={onBackToForm}
-            className="flex items-center gap-2 text-terra-500 hover:text-terra-600 font-medium mb-6 transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            <span className="text-sm">Back to form</span>
-          </button>
+        <button
+          type="button"
+          onClick={onBackToForm}
+          className="flex items-center gap-2 text-terra-500 hover:text-terra-600 font-medium mb-6 transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          <span className="text-sm">Back to form</span>
+        </button>
 
-          <div className="card-apothecary overflow-hidden">
-            <div className="bg-terra-400 p-6 text-white text-center">
+        <div className="card-apothecary overflow-hidden">
+          <div className="bg-terra-400 p-6 text-white text-center">
             <h1 className="font-display text-2xl font-semibold">Your Cart</h1>
             <p className="text-white/75 mt-1 text-sm">
-              {cart.totalQuantity} soap{cart.totalQuantity !== 1 ? "s" : ""} in your order
+              {cart.totalQuantity} soap{cart.totalQuantity !== 1 ? 's' : ''} in your order
             </p>
           </div>
 
@@ -135,7 +168,9 @@ const CartPage: React.FC<{
                   {cart.items.map((item) => (
                     <div key={item.id} className="cart-item">
                       <div className="flex-1 min-w-0">
-                        <p className="font-display font-semibold text-lg text-ink-700">{item.shape} · {item.scent}</p>
+                        <p className="font-display font-semibold text-lg text-ink-700">
+                          {item.shape} · {item.scent}
+                        </p>
                         <p className="text-ink-400 text-sm">
                           {item.color} · {item.size}g
                         </p>
@@ -144,18 +179,26 @@ const CartPage: React.FC<{
                         </div>
                       </div>
                       <div className="flex items-center gap-3 flex-shrink-0">
-                        <span className="font-display font-semibold text-terra-500">Rs. {item.price * item.quantity}</span>
+                        <span className="font-display font-semibold text-terra-500">
+                          Rs. {item.price * item.quantity}
+                        </span>
                         {onUpdateQuantity ? (
                           <div className="flex items-center gap-1 bg-parchment-100 rounded-full px-1 py-0.5">
                             <button
                               type="button"
-                              onClick={() => item.quantity > 1 ? onUpdateQuantity(item.id, item.quantity - 1) : onRemoveItem(item.id)}
+                              onClick={() =>
+                                item.quantity > 1
+                                  ? onUpdateQuantity(item.id, item.quantity - 1)
+                                  : onRemoveItem(item.id)
+                              }
                               className="w-8 h-8 flex items-center justify-center rounded-full bg-white shadow-sm hover:bg-parchment-50 text-ink-600 font-semibold text-lg"
                               aria-label="Decrease quantity"
                             >
                               −
                             </button>
-                            <span className="w-8 text-center font-semibold text-ink-700">{item.quantity}</span>
+                            <span className="w-8 text-center font-semibold text-ink-700">
+                              {item.quantity}
+                            </span>
                             <button
                               type="button"
                               onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
@@ -184,11 +227,14 @@ const CartPage: React.FC<{
                   <div className="bg-botanical-100 rounded-2xl p-4 border border-botanical-300 mb-5">
                     <div className="flex items-center justify-center gap-2 text-botanical-700 font-semibold">
                       <Sparkles className="w-5 h-5" />
-                      <span className="uppercase text-xs tracking-widest font-accent">Bulk Discount Applied</span>
+                      <span className="uppercase text-xs tracking-widest font-accent">
+                        Bulk Discount Applied
+                      </span>
                       <Sparkles className="w-5 h-5" />
                     </div>
                     <p className="text-botanical-600 text-sm text-center mt-1">
-                      {discountPercentage}% off on {cart.totalQuantity} soaps — you save Rs. {discountAmount}
+                      {discountPercentage}% off on {cart.totalQuantity} soaps — you save Rs.{' '}
+                      {discountAmount}
                     </p>
                   </div>
                 )}
@@ -201,7 +247,8 @@ const CartPage: React.FC<{
                   {discountPercentage > 0 && (
                     <div className="flex justify-between text-botanical-600 font-medium text-sm">
                       <span className="flex items-center gap-1">
-                        <Sparkles className="w-3.5 h-3.5" />Discount ({discountPercentage}%)
+                        <Sparkles className="w-3.5 h-3.5" />
+                        Discount ({discountPercentage}%)
                       </span>
                       <span>- Rs. {discountAmount}</span>
                     </div>
@@ -213,10 +260,18 @@ const CartPage: React.FC<{
                 </div>
 
                 <div className="space-y-2">
-                  <button type="button" onClick={onCheckout} className="btn-apothecary btn-primary btn-full text-base py-4">
+                  <button
+                    type="button"
+                    onClick={onCheckout}
+                    className="btn-apothecary btn-primary btn-full text-base py-4"
+                  >
                     Checkout — Rs. {total}
                   </button>
-                  <button type="button" onClick={onBackToForm} className="btn-apothecary btn-secondary btn-full text-sm py-3">
+                  <button
+                    type="button"
+                    onClick={onBackToForm}
+                    className="btn-apothecary btn-secondary btn-full text-sm py-3"
+                  >
                     + Add Another Soap
                   </button>
                   <button
