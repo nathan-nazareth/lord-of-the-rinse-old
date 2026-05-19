@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test('homepage loads correctly', async ({ page }) => {
   await page.goto('/');
-  await expect(page).toHaveTitle(/Organic Soap Builder/);
+  await expect(page).toHaveTitle(/Lord of the Rinse/);
   await expect(page.locator('h1:has-text("Handmade Soap Workshop")')).toBeVisible();
   await expect(page.locator('text=Handcraft your own organic soaps')).toBeVisible();
   await expect(page.locator('button:has-text("Start Building Soaps")')).toBeVisible();

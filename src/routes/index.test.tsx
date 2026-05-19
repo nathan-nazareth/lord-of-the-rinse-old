@@ -40,7 +40,7 @@ describe('index route', () => {
     const route = indexRoute as any;
     expect(typeof route.options.beforeLoad).toBe('function');
     route.options.beforeLoad();
-    expect(document.title).toBe('Organic Soap Builder');
+    expect(document.title).toBe('Lord of the Rinse');
   });
 
   it('has a beforeLoad hook', () => {

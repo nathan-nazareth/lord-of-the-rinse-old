@@ -21,8 +21,8 @@ export default defineConfig(({ mode }) => {
           registerType: 'autoUpdate',
           includeAssets: ['favicon.ico', 'logo.png'],
           manifest: {
-            name: 'Organic Soap Builder',
-            short_name: 'Soap Builder',
+            name: 'Lord of the Rinse',
+            short_name: 'Lord of the Rinse',
             description: 'Build your custom organic soaps',
             theme_color: '#efece6',
             background_color: '#f9f8f6',
