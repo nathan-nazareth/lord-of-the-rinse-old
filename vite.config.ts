@@ -19,7 +19,7 @@ export default defineConfig(({ mode }) => {
         }),
         VitePWA({
           registerType: 'autoUpdate',
-          includeAssets: ['favicon.ico', 'logo.png'],
+          includeAssets: ['logo.png'],
           manifest: {
             name: 'Lord of the Rinse',
             short_name: 'Lord of the Rinse',
