@@ -36,18 +36,18 @@ function IndexContent() {
             }}
           />
           <div className="absolute inset-0 bg-black/10" />
-          <div className="relative z-10 flex flex-col items-center justify-start h-full pt-16 md:pt-0 md:justify-center">
-            <button
-              type="button"
-              onClick={handleShopClick}
-              className="btn-apothecary btn-primary text-base px-10 py-4 animate-enter delay-5"
-            >
-              Shop Now
-            </button>
-            <p className="text-white/90 text-sm mt-4 font-accent tracking-wider border border-white/30 bg-black/20 rounded px-4 py-2">
-              Bulk discounts available — order 3+ and save up to 15%
-            </p>
-          </div>
+            <div className="relative z-10 flex flex-col items-center justify-start h-full pt-32 md:pt-0 md:justify-center md:mt-24">
+              <button
+                type="button"
+                onClick={handleShopClick}
+                className="btn-apothecary btn-primary text-base px-10 py-4 animate-enter delay-5"
+              >
+                Shop Now
+              </button>
+              <p className="text-white/90 text-sm mt-4 font-accent tracking-wider border border-white/30 bg-black/40 rounded px-4 py-2">
+                Bulk discounts available — order 3+ and save up to 15%
+              </p>
+            </div>
         </div>
       ) : (
         <div className="relative z-base min-h-screen py-8 px-4">
@@ -78,5 +78,7 @@ function IndexContent() {
 export const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
+  meta: [{ title: 'Organic Soap Builder' }],
+  beforeLoad: () => {},
   component: IndexContent,
 });
