@@ -36,7 +36,7 @@ function IndexContent() {
             }}
           />
           <div className="absolute inset-0 bg-black/10" />
-            <div className="relative z-10 flex flex-col items-center justify-start h-full pt-48 md:pt-0 md:justify-center md:mt-40">
+            <div className="relative z-10 flex flex-col items-center justify-start h-full pt-64 md:pt-0 md:justify-center md:mt-56">
               <button
                 type="button"
                 onClick={handleShopClick}
