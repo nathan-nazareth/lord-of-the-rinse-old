@@ -36,7 +36,7 @@ function IndexContent() {
             }}
           />
           <div className="absolute inset-0 bg-black/10" />
-            <div className="relative z-10 flex flex-col items-center justify-start h-full pt-32 md:pt-0 md:justify-center md:mt-24">
+            <div className="relative z-10 flex flex-col items-center justify-start h-full pt-48 md:pt-0 md:justify-center md:mt-40">
               <button
                 type="button"
                 onClick={handleShopClick}
@@ -78,7 +78,8 @@ function IndexContent() {
 export const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  meta: [{ title: 'Organic Soap Builder' }],
   beforeLoad: () => {},
   component: IndexContent,
+}).update({
+  meta: [{ title: 'Organic Soap Builder' }],
 });
