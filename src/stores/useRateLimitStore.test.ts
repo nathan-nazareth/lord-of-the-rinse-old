@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { createJSONStorage } from 'zustand/middleware';
 import { MockLocalStorage } from '@/src/test-utils/mock-local-storage';
 import { useRateLimitStore } from '@/src/stores/useRateLimitStore';
 
@@ -8,6 +9,9 @@ describe('useRateLimitStore', () => {
   beforeEach(() => {
     mockStorage = new MockLocalStorage();
     vi.stubGlobal('localStorage', mockStorage);
+    useRateLimitStore.persist.setOptions({
+      storage: createJSONStorage(() => mockStorage),
+    });
     useRateLimitStore.persist.clearStorage();
     useRateLimitStore.setState({ count: 0, windowStart: 0, lastSubmission: 0 });
   });
