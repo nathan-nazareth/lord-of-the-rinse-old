@@ -79,7 +79,7 @@ export const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
   beforeLoad: () => {
-    document.title = 'Organic Soap Builder';
+    document.title = 'Lord of the Rinse';
   },
   component: IndexContent,
 });
