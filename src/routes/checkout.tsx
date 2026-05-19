@@ -29,5 +29,8 @@ function CheckoutContent() {
 export const checkoutRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/checkout',
+  beforeLoad: () => {
+    document.title = 'Checkout';
+  },
   component: CheckoutContent,
 });

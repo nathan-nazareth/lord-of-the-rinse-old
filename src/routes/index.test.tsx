@@ -35,6 +35,18 @@ describe('index route', () => {
     });
   });
 
+  it('has meta title for the home page', () => {
+    // biome-ignore lint/suspicious/noExplicitAny: TanStack Router route types are complex generics
+    const route = indexRoute as any;
+    expect(typeof route.options.beforeLoad).toBe('function');
+    route.options.beforeLoad();
+    expect(document.title).toBe('Organic Soap Builder');
+  });
+
+  it('has a beforeLoad hook', () => {
+    expect(typeof indexRoute.options.beforeLoad).toBe('function');
+  });
+
   it('renders landing page with Shop Now button on first visit', async () => {
     const router = createTestRouter();
 

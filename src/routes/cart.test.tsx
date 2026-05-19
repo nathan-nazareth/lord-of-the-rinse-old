@@ -37,6 +37,18 @@ describe('cart route', () => {
     });
   });
 
+  it('has meta title for the cart page', () => {
+    // biome-ignore lint/suspicious/noExplicitAny: TanStack Router route types are complex generics
+    const route = cartRoute as any;
+    expect(typeof route.options.beforeLoad).toBe('function');
+    route.options.beforeLoad();
+    expect(document.title).toBe('Cart');
+  });
+
+  it('has a beforeLoad hook', () => {
+    expect(typeof cartRoute.options.beforeLoad).toBe('function');
+  });
+
   it('renders empty cart with "Nothing here yet" message', async () => {
     const router = createTestRouter(['/cart']);
 
@@ -100,7 +112,7 @@ describe('cart route', () => {
     fireEvent.click(screen.getByText('Back to form'));
 
     await waitFor(() => {
-      expect(screen.getByText('Your soap, your story')).not.toBeNull();
+      expect(screen.getByText('Lord of the Rinse')).not.toBeNull();
     });
   });
 });

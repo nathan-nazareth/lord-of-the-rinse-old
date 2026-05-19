@@ -18,5 +18,8 @@ function ConfirmationContent() {
 export const confirmationRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/confirmation',
+  beforeLoad: () => {
+    document.title = 'Order Confirmed';
+  },
   component: ConfirmationContent,
 });

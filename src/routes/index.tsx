@@ -78,8 +78,8 @@ function IndexContent() {
 export const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  beforeLoad: () => {},
+  beforeLoad: () => {
+    document.title = 'Organic Soap Builder';
+  },
   component: IndexContent,
-}).update({
-  meta: [{ title: 'Organic Soap Builder' }],
 });

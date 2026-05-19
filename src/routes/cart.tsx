@@ -34,5 +34,8 @@ function CartContent() {
 export const cartRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/cart',
+  beforeLoad: () => {
+    document.title = 'Cart';
+  },
   component: CartContent,
 });
