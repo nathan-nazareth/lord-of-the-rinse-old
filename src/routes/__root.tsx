@@ -3,7 +3,7 @@ import { ErrorBoundary } from '../components/ErrorBoundary';
 import { LoadingState } from '../components/LoadingState';
 import { HomeProvider } from './-components/home-context';
 
-export const rootRoute = createRootRouteWithContext<object>()({
+export const Route = createRootRouteWithContext<object>()({
   component: () => (
     <ErrorBoundary>
       <LoadingState timeout={3000}>

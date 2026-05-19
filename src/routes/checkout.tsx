@@ -1,5 +1,4 @@
-import { createRoute, useNavigate } from '@tanstack/react-router';
-import { rootRoute } from './__root';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useHomeContext } from './-components/home-context';
 import CheckoutPage from '../components/CheckoutPage';
 
@@ -22,9 +21,7 @@ function CheckoutContent() {
   );
 }
 
-export const checkoutRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/checkout',
+export const Route = createFileRoute('/checkout')({
   beforeLoad: () => {
     document.title = 'Checkout';
   },

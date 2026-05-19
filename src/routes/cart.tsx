@@ -1,5 +1,4 @@
-import { createRoute, useNavigate } from '@tanstack/react-router';
-import { rootRoute } from './__root';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useHomeContext } from './-components/home-context';
 import CartPage from '../components/CartPage';
 
@@ -34,9 +33,7 @@ function CartContent() {
   );
 }
 
-export const cartRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/cart',
+export const Route = createFileRoute('/cart')({
   beforeLoad: () => {
     document.title = 'Cart';
   },

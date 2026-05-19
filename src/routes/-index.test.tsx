@@ -1,14 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { RouterProvider, createRouter, createMemoryHistory } from '@tanstack/react-router';
-import { rootRoute } from './__root';
-import { indexRoute } from './index';
+import { Route as rootRoute } from './__root';
+import { Route as indexRoute } from './index';
 import { HomeProvider } from './-components/home-context';
 import { useFormStore } from '../stores/useFormStore';
 import { MockLocalStorage } from '../test-utils/mock-local-storage';
 
 function createTestRouter(initialEntries: string[] = ['/']) {
-  const routeTree = rootRoute.addChildren([indexRoute]);
+  const IndexRoute = indexRoute.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => rootRoute,
+  } as any);
+  const routeTree = rootRoute._addFileChildren({ IndexRoute })._addFileTypes();
   return createRouter({
     routeTree,
     history: createMemoryHistory({ initialEntries }),

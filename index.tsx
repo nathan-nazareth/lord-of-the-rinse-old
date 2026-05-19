@@ -1,10 +1,16 @@
 import ReactDOM from 'react-dom/client';
-import { RouterProvider } from '@tanstack/react-router';
-import { router } from './src/router';
+import { RouterProvider, createRouter, createBrowserHistory } from '@tanstack/react-router';
+import { routeTree } from './src/routeTree.gen';
 import './index.css';
 import { setupGlobalErrorHandlers } from './src/utils/errorLogging';
 
 setupGlobalErrorHandlers();
+
+const router = createRouter({
+  routeTree,
+  history: createBrowserHistory(),
+  context: {},
+});
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {

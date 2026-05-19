@@ -1,5 +1,4 @@
-import { createRoute, useNavigate } from '@tanstack/react-router';
-import { rootRoute } from './__root';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useHomeContext } from './-components/home-context';
 import ConfirmationPage from '../components/ConfirmationPage';
 
@@ -12,9 +11,7 @@ function ConfirmationContent() {
   );
 }
 
-export const confirmationRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/confirmation',
+export const Route = createFileRoute('/confirmation')({
   beforeLoad: () => {
     document.title = 'Order Confirmed';
   },

@@ -1,5 +1,4 @@
-import { createRoute, useNavigate } from '@tanstack/react-router';
-import { rootRoute } from './__root';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useHomeContext } from './-components/home-context';
 import { SoapForm } from '../components/SoapForm';
 
@@ -77,9 +76,7 @@ function IndexContent() {
   );
 }
 
-export const indexRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/',
+export const Route = createFileRoute('/')({
   beforeLoad: () => {
     document.title = 'Lord of the Rinse';
   },

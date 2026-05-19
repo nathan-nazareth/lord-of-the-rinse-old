@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, waitFor } from '@testing-library/react';
 import { RouterProvider, createRouter, createMemoryHistory } from '@tanstack/react-router';
-import { rootRoute } from './__root';
+import { Route as rootRoute } from './__root';
 
 describe('__root route', () => {
   it('renders layout wrapper with HomeProvider', async () => {

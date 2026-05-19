@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { RouterProvider, createRouter, createMemoryHistory } from '@tanstack/react-router';
-import { rootRoute } from './__root';
-import { cartRoute } from './cart';
-import { indexRoute } from './index';
+import { Route as rootRoute } from './__root';
+import { Route as cartRouteImport } from './cart';
+import { Route as indexRoute } from './index';
 import { HomeProvider } from './-components/home-context';
 import { useFormStore } from '../stores/useFormStore';
 import { useCartStore } from '../stores/useCartStore';
@@ -11,7 +11,17 @@ import { MockLocalStorage } from '../test-utils/mock-local-storage';
 import { CART_KEY } from '../types/cart';
 
 function createTestRouter(initialEntries: string[] = ['/cart']) {
-  const routeTree = rootRoute.addChildren([indexRoute, cartRoute]);
+  const IndexRoute = indexRoute.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => rootRoute,
+  } as any);
+  const cartRoute = cartRouteImport.update({
+    id: '/cart',
+    path: '/cart',
+    getParentRoute: () => rootRoute,
+  } as any);
+  const routeTree = rootRoute.addChildren([IndexRoute, cartRoute]);
   return createRouter({
     routeTree,
     history: createMemoryHistory({ initialEntries }),
@@ -42,14 +52,14 @@ describe('cart route', () => {
 
   it('has meta title for the cart page', () => {
     // biome-ignore lint/suspicious/noExplicitAny: TanStack Router route types are complex generics
-    const route = cartRoute as any;
+    const route = cartRouteImport as any;
     expect(typeof route.options.beforeLoad).toBe('function');
     route.options.beforeLoad();
     expect(document.title).toBe('Cart');
   });
 
   it('has a beforeLoad hook', () => {
-    expect(typeof cartRoute.options.beforeLoad).toBe('function');
+    expect(typeof cartRouteImport.options.beforeLoad).toBe('function');
   });
 
   it('renders empty cart with "Nothing here yet" message', async () => {
