@@ -1,4 +1,4 @@
-import { createRoute } from '@tanstack/react-router';
+import { createRoute, useNavigate } from '@tanstack/react-router';
 import { rootRoute } from './__root';
 import { useHomeContext } from './-components/home-context';
 import { SoapForm } from '../components/SoapForm';
@@ -11,6 +11,7 @@ function IndexContent() {
     handleShopClick,
     handleAddToCart,
   } = useHomeContext();
+  const navigate = useNavigate();
 
   return (
     <div className="apothecary-bg">
@@ -56,8 +57,8 @@ function IndexContent() {
                 <SoapForm
                   cart={cart}
                   onAddToCart={handleAddToCart}
-                  onGoToCart={() => {}}
-                  onGoToCheckout={() => {}}
+                  onGoToCart={() => navigate({ to: '/cart' })}
+                  onGoToCheckout={() => navigate({ to: '/checkout' })}
                 />
               </div>
             </main>

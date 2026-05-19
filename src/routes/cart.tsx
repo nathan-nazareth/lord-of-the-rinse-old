@@ -1,0 +1,38 @@
+import { createRoute, useNavigate } from '@tanstack/react-router';
+import { rootRoute } from './__root';
+import { useHomeContext } from './-components/home-context';
+import CartPage from '../components/CartPage';
+
+function CartContent() {
+  const navigate = useNavigate();
+  const {
+    cart,
+    removeItem,
+    updateQuantity,
+    clearCart,
+    justOrdered,
+    confirmationItemCount,
+    handleDismissOrdered,
+    setShowLanding,
+  } = useHomeContext();
+
+  return (
+    <CartPage
+      cart={cart}
+      onBackToForm={() => { setShowLanding(false); navigate({ to: '/' }); }}
+      onCheckout={() => navigate({ to: '/checkout' })}
+      onRemoveItem={removeItem}
+      onClearCart={clearCart}
+      onUpdateQuantity={updateQuantity}
+      justOrdered={justOrdered}
+      orderedItemCount={confirmationItemCount}
+      onDismissOrdered={handleDismissOrdered}
+    />
+  );
+}
+
+export const cartRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/cart',
+  component: CartContent,
+});
