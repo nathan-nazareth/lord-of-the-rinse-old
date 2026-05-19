@@ -111,7 +111,7 @@ const Hero: React.FC<{ onShopClick: () => void }> = ({ onShopClick }) => {
             Shop Now
           </button>
           <p className="text-ink-400 text-xs mt-3 font-accent">
-            Bulk discounts available — order 3+ and save up to 15%
+            Bulk discounts available — order 2+ and save up to 15%
           </p>
         </div>
       </div>

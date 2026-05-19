@@ -7,6 +7,7 @@ import {
   logWeb3FormsError,
   logWeb3FormsSuccess,
 } from '../utils/errorLogging';
+import { calculateDiscount } from '../utils/pricing';
 
 const WEB3FORMS_ENDPOINT =
   import.meta.env.VITE_WEB3FORMS_ENDPOINT || 'https://api.web3forms.com/submit';
@@ -57,9 +58,11 @@ export async function submitCartToWebhook(
 
   const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const discountPercentage = totalQuantity >= 4 ? 15 : totalQuantity >= 2 ? 10 : 0;
-  const discountAmount = Math.round(subtotal * (discountPercentage / 100));
-  const finalTotal = subtotal - discountAmount;
+  const {
+    discountPercentage,
+    discountAmount,
+    total: finalTotal,
+  } = calculateDiscount(subtotal, totalQuantity);
 
   const orderItemsFormatted = items
     .map(
