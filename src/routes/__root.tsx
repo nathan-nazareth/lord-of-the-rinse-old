@@ -1,22 +1,15 @@
-import { createRootRouteWithContext } from '@tanstack/react-router';
-import { BrowserRouter } from 'react-router-dom';
+import { createRootRouteWithContext, Outlet } from '@tanstack/react-router';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { LoadingState } from '../components/LoadingState';
-import App from '../../App';
+import { HomeProvider } from './-components/home-context';
 
 export const rootRoute = createRootRouteWithContext<object>()({
   component: () => (
     <ErrorBoundary>
       <LoadingState timeout={3000}>
-        <div className="apothecary-bg">
-          <div className="relative z-base min-h-screen py-8 px-4">
-            <div className="max-w-5xl mx-auto">
-              <BrowserRouter>
-                <App />
-              </BrowserRouter>
-            </div>
-          </div>
-        </div>
+        <HomeProvider>
+          <Outlet />
+        </HomeProvider>
       </LoadingState>
     </ErrorBoundary>
   ),

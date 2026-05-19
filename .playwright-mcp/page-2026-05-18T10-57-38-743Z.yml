@@ -1,0 +1,102 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e4]:
+        - link [ref=e5] [cursor=pointer]:
+          - /url: https://postimages.org/
+          - img [ref=e6]:
+            - generic [ref=e7]:
+              - generic "post" [ref=e8]
+              - generic "images" [ref=e9]
+        - generic [ref=e10]:
+          - list [ref=e11]:
+            - listitem [ref=e12]:
+              - link "Upload" [ref=e13] [cursor=pointer]:
+                - /url: https://postimages.org/
+                - img [ref=e14]
+                - text: Upload
+            - listitem [ref=e16]:
+              - link "Upload via URL" [ref=e17] [cursor=pointer]:
+                - /url: https://postimages.org/web
+                - img [ref=e18]
+                - text: Upload via URL
+            - listitem [ref=e20]:
+              - link "Website plugins" [ref=e21] [cursor=pointer]:
+                - /url: https://postimages.org/plugins
+                - img [ref=e22]
+                - text: Website plugins
+            - listitem
+          - list [ref=e24]:
+            - listitem [ref=e25]:
+              - link "Log in" [ref=e26] [cursor=pointer]:
+                - /url: https://postimages.org/login
+                - img [ref=e27]
+                - text: Log in
+            - listitem [ref=e29]:
+              - link "Sign up" [ref=e30] [cursor=pointer]:
+                - /url: https://postimages.org/signup
+                - img [ref=e31]
+                - text: Sign up
+  - main [ref=e33]:
+    - generic [ref=e34]:
+      - generic [ref=e35]:
+        - button "Zoom" [ref=e36] [cursor=pointer]:
+          - img [ref=e37]
+          - text: Zoom
+        - link "Download original image" [ref=e39] [cursor=pointer]:
+          - /url: https://i.postimg.cc/4sV7sx8T/Gemini-Generated-Image-iz8f8oiz8f8oiz8f.png?dl=1
+          - img [ref=e40]
+          - text: Download original image
+        - button "Share" [ref=e42] [cursor=pointer]:
+          - img [ref=e43]
+          - text: Share
+      - generic [ref=e46]:
+        - img "Gemini Generated Image iz8f8oiz8f8oiz8f" [ref=e48]
+        - heading "Gemini Generated Image iz8f8oiz8f8oiz8f" [level=6] [ref=e49]
+  - contentinfo [ref=e51]:
+    - generic [ref=e52]:
+      - list [ref=e55]:
+        - listitem [ref=e56]:
+          - link "Upload" [ref=e57] [cursor=pointer]:
+            - /url: https://postimages.org/
+            - img [ref=e58]
+            - text: Upload
+        - listitem [ref=e60]:
+          - link "Upload via URL" [ref=e61] [cursor=pointer]:
+            - /url: https://postimages.org/web
+            - img [ref=e62]
+            - text: Upload via URL
+        - listitem [ref=e64]:
+          - link "Website plugins" [ref=e65] [cursor=pointer]:
+            - /url: https://postimages.org/plugins
+            - img [ref=e66]
+            - text: Website plugins
+        - listitem [ref=e68]:
+          - link "Windows App" [ref=e69] [cursor=pointer]:
+            - /url: https://postimages.org/app
+            - img [ref=e70]
+            - text: Windows App
+      - list [ref=e74]:
+        - listitem [ref=e75]:
+          - link "About" [ref=e76] [cursor=pointer]:
+            - /url: https://postimages.org/about
+        - listitem [ref=e77]:
+          - link "Terms of Use" [ref=e78] [cursor=pointer]:
+            - /url: https://postimages.org/terms
+        - listitem [ref=e79]:
+          - link "Privacy Policy" [ref=e80] [cursor=pointer]:
+            - /url: https://postimages.org/privacy
+        - listitem [ref=e81]:
+          - link "FAQ" [ref=e82] [cursor=pointer]:
+            - /url: https://postimages.org/faq
+        - listitem [ref=e83]:
+          - link "Contact Us" [ref=e84] [cursor=pointer]:
+            - /url: https://postimages.org/contact
+      - generic [ref=e85]:
+        - button "Dark mode" [ref=e86] [cursor=pointer]:
+          - img [ref=e87]
+          - text: Dark mode
+        - button "Languages" [ref=e90] [cursor=pointer]:
+          - img [ref=e91]
+          - text: Languages
+      - generic [ref=e93]: © 2026 Postimages — Image hosting made simple.
