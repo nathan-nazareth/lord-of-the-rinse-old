@@ -9,7 +9,9 @@
       "!!test-*.js",
       "!!debug-*.js",
       "!!quick-test.js",
-      "!!src/routeTree.gen.ts"
+      "!!src/routeTree.gen.ts",
+      "!!bun.lock",
+      "!!package-lock.json"
     ]
   },
   "formatter": {
