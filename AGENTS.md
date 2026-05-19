@@ -1,39 +1,61 @@
-# Soap-Selling Development Guidelines
+# Repository Guidelines
 
-Auto-generated from all feature plans. Last updated: 2026-01-03
+## Project Overview
 
-## Active Technologies
-- [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION] + [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION] (001-web3forms-migration)
-- [if applicable, e.g., PostgreSQL, CoreData, files or N/A] (001-web3forms-migration)
-- TypeScript 5.8.2 + React 19.2.3 + Vite 6.2.0 + React 19.2.3, lucide-react 0.562.0, Vite 6.2.0 (001-web3forms-migration)
-- Browser localStorage for submission state tracking (001-web3forms-migration)
-
-- TypeScript 5.8.2 + React 19.2.3 + Vite 6.2.0 (main)
-- TypeScript 5.8.2 + React 19.2.3 + Vite 6.2.0 (1-webhook-order-submission)
-- TypeScript 5.8.2 + React 19.2.3 + Vite 6.2.0 (2-multi-item-order)
+Organic soap builder — a React SPA where customers configure custom soaps (shape, color, scent, weight) and submit orders via webhook. Built with TypeScript 5.8, React 19, Vite 6, Tailwind CSS 4, Zustand, and react-router-dom 7.
 
 ## Project Structure
 
 ```text
-src/
-├── types/
-├── services/
-├── hooks/
-└── components/
-
-tests/
+├── src/
+│   ├── components/    # React UI components (SoapForm, Cart, CartPage, CheckoutPage, etc.)
+│   ├── hooks/         # Custom hooks (useCart, useFormPersistence, useSoapPricing)
+│   ├── services/      # Business logic (cart.ts, webhook.ts)
+│   ├── stores/        # Zustand stores (useRateLimitStore)
+│   ├── types/         # Shared TypeScript interfaces (cart.ts, webhook.ts)
+│   ├── utils/         # Pure helpers (pricing.ts, validators.ts, errorLogging.ts)
+│   └── test-utils/    # Test factories and helpers
+├── components/        # Shared layout components (Header)
+├── specs/             # Feature specs and plans
+├── App.tsx            # Root component with routing
+├── index.tsx          # Entry point
+└── server/            # Backend server (Node.js)
 ```
 
-## Commands
+## Build, Test, and Development Commands
 
-bun install; bun run dev
+| Command | Description |
+|---|---|
+| `bun install` | Install dependencies |
+| `bun run dev` | Start Vite dev server |
+| `bun run build` | Production build via Vite |
+| `bun run preview` | Preview production build |
+| `bun run test` | Run unit tests with Vitest (single run) |
+| `bun run test:watch` | Run Vitest in watch mode |
+| `bun run test:e2e` | Run Playwright end-to-end tests |
+| `bun run lint` | Lint with Biome |
 
-## Code Style
+## Coding Style and Naming Conventions
 
-TypeScript 5.8.2: Follow standard conventions
+- **Language:** TypeScript (strict mode, ES2022 target, bundler module resolution).
+- **Linting:** Biome with `recommended` rules. Run `bun run lint` before committing.
+- **Styling:** Tailwind CSS 4 with `@tailwindcss/postcss`. No CSS modules.
+- **Path aliases:** `@/*` maps to the project root (configured in `tsconfig.json` and `vitest.config.ts`).
+- **Components:** PascalCase `.tsx` files (e.g., `CartPage.tsx`).
+- **Hooks:** `use` prefix, camelCase (e.g., `useCart.ts`).
+- **Utilities/Services:** camelCase `.ts` files (e.g., `pricing.ts`, `webhook.ts`).
+- **Types:** Shared interfaces in `src/types/`, named exports only.
 
-## Recent Changes
-- 001-web3forms-migration: Added TypeScript 5.8.2 + React 19.2.3 + Vite 6.2.0 + React 19.2.3, lucide-react 0.562.0, Vite 6.2.0
-- 001-web3forms-migration: Added [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION] + [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]
+## Testing Guidelines
 
-- main: Added TypeScript 5.8.2 + React 19.2.3 + Vite 6.2.0
+- **Unit tests:** Vitest with `happy-dom` environment. Globals enabled (`describe`, `it`, `expect` available without imports).
+- **Test location:** Co-located next to source files using `*.test.ts` / `*.test.tsx` naming (e.g., `pricing.test.ts` next to `pricing.ts`).
+- **E2E tests:** Playwright, configured in `playwright.config.ts`. Run with `bun run test:e2e`.
+- **Test factories:** Shared helpers in `src/test-utils/`.
+
+## Commit and Pull Request Guidelines
+
+- Use **Conventional Commits**: `feat:`, `test:`, `fix:`, `chore:`, `docs:` prefixes followed by a lowercase imperative description.
+- Example: `feat: replace useFormRateLimit hook with useRateLimitStore Zustand store`.
+- Reference issue numbers in parentheses when applicable: `test: add localStorage mock and cart item factory (#19)`.
+- Keep commits focused and atomic — one logical change per commit.
