@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import {
   SoapScent,
   SoapColor,
   SoapShape,
-  type OrderFormState,
   SOAP_OPTIONS,
   SHAPE_OPTIONS,
   DEFAULT_SIZE,
@@ -11,7 +10,7 @@ import {
 } from "../../types";
 import { useSoapPricing } from "../hooks/useSoapPricing";
 import type { CartItem } from "../types/cart";
-import { useFormPersistence } from "../hooks/useFormPersistence";
+import { useFormStore } from "../stores/useFormStore";
 import { calculateDiscount } from "../utils/pricing";
 import ShoppingCart from "lucide-react/dist/esm/icons/shopping-cart";
 import Check from "lucide-react/dist/esm/icons/check";
@@ -28,18 +27,6 @@ const _SIZE_OPTIONS = [
   { label: "M", weight: 75 },
   { label: "L", weight: 100 },
 ];
-
-const INITIAL_STATE: OrderFormState = {
-  shape: null,
-  scent: null,
-  color: null,
-  quantity: "",
-  size: DEFAULT_SIZE,
-  hasLavenderPieces: false,
-  customerName: "",
-  customerEmail: "",
-  customerPhone: "",
-};
 
 const SCENT_INFO: Record<string, { description: string; tagline: string }> = {
   Lavender: { description: "Calming & relaxing", tagline: "For a restful ritual" },
@@ -166,17 +153,25 @@ interface SoapFormProps {
 }
 
 export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCart, onGoToCheckout }) => {
-  const [formData, setFormData] = useState<OrderFormState>(INITIAL_STATE);
   const [showAddedToast, setShowAddedToast] = useState(false);
-  const [currentStep, setCurrentStep] = useState<FormStep>("landing");
 
-  const { totalPrice } = useSoapPricing(
-    formData.scent, formData.size, formData.hasLavenderPieces,
-  );
+  const shape = useFormStore(s => s.shape);
+  const scent = useFormStore(s => s.scent);
+  const color = useFormStore(s => s.color);
+  const quantity = useFormStore(s => s.quantity);
+  const size = useFormStore(s => s.size);
+  const hasLavenderPieces = useFormStore(s => s.hasLavenderPieces);
+  const currentStep = useFormStore(s => s.currentStep);
+  const visited = useFormStore(s => s.visited);
+  const setField = useFormStore(s => s.setField);
+  const setCurrentStep = useFormStore(s => s.setCurrentStep);
+  const setVisited = useFormStore(s => s.setVisited);
+  const clear = useFormStore(s => s.clear);
+
+  const { totalPrice } = useSoapPricing(scent, size, hasLavenderPieces);
 
   const cartSubtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const { total: cartTotal } = calculateDiscount(cartSubtotal, cart.totalQuantity);
-  const { hasVisited: hasVisitedFn, restoreFormState, saveFormState } = useFormPersistence();
 
   const shapeSectionRef = useRef<HTMLDivElement>(null);
   const flavorSectionRef = useRef<HTMLDivElement>(null);
@@ -185,33 +180,6 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
   const colorSectionRef = useRef<HTMLDivElement>(null);
   const quantitySectionRef = useRef<HTMLDivElement>(null);
 
-  const hasVisited = hasVisitedFn();
-
-  useEffect(() => {
-    if (!hasVisited) return;
-    const restored = restoreFormState();
-    if (!restored) return;
-    setFormData((prev) => ({
-      ...prev,
-      shape: restored.shape ?? prev.shape,
-      scent: restored.scent ?? prev.scent,
-      color: restored.color ?? prev.color,
-      quantity: restored.quantity ?? prev.quantity,
-      size: restored.size ?? prev.size,
-      hasLavenderPieces: restored.hasLavenderPieces ?? prev.hasLavenderPieces,
-    }));
-    if (restored.currentStep && restored.currentStep !== "landing") {
-      setCurrentStep(restored.currentStep);
-    }
-  }, [hasVisited, restoreFormState]);
-
-  useEffect(() => {
-    saveFormState(
-      formData.shape, formData.scent, formData.color, formData.quantity, formData.size,
-      formData.hasLavenderPieces, currentStep,
-    );
-  }, [formData, currentStep, saveFormState]);
-
   const scrollToSection = (ref: React.RefObject<HTMLDivElement | null>) => {
     ref.current?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
@@ -219,47 +187,46 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
   const handleShapeChange = (shape: SoapShape) => {
     const limits = SIZE_LIMITS[shape];
     const clampedSize = Math.min(Math.max(DEFAULT_SIZE, limits.min), limits.max);
-    setFormData((prev) => ({ ...prev, shape, size: clampedSize }));
+    setField('shape', shape);
+    setField('size', clampedSize);
     setTimeout(() => scrollToSection(flavorSectionRef), 300);
   };
 
   const handleScentChange = (scent: SoapScent) => {
-    setFormData((prev) => ({
-      ...prev,
-      scent,
-      hasLavenderPieces: false,
-    }));
+    setField('scent', scent);
+    setField('hasLavenderPieces', false);
     setTimeout(() => scrollToSection(sizeSectionRef), 300);
   };
 
   const handleSizeChange = (size: number) => {
-    setFormData((prev) => ({ ...prev, size }));
+    setField('size', size);
     setTimeout(() => scrollToSection(lavenderSectionRef), 300);
   };
 
   const handleContinueFromLanding = () => {
+    setVisited();
     setCurrentStep("shape");
     setTimeout(() => scrollToSection(shapeSectionRef), 100);
   };
 
   const handleColorChange = (color: SoapColor) => {
-    setFormData((prev) => ({ ...prev, color }));
+    setField('color', color);
     setTimeout(() => scrollToSection(quantitySectionRef), 100);
   };
 
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/[^0-9]/g, "");
-    setFormData((prev) => ({ ...prev, quantity: value }));
+    setField('quantity', value);
   };
 
-  const isScentStepValid = formData.scent && formData.size > 0;
+  const isScentStepValid = scent && size > 0;
   const isFormValid =
-    formData.shape &&
-    formData.scent &&
-    formData.color &&
-    formData.size > 0 &&
-    formData.quantity.length > 0 &&
-    parseInt(formData.quantity, 10) > 0;
+    shape &&
+    scent &&
+    color &&
+    size > 0 &&
+    quantity.length > 0 &&
+    parseInt(quantity, 10) > 0;
 
   const handleStepNavigate = (step: FormStep) => {
     const stepIdx = STEPS.indexOf(step);
@@ -280,16 +247,13 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
     setShowAddedToast(true);
     setTimeout(() => setShowAddedToast(false), 3500);
     // biome-ignore lint/style/noNonNullAssertion: validated by isFormValid before submit
-    const shape = formData.shape!;
+    const shapeVal = shape!;
     // biome-ignore lint/style/noNonNullAssertion: validated by isFormValid before submit
-    const scent = formData.scent!;
+    const scentVal = scent!;
     // biome-ignore lint/style/noNonNullAssertion: validated by isFormValid before submit
-    const color = formData.color!;
-    onAddToCart(
-      shape, scent, totalPrice, color, formData.quantity,
-      formData.size, formData.hasLavenderPieces,
-    );
-    setFormData(INITIAL_STATE);
+    const colorVal = color!;
+    onAddToCart(shapeVal, scentVal, totalPrice, colorVal, quantity, size, hasLavenderPieces);
+    clear();
     setCurrentStep("shape");
   };
 
@@ -306,7 +270,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
       )}
 
       {/* Landing page */}
-      {currentStep === "landing" && !hasVisited ? (
+      {currentStep === "landing" && !visited ? (
         <div className="text-center">
           <div className="inline-flex items-center justify-center mb-6 animate-float">
             <img
@@ -394,7 +358,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
 
               <div className="grid grid-cols-2 gap-3">
                 {SHAPE_OPTIONS.map((option) => {
-                  const isSelected = formData.shape === option.value;
+                  const isSelected = shape === option.value;
                   return (
                     <button
                       type="button"
@@ -417,7 +381,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
                 })}
               </div>
 
-              {formData.shape && (
+              {shape && (
                 <button
                   type="button"
                   onClick={() => {
@@ -433,18 +397,18 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
             </div>
 
             {/* ── SCENT STEP ── */}
-            {formData.shape && (
+            {shape && (
               <div ref={flavorSectionRef} className="mt-8 space-y-5">
                 <div className="border-t border-parchment-300 pt-6">
                   <p className="overline mb-1">Step 2 of 4</p>
                   <h2 className="font-display text-2xl font-semibold text-ink-700 mb-1">Choose your scent</h2>
-                  <p className="text-ink-400 text-sm">Select the botanical fragrance for your {formData.shape} soap</p>
+                  <p className="text-ink-400 text-sm">Select the botanical fragrance for your {shape} soap</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   {SOAP_OPTIONS.map((option) => {
                     const info = SCENT_INFO[option.scent];
-                    const isSelected = formData.scent === option.scent;
+                    const isSelected = scent === option.scent;
                     return (
                       <button
                         type="button"
@@ -469,7 +433,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
             )}
 
             {/* ── SIZE + ADDONS STEP ── */}
-            {formData.scent && (
+            {scent && (
               <div ref={sizeSectionRef} className="mt-8 space-y-5">
                 <div className="border-t border-parchment-300 pt-6">
                   <div className="flex items-center justify-between mb-4">
@@ -478,21 +442,21 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
                       <h2 className="font-display text-xl font-semibold text-ink-700">Select size</h2>
                     </div>
                     <div className="flex gap-2">
-                      <span className="badge-tag">{formData.shape}</span>
-                      <span className="badge-tag">{formData.scent}</span>
+                      <span className="badge-tag">{shape}</span>
+                      <span className="badge-tag">{scent}</span>
                     </div>
                   </div>
 
-                  {formData.shape && (
+                  {shape && (
                     <div>
                       <p className="text-ink-400 text-sm mb-3">
-                        Enter weight in grams ({SIZE_LIMITS[formData.shape].min}–{SIZE_LIMITS[formData.shape].max}g for {formData.shape})
+                        Enter weight in grams ({SIZE_LIMITS[shape].min}–{SIZE_LIMITS[shape].max}g for {shape})
                       </p>
                       <div className="flex gap-2">
                         <input
                           type="text"
                           inputMode="numeric"
-                          value={formData.size === 0 ? "" : String(formData.size)}
+                          value={size === 0 ? "" : String(size)}
                           onChange={(e) => {
                             const raw = e.target.value.replace(/[^0-9]/g, "");
                             if (raw === "") {
@@ -510,20 +474,20 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
                             const raw = e.target.value.replace(/[^0-9]/g, "");
                             const num = raw === "" ? 0 : parseInt(raw, 10);
                             // biome-ignore lint/style/noNonNullAssertion: shape is set when on scent step
-                            const limits = SIZE_LIMITS[formData.shape!];
+                            const limits = SIZE_LIMITS[shape!];
                             const clamped = Math.min(Math.max(num, limits.min), limits.max);
                             handleSizeChange(clamped);
                           }}
-                          placeholder={`${SIZE_LIMITS[formData.shape].min}–${SIZE_LIMITS[formData.shape].max}g`}
+                          placeholder={`${SIZE_LIMITS[shape].min}–${SIZE_LIMITS[shape].max}g`}
                           className="input-apothecary w-32 text-center text-2xl font-display font-semibold py-3"
                         />
                         <span className="flex items-center text-ink-400 font-display text-lg">g</span>
                       </div>
                       <input
                         type="range"
-                        min={SIZE_LIMITS[formData.shape].min}
-                        max={SIZE_LIMITS[formData.shape].max}
-                        value={formData.size}
+                        min={SIZE_LIMITS[shape].min}
+                        max={SIZE_LIMITS[shape].max}
+                        value={size}
                         onChange={(e) => handleSizeChange(parseInt(e.target.value, 10))}
                         className="w-full h-2 rounded-lg appearance-none cursor-pointer"
                         style={{ accentColor: '#C4785A' }}
@@ -533,12 +497,12 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
                 </div>
 
                 <div ref={lavenderSectionRef} className="space-y-3">
-                  {(formData.scent === SoapScent.LAVENDER || formData.scent === SoapScent.COCONUT) && (
+                  {(scent === SoapScent.LAVENDER || scent === SoapScent.COCONUT) && (
                     <button
                       type="button"
-                      onClick={() => setFormData((p) => ({ ...p, hasLavenderPieces: !p.hasLavenderPieces }))}
-                      className={`addon-toggle ${formData.hasLavenderPieces ? "addon-toggle--active" : ""}`}
-                      aria-pressed={formData.hasLavenderPieces}
+                      onClick={() => setField('hasLavenderPieces', !hasLavenderPieces)}
+                      className={`addon-toggle ${hasLavenderPieces ? "addon-toggle--active" : ""}`}
+                      aria-pressed={hasLavenderPieces}
                     >
                       <span className="flex items-center gap-3">
                         <BotanicalLeafIcon className="w-6 h-6 flex-shrink-0" />
@@ -547,15 +511,15 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
                           <span className="text-ink-400 text-sm">+Rs. {LAVENDER_PIECES_PRICE} — calming botanicals</span>
                         </span>
                       </span>
-                      {formData.hasLavenderPieces && <Check className="w-5 h-5 text-botanical-500 flex-shrink-0" />}
+                      {hasLavenderPieces && <Check className="w-5 h-5 text-botanical-500 flex-shrink-0" />}
                     </button>
                   )}
 
                   {/* Price summary */}
                   <div className="flex items-center justify-between p-4 bg-parchment-100 rounded-2xl border border-parchment-300">
                     <span className="text-ink-600 font-medium">
-                      {formData.size}g {formData.scent}
-                      {formData.hasLavenderPieces && " + Lavender"}
+                      {size}g {scent}
+                      {hasLavenderPieces && " + Lavender"}
                     </span>
                     <span className="font-display text-xl font-semibold text-terra-500">Rs. {totalPrice}</span>
                   </div>
@@ -577,19 +541,19 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
             )}
 
             {/* ── COLOR STEP ── */}
-            {currentStep === "color" && formData.shape && formData.scent && (
+            {currentStep === "color" && shape && scent && (
               <div ref={colorSectionRef} className="mt-8 space-y-5">
                 <div className="border-t border-parchment-300 pt-6">
                   <p className="overline mb-1">Step 3 of 4</p>
                   <h2 className="font-display text-2xl font-semibold text-ink-700 mb-1">Choose a color</h2>
                   <p className="text-ink-400 text-sm">
-                    {formData.shape} · {formData.scent} · {formData.size}g · Rs. {totalPrice}
+                    {shape} · {scent} · {size}g · Rs. {totalPrice}
                   </p>
                 </div>
 
                 <div className="flex flex-wrap gap-5 justify-center py-4">
                   {COLOR_CONFIG.map((opt) => {
-                    const isSelected = formData.color === opt.value;
+                    const isSelected = color === opt.value;
                     return (
                       <button
                         type="button"
@@ -626,7 +590,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
                       setCurrentStep("quantity");
                       setTimeout(() => scrollToSection(quantitySectionRef), 100);
                     }}
-                    disabled={!formData.color}
+                    disabled={!color}
                     className="btn-apothecary btn-primary flex-1"
                   >
                     Set Quantity
@@ -637,13 +601,13 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
             )}
 
             {/* ── QUANTITY STEP ── */}
-            {currentStep === "quantity" && formData.shape && formData.scent && formData.color && (
+            {currentStep === "quantity" && shape && scent && color && (
               <div ref={quantitySectionRef} className="mt-8 space-y-5">
                 <div className="border-t border-parchment-300 pt-6">
                   <p className="overline mb-1">Step 4 of 4</p>
                   <h2 className="font-display text-2xl font-semibold text-ink-700 mb-1">How many soaps?</h2>
                   <p className="text-ink-400 text-sm">
-                    {formData.shape} · {formData.scent} · {formData.color} · {formData.size}g · Rs. {totalPrice} each
+                    {shape} · {scent} · {color} · {size}g · Rs. {totalPrice} each
                   </p>
                 </div>
 
@@ -654,7 +618,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
                   <input
                     type="text"
                     inputMode="numeric"
-                    value={formData.quantity}
+                    value={quantity}
                     onChange={handleQuantityChange}
                     placeholder="0"
                     className="input-apothecary w-28 text-center text-3xl font-display font-semibold py-4"
@@ -667,9 +631,9 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
                     <button
                       type="button"
                       key={num}
-                      onClick={() => setFormData((p) => ({ ...p, quantity: String(num) }))}
-                      className={`qty-quick-btn ${formData.quantity === String(num) ? "qty-quick-btn--selected" : ""}`}
-                      aria-pressed={formData.quantity === String(num)}
+                      onClick={() => setField('quantity', String(num))}
+                      className={`qty-quick-btn ${quantity === String(num) ? "qty-quick-btn--selected" : ""}`}
+                      aria-pressed={quantity === String(num)}
                     >
                       {num}
                     </button>
@@ -677,8 +641,8 @@ export const SoapForm: React.FC<SoapFormProps> = ({ cart, onAddToCart, onGoToCar
                 </div>
 
                 {/* Order preview */}
-                {formData.quantity && parseInt(formData.quantity, 10) > 0 && (() => {
-                  const qty = parseInt(formData.quantity, 10);
+                {quantity && parseInt(quantity, 10) > 0 && (() => {
+                  const qty = parseInt(quantity, 10);
                   const subtotal = totalPrice * qty;
                   const totalQty = qty + cart.totalQuantity;
                   const { discountPercentage, discountAmount, total } = calculateDiscount(subtotal, totalQty);

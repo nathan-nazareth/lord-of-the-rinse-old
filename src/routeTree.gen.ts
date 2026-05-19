@@ -10,10 +10,8 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 
-export type FileRoutesByFullPath = {
-};
-export type FileRoutesByTo = {
-};
+export interface FileRoutesByFullPath {}
+export interface FileRoutesByTo {}
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
 }
@@ -25,8 +23,7 @@ export interface FileRouteTypes {
   id: '__root__'
   fileRoutesById: FileRoutesById
 }
-export type RootRouteChildren = {
-};
+export interface RootRouteChildren {}
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {}

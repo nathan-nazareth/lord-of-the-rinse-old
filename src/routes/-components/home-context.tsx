@@ -2,7 +2,7 @@ import type React from 'react';
 import { useRef, useCallback, useState, createContext, useContext, useMemo } from 'react';
 import { useCartStore } from '../../stores/useCartStore';
 import { submitCartToWebhook } from '../../services/webhook';
-import { useFormPersistence } from '../../hooks/useFormPersistence';
+import { useFormStore } from '../../stores/useFormStore';
 import type { Customer } from '../../types/webhook';
 import type { CartItem } from '../../types/cart';
 
@@ -48,7 +48,8 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
   const removeItem = useCartStore(s => s.removeItem);
   const updateQuantity = useCartStore(s => s.updateQuantity);
   const clearCart = useCartStore(s => s.clearCart);
-  const { clearFormState } = useFormPersistence();
+  const clearFormState = useFormStore(s => s.clear);
+  const setVisited = useFormStore(s => s.setVisited);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmationItemCount, setConfirmationItemCount] = useState(0);
   const [justOrdered, setJustOrdered] = useState(false);
@@ -56,10 +57,11 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
 
   const handleShopClick = useCallback(() => {
     setShowLanding(false);
+    setVisited();
     setTimeout(() => {
       formSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 50);
-  }, []);
+  }, [setVisited]);
 
   const handleAddToCart = useCallback((
     shape: string,

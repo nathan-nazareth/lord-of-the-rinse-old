@@ -33,8 +33,8 @@ describe('cart route', () => {
       quantity: '',
       size: 75,
       hasLavenderPieces: false,
-      currentStep: 'shape',
-      visited: true,
+      currentStep: 'landing',
+      visited: false,
     });
     useCartStore.persist.clearStorage();
     useCartStore.setState({ items: [], totalQuantity: 0 });
