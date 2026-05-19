@@ -9,5 +9,3 @@ export const router = createRouter({
   history: createBrowserHistory(),
   context: {},
 });
-
-router.urlTree;
