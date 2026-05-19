@@ -12,6 +12,7 @@ function createTestRouter(initialEntries: string[] = ['/']) {
     id: '/',
     path: '/',
     getParentRoute: () => rootRoute,
+    // biome-ignore lint/suspicious/noExplicitAny: TanStack Router .update() generic is too complex to type in test helpers
   } as any);
   const routeTree = rootRoute._addFileChildren({ IndexRoute })._addFileTypes();
   return createRouter({

@@ -15,11 +15,13 @@ function createTestRouter(initialEntries: string[] = ['/cart']) {
     id: '/',
     path: '/',
     getParentRoute: () => rootRoute,
+    // biome-ignore lint/suspicious/noExplicitAny: TanStack Router .update() generic is too complex to type in test helpers
   } as any);
   const cartRoute = cartRouteImport.update({
     id: '/cart',
     path: '/cart',
     getParentRoute: () => rootRoute,
+    // biome-ignore lint/suspicious/noExplicitAny: TanStack Router .update() generic is too complex to type in test helpers
   } as any);
   const routeTree = rootRoute.addChildren([IndexRoute, cartRoute]);
   return createRouter({
