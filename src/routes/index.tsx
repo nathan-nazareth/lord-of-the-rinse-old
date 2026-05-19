@@ -23,14 +23,14 @@ function IndexContent() {
             className="absolute inset-0 bg-cover bg-no-repeat transition-opacity duration-300 md:hidden"
             style={{
               backgroundImage: "url('https://i.postimg.cc/ydxpFVKV/Gemini-Generated-Image-umgfgkumgfgkumgf.png')",
-              backgroundPosition: 'center 30%',
+              backgroundPosition: 'center 0%',
               animation: 'fadeIn 0.5s ease-out'
             }}
           />
           <div className="absolute inset-0 hidden md:block bg-cover bg-center bg-no-repeat transition-opacity duration-300"
             style={{
               backgroundImage: "url('https://i.postimg.cc/vZ8HvbFP/Gemini-Generated-Image-iz8f8oiz8f8oiz8f.png')",
-              backgroundPosition: 'center 70%',
+              backgroundPosition: 'center 30%',
               animation: 'fadeIn 0.5s ease-out'
             }}
           />
