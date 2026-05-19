@@ -1,6 +1,6 @@
 import type React from 'react';
-import { useRef, useCallback, useState, createContext, useContext } from 'react';
-import { useCart } from '../../hooks/useCart';
+import { useRef, useCallback, useState, createContext, useContext, useMemo } from 'react';
+import { useCartStore } from '../../stores/useCartStore';
 import { submitCartToWebhook } from '../../services/webhook';
 import { useFormPersistence } from '../../hooks/useFormPersistence';
 import type { Customer } from '../../types/webhook';
@@ -41,7 +41,13 @@ export function useHomeContext(): HomeContextValue {
 
 export function HomeProvider({ children }: { children: React.ReactNode }) {
   const formSectionRef = useRef<HTMLDivElement>(null);
-  const { cart, addItem, removeItem, updateQuantity, clearCart } = useCart();
+  const items = useCartStore(s => s.items);
+  const totalQuantity = useCartStore(s => s.totalQuantity);
+  const cart = useMemo(() => ({ items, totalQuantity }), [items, totalQuantity]);
+  const addItem = useCartStore(s => s.addItem);
+  const removeItem = useCartStore(s => s.removeItem);
+  const updateQuantity = useCartStore(s => s.updateQuantity);
+  const clearCart = useCartStore(s => s.clearCart);
   const { clearFormState } = useFormPersistence();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmationItemCount, setConfirmationItemCount] = useState(0);

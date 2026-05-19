@@ -6,7 +6,8 @@ export function validateEmail(email: string): boolean {
 }
 
 export function validatePhone(phone: string): boolean {
-  return PHONE_REGEX.test(phone);
+  const digitCount = phone.replace(/\D/g, '').length;
+  return digitCount >= 7 && PHONE_REGEX.test(phone);
 }
 
 export function validateName(name: string): boolean {

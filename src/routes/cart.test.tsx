@@ -6,6 +6,7 @@ import { cartRoute } from './cart';
 import { indexRoute } from './index';
 import { HomeProvider } from './-components/home-context';
 import { useFormStore } from '../stores/useFormStore';
+import { useCartStore } from '../stores/useCartStore';
 import { MockLocalStorage } from '../test-utils/mock-local-storage';
 import { CART_KEY } from '../types/cart';
 
@@ -35,6 +36,8 @@ describe('cart route', () => {
       currentStep: 'shape',
       visited: true,
     });
+    useCartStore.persist.clearStorage();
+    useCartStore.setState({ items: [], totalQuantity: 0 });
   });
 
   it('has meta title for the cart page', () => {
@@ -80,6 +83,9 @@ describe('cart route', () => {
       items: [testItem],
       updatedAt: Date.now(),
     }));
+
+    useCartStore.persist.rehydrate();
+    await new Promise((r) => setTimeout(r, 10));
 
     const router = createTestRouter(['/cart']);
 
