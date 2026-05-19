@@ -8,7 +8,7 @@ import type { CartItem } from '../../types/cart';
 
 interface HomeContextValue {
   cart: { items: CartItem[]; totalQuantity: number };
-  formSectionRef: React.RefObject<HTMLDivElement>;
+  formSectionRef: React.RefObject<HTMLDivElement | null>;
   showLanding: boolean;
   setShowLanding: (v: boolean) => void;
   handleShopClick: () => void;
