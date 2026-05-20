@@ -1,5 +1,5 @@
 import type React from 'react';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 const LoadingSpinner: React.FC<{ message?: string }> = ({ message = 'Loading...' }) => (
   <div className="min-h-screen bg-parchment-100 flex items-center justify-center p-4">

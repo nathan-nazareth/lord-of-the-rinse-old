@@ -1,10 +1,10 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import React from 'react';
-import { HomeProvider, useHomeContext } from './home-context';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { submitCartToWebhook } from '../../services/webhook';
 import { useCartStore } from '../../stores/useCartStore';
 import { MockLocalStorage } from '../../test-utils/mock-local-storage';
-import { submitCartToWebhook } from '../../services/webhook';
+import { HomeProvider, useHomeContext } from './home-context';
 
 vi.mock('../../services/webhook', () => ({
   submitCartToWebhook: vi.fn(),

@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { useCartStore } from './useCartStore';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MockLocalStorage } from '../test-utils/mock-local-storage';
+import { useCartStore } from './useCartStore';
 
 describe('useCartStore', () => {
   let mockStorage: MockLocalStorage;

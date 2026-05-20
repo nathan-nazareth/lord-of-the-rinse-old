@@ -1,12 +1,12 @@
+import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
+import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
+import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
 import type React from 'react';
 import { useState } from 'react';
-import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
-import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
-import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
+import type { CartItem } from '../types/cart';
 import type { Customer } from '../types/webhook';
 import { calculateDiscount } from '../utils/pricing';
-import { validateEmail, validatePhone, validateName } from '../utils/validators';
-import type { CartItem } from '../types/cart';
+import { validateEmail, validateName, validatePhone } from '../utils/validators';
 
 const CheckoutPage: React.FC<{
   cart: { items: CartItem[]; totalQuantity: number };

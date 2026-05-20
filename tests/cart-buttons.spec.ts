@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 test('cart buttons appear after add to cart', async ({ page }) => {
   await page.goto('https://soap-selling.vercel.app');

@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { getDiscountPercentage, calculateDiscount } from './pricing';
+import { describe, expect, it } from 'vitest';
+import { calculateDiscount, getDiscountPercentage } from './pricing';
 
 describe('getDiscountPercentage', () => {
   it('returns 0 for 0 items', () => {

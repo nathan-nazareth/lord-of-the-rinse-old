@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useHomeContext } from './-components/home-context';
 import CartPage from '../components/CartPage';
+import { useHomeContext } from './-components/home-context';
 
 function CartContent() {
   const navigate = useNavigate();

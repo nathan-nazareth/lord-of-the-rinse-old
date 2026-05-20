@@ -1,11 +1,11 @@
-import type React from 'react';
-import ShoppingCart from 'lucide-react/dist/esm/icons/shopping-cart';
-import Check from 'lucide-react/dist/esm/icons/check';
-import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
 import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
+import Check from 'lucide-react/dist/esm/icons/check';
+import ShoppingCart from 'lucide-react/dist/esm/icons/shopping-cart';
+import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
 import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
-import { calculateDiscount } from '../utils/pricing';
+import type React from 'react';
 import type { CartItem } from '../types/cart';
+import { calculateDiscount } from '../utils/pricing';
 
 const CartPage: React.FC<{
   cart: { items: CartItem[]; totalQuantity: number };

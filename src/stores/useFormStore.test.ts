@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { useFormStore } from './useFormStore';
-import { SoapShape, SoapScent, SoapColor } from '../../types';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { SoapColor, SoapScent, SoapShape } from '../../types';
 import { MockLocalStorage } from '../test-utils/mock-local-storage';
+import { useFormStore } from './useFormStore';
 
 describe('useFormStore', () => {
   let mockStorage: MockLocalStorage;

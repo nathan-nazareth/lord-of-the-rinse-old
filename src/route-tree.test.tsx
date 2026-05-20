@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
+import { createMemoryHistory, createRouter, RouterProvider } from '@tanstack/react-router';
 import { render, waitFor } from '@testing-library/react';
-import { RouterProvider, createRouter, createMemoryHistory } from '@tanstack/react-router';
+import { describe, expect, it } from 'vitest';
 import { routeTree } from './routeTree.gen';
 
 describe('generated route tree', () => {

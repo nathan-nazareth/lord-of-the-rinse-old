@@ -1,7 +1,7 @@
-import type React from 'react';
-import Leaf from 'lucide-react/dist/esm/icons/leaf';
 import Droplets from 'lucide-react/dist/esm/icons/droplets';
+import Leaf from 'lucide-react/dist/esm/icons/leaf';
 import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
+import type React from 'react';
 
 const SCENTS = [
   {

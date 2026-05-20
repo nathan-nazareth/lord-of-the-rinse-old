@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import { readFileSync, existsSync, readdirSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { describe, expect, it } from 'vitest';
 
 function findFilesWithContent(dir: string, pattern: RegExp): string[] {
   const results: string[] = [];

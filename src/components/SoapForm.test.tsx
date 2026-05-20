@@ -1,9 +1,9 @@
 import { render, screen, waitFor } from '@testing-library/react';
-import { describe, it, beforeEach, expect, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { SoapColor, SoapScent, SoapShape } from '../../types';
 import { useFormStore } from '../stores/useFormStore';
-import { SoapForm } from './SoapForm';
 import { MockLocalStorage } from '../test-utils/mock-local-storage';
-import { SoapShape, SoapScent, SoapColor } from '../../types';
+import { SoapForm } from './SoapForm';
 
 describe('SoapForm component', () => {
   let mockStorage: MockLocalStorage;

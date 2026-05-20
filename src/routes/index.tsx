@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useHomeContext } from './-components/home-context';
 import { SoapForm } from '../components/SoapForm';
+import { useHomeContext } from './-components/home-context';
 
 function IndexContent() {
   const { cart, formSectionRef, showLanding, handleShopClick, handleAddToCart } = useHomeContext();

@@ -1,7 +1,7 @@
-import { describe, it, expect } from 'vitest';
+import { execSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { execSync } from 'node:child_process';
+import { describe, expect, it } from 'vitest';
 
 const biomeConfigPath = join(process.cwd(), 'biome.json');
 const biomeConfig = JSON.parse(readFileSync(biomeConfigPath, 'utf-8'));

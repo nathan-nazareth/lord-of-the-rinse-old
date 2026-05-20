@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useHomeContext } from './-components/home-context';
 import CheckoutPage from '../components/CheckoutPage';
+import { useHomeContext } from './-components/home-context';
 
 function CheckoutContent() {
   const navigate = useNavigate();

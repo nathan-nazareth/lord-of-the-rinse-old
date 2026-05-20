@@ -1,19 +1,19 @@
-import React, { useState } from 'react';
-import ShoppingCart from 'lucide-react/dist/esm/icons/shopping-cart';
-import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
-import Send from 'lucide-react/dist/esm/icons/send';
-import User from 'lucide-react/dist/esm/icons/user';
-import Phone from 'lucide-react/dist/esm/icons/phone';
-import MailIcon from 'lucide-react/dist/esm/icons/mail';
-import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
 import Check from 'lucide-react/dist/esm/icons/check';
+import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
+import MailIcon from 'lucide-react/dist/esm/icons/mail';
+import Phone from 'lucide-react/dist/esm/icons/phone';
+import Send from 'lucide-react/dist/esm/icons/send';
+import ShoppingCart from 'lucide-react/dist/esm/icons/shopping-cart';
 import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
-import type { CartItem as CartItemType } from '../types/cart';
-import type { Customer } from '../types/webhook';
+import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
+import User from 'lucide-react/dist/esm/icons/user';
+import React, { useState } from 'react';
 import { submitCartToWebhook } from '../services/webhook';
 import { useRateLimitStore } from '../stores/useRateLimitStore';
+import type { CartItem as CartItemType } from '../types/cart';
+import type { Customer } from '../types/webhook';
 import { calculateDiscount } from '../utils/pricing';
-import { validateEmail, validatePhone, validateName } from '../utils/validators';
+import { validateEmail, validateName, validatePhone } from '../utils/validators';
 
 interface CartProps {
   cart: {

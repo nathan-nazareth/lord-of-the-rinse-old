@@ -1,26 +1,26 @@
-import React, { useState, useRef } from 'react';
+import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
+import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
+import Check from 'lucide-react/dist/esm/icons/check';
+import Circle from 'lucide-react/dist/esm/icons/circle';
+import Heart from 'lucide-react/dist/esm/icons/heart';
+import Leaf from 'lucide-react/dist/esm/icons/leaf';
+import ShoppingCart from 'lucide-react/dist/esm/icons/shopping-cart';
+import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
+import Square from 'lucide-react/dist/esm/icons/square';
+import React, { useRef, useState } from 'react';
 import {
-  SoapScent,
-  SoapColor,
-  SoapShape,
-  SOAP_OPTIONS,
-  SHAPE_OPTIONS,
   DEFAULT_SIZE,
   LAVENDER_PIECES_PRICE,
+  SHAPE_OPTIONS,
+  SOAP_OPTIONS,
+  SoapColor,
+  SoapScent,
+  SoapShape,
 } from '../../types';
 import { useSoapPricing } from '../hooks/useSoapPricing';
-import type { CartItem } from '../types/cart';
 import { useFormStore } from '../stores/useFormStore';
+import type { CartItem } from '../types/cart';
 import { calculateDiscount } from '../utils/pricing';
-import ShoppingCart from 'lucide-react/dist/esm/icons/shopping-cart';
-import Check from 'lucide-react/dist/esm/icons/check';
-import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
-import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
-import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
-import Leaf from 'lucide-react/dist/esm/icons/leaf';
-import Heart from 'lucide-react/dist/esm/icons/heart';
-import Circle from 'lucide-react/dist/esm/icons/circle';
-import Square from 'lucide-react/dist/esm/icons/square';
 
 const _SIZE_OPTIONS = [
   { label: 'S', weight: 50 },

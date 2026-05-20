@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { Route as checkoutRouteImport } from './checkout';
 
 describe('checkout route', () => {

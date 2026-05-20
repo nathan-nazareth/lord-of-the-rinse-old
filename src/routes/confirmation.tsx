@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useHomeContext } from './-components/home-context';
 import ConfirmationPage from '../components/ConfirmationPage';
+import { useHomeContext } from './-components/home-context';
 
 function ConfirmationContent() {
   const navigate = useNavigate();

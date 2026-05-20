@@ -1,10 +1,10 @@
 /// <reference types="vite/client" />
 
-import type { WebhookLogEntry, WebhookStatus, Customer } from '../types/webhook';
 import type { CartItem } from '../types/cart';
+import type { Customer, WebhookLogEntry, WebhookStatus } from '../types/webhook';
 import {
-  logWeb3FormsRateLimit,
   logWeb3FormsError,
+  logWeb3FormsRateLimit,
   logWeb3FormsSuccess,
 } from '../utils/errorLogging';
 import { calculateDiscount } from '../utils/pricing';

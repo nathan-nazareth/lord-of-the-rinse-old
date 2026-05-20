@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { CartItem } from '../types/cart';
-import { MAX_CART_ITEMS, CART_KEY, CART_EXPIRY_MS } from '../types/cart';
+import { CART_EXPIRY_MS, CART_KEY, MAX_CART_ITEMS } from '../types/cart';
 
 interface CartState {
   items: CartItem[];

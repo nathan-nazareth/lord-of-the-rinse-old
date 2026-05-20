@@ -1,14 +1,14 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import { RouterProvider, createRouter, createMemoryHistory } from '@tanstack/react-router';
-import { Route as rootRoute } from './__root';
-import { Route as cartRouteImport } from './cart';
-import { Route as indexRoute } from './index';
-import { HomeProvider } from './-components/home-context';
-import { useFormStore } from '../stores/useFormStore';
+import { createMemoryHistory, createRouter, RouterProvider } from '@tanstack/react-router';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useCartStore } from '../stores/useCartStore';
+import { useFormStore } from '../stores/useFormStore';
 import { MockLocalStorage } from '../test-utils/mock-local-storage';
 import { CART_KEY } from '../types/cart';
+import { Route as rootRoute } from './__root';
+import { HomeProvider } from './-components/home-context';
+import { Route as cartRouteImport } from './cart';
+import { Route as indexRoute } from './index';
 
 function createTestRouter(initialEntries: string[] = ['/cart']) {
   const IndexRoute = indexRoute.update({

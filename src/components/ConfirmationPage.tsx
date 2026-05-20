@@ -1,6 +1,6 @@
-import type React from 'react';
 import Check from 'lucide-react/dist/esm/icons/check';
 import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
+import type React from 'react';
 
 const ConfirmationPage: React.FC<{
   itemCount: number;

@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createJSONStorage } from 'zustand/middleware';
-import { MockLocalStorage } from '@/src/test-utils/mock-local-storage';
 import { useRateLimitStore } from '@/src/stores/useRateLimitStore';
+import { MockLocalStorage } from '@/src/test-utils/mock-local-storage';
 
 describe('useRateLimitStore', () => {
   let mockStorage: MockLocalStorage;

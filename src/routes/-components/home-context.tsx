@@ -1,10 +1,10 @@
 import type React from 'react';
-import { useRef, useCallback, useState, createContext, useContext, useMemo } from 'react';
-import { useCartStore } from '../../stores/useCartStore';
+import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
 import { submitCartToWebhook } from '../../services/webhook';
+import { useCartStore } from '../../stores/useCartStore';
 import { useFormStore } from '../../stores/useFormStore';
-import type { Customer } from '../../types/webhook';
 import type { CartItem } from '../../types/cart';
+import type { Customer } from '../../types/webhook';
 
 interface HomeContextValue {
   cart: { items: CartItem[]; totalQuantity: number };

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { SoapScent, SoapColor, SoapShape } from '../../types';
+import type { SoapColor, SoapScent, SoapShape } from '../../types';
 
 type FormStep = 'landing' | 'shape' | 'scent' | 'color' | 'quantity';
 
