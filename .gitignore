@@ -28,3 +28,11 @@ nul
 test-results/
 .vercel
 .env*.local
+
+# Kilo/.opencode tooling
+.opencode/
+
+# Package lockfiles (use Bun exclusively)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
