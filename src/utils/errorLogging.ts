@@ -56,7 +56,10 @@ export const logResourceError = (event: Event): void => {
 
 export const logUnhandledRejection = (event: PromiseRejectionEvent): void => {
   const error: StructuredError = {
-    message: event.reason?.message || 'Unhandled Promise Rejection',
+    message:
+      typeof event.reason === 'string'
+        ? event.reason
+        : event.reason?.message || 'Unhandled Promise Rejection',
     timestamp: new Date().toISOString(),
     stack: event.reason?.stack,
     type: 'promise',
