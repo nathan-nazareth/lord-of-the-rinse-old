@@ -1,12 +1,14 @@
-import Check from 'lucide-react/dist/esm/icons/check';
-import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
-import MailIcon from 'lucide-react/dist/esm/icons/mail';
-import Phone from 'lucide-react/dist/esm/icons/phone';
-import Send from 'lucide-react/dist/esm/icons/send';
-import ShoppingCart from 'lucide-react/dist/esm/icons/shopping-cart';
-import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
-import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
-import User from 'lucide-react/dist/esm/icons/user';
+import {
+  IconCheck,
+  IconLoader2,
+  IconMail,
+  IconPhone,
+  IconSend,
+  IconShoppingCart,
+  IconSparkles,
+  IconTrash,
+  IconUser,
+} from '@tabler/icons-react';
 import React, { useState } from 'react';
 import { submitCartToWebhook } from '../services/webhook';
 import { useRateLimitStore } from '../stores/useRateLimitStore';
@@ -72,7 +74,7 @@ const CheckoutForm: React.FC<{
             htmlFor="sidebar-name"
             className="flex items-center gap-2 text-sm text-ink-500 mb-1.5 font-medium"
           >
-            <User className="w-4 h-4" />
+            <IconUser className="w-4 h-4" />
             Full Name
           </label>
           <input
@@ -93,7 +95,7 @@ const CheckoutForm: React.FC<{
             htmlFor="sidebar-email"
             className="flex items-center gap-2 text-sm text-ink-500 mb-1.5 font-medium"
           >
-            <MailIcon className="w-4 h-4" />
+            <IconMail className="w-4 h-4" />
             Email Address
           </label>
           <input
@@ -114,7 +116,7 @@ const CheckoutForm: React.FC<{
             htmlFor="sidebar-phone"
             className="flex items-center gap-2 text-sm text-ink-500 mb-1.5 font-medium"
           >
-            <Phone className="w-4 h-4" />
+            <IconPhone className="w-4 h-4" />
             Phone Number
           </label>
           <input
@@ -146,12 +148,12 @@ const CheckoutForm: React.FC<{
           >
             {isSubmitting ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <IconLoader2 className="w-4 h-4 animate-spin" />
                 Sending
               </>
             ) : (
               <>
-                <Send className="w-4 h-4" />
+                <IconSend className="w-4 h-4" />
                 Submit
               </>
             )}
@@ -168,7 +170,7 @@ const OrderConfirmation: React.FC<{ itemCount: number; onContinue: () => void }>
 }) => (
   <div className="p-8 text-center space-y-5">
     <div className="w-16 h-16 bg-botanical-100 rounded-full flex items-center justify-center mx-auto">
-      <Check className="w-8 h-8 text-botanical-600" />
+      <IconCheck className="w-8 h-8 text-botanical-600" />
     </div>
     <div>
       <h3 className="font-display text-2xl font-semibold text-ink-700 mb-2">Order placed!</h3>
@@ -284,7 +286,7 @@ export const Cart: React.FC<CartProps> = ({
       <div className="fixed right-0 top-0 bottom-0 w-full max-w-sm bg-parchment-50 shadow-lift z-50 flex flex-col">
         <div className="flex items-center justify-between p-5 border-b border-parchment-300 bg-terra-400">
           <div className="flex items-center gap-2">
-            <ShoppingCart className="w-5 h-5 text-white" />
+            <IconShoppingCart className="w-5 h-5 text-white" />
             <h2 className="text-lg font-display font-semibold text-white">
               {showConfirmation
                 ? 'Thank you!'
@@ -319,7 +321,7 @@ export const Cart: React.FC<CartProps> = ({
           ) : showAddedToCart ? (
             <div className="p-8 text-center space-y-5">
               <div className="w-16 h-16 bg-botanical-100 rounded-full flex items-center justify-center mx-auto">
-                <Check className="w-8 h-8 text-botanical-600" />
+                <IconCheck className="w-8 h-8 text-botanical-600" />
               </div>
               <div>
                 <h3 className="font-display text-2xl font-semibold text-ink-700 mb-2">
@@ -364,7 +366,7 @@ export const Cart: React.FC<CartProps> = ({
             <div className="p-4 space-y-3">
               {cart.items.length === 0 ? (
                 <div className="text-center py-16">
-                  <ShoppingCart className="w-12 h-12 text-parchment-400 mx-auto mb-4" />
+                  <IconShoppingCart className="w-12 h-12 text-parchment-400 mx-auto mb-4" />
                   <p className="text-ink-400 font-medium mb-1">Your cart is empty</p>
                   <p className="text-ink-300 text-sm">Start creating your soaps above</p>
                 </div>
@@ -417,7 +419,7 @@ export const Cart: React.FC<CartProps> = ({
                           className="p-2 text-red-400 hover:bg-red-50 rounded-full transition-colors"
                           aria-label="Remove item"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <IconTrash className="w-4 h-4" />
                         </button>
                       )}
                     </div>
@@ -433,11 +435,11 @@ export const Cart: React.FC<CartProps> = ({
             {discountPercentage > 0 && (
               <div className="bg-botanical-100 rounded-xl p-3 border border-botanical-300">
                 <div className="flex items-center gap-2 text-botanical-700 font-semibold text-sm mb-1">
-                  <Sparkles className="w-4 h-4" />
+                  <IconSparkles className="w-4 h-4" />
                   <span className="uppercase text-xs tracking-widest font-accent">
                     Bulk Discount
                   </span>
-                  <Sparkles className="w-4 h-4" />
+                  <IconSparkles className="w-4 h-4" />
                 </div>
                 <p className="text-botanical-600 text-sm">
                   <span className="font-semibold">{discountPercentage}% off</span> on{' '}
@@ -472,7 +474,7 @@ export const Cart: React.FC<CartProps> = ({
                 onClick={() => setShowCheckout(true)}
                 className="btn-apothecary btn-primary btn-full"
               >
-                <ShoppingCart className="w-4 h-4" />
+                <IconShoppingCart className="w-4 h-4" />
                 Checkout — Rs. {total}
               </button>
               <button

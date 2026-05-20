@@ -1,12 +1,14 @@
-import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
-import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right';
-import Check from 'lucide-react/dist/esm/icons/check';
-import Circle from 'lucide-react/dist/esm/icons/circle';
-import Heart from 'lucide-react/dist/esm/icons/heart';
-import Leaf from 'lucide-react/dist/esm/icons/leaf';
-import ShoppingCart from 'lucide-react/dist/esm/icons/shopping-cart';
-import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
-import Square from 'lucide-react/dist/esm/icons/square';
+import {
+  IconArrowLeft,
+  IconArrowRight,
+  IconCheck,
+  IconCircle,
+  IconHeart,
+  IconLeaf,
+  IconShoppingCart,
+  IconSparkles,
+  IconSquare,
+} from '@tabler/icons-react';
 import React, { useRef, useState } from 'react';
 import {
   DEFAULT_SIZE,
@@ -72,7 +74,7 @@ const StepIndicator: React.FC<{ current: FormStep; onNavigate: (s: FormStep) => 
               <div
                 className={`step-circle ${isDone ? 'step-circle--done' : isActive ? 'step-circle--active' : 'step-circle--pending'}`}
               >
-                {isDone ? <Check className="w-4 h-4" /> : idx + 1}
+                {isDone ? <IconCheck className="w-4 h-4" /> : idx + 1}
               </div>
               <span
                 className={`step-label ${isDone ? 'step-label--done' : isActive ? 'step-label--active' : 'step-label--pending'}`}
@@ -98,11 +100,11 @@ const SIZE_LIMITS: Record<string, { min: number; max: number }> = {
 const ShapeIcon: React.FC<{ shape: SoapShape; className?: string }> = ({ shape, className }) => {
   switch (shape) {
     case SoapShape.SQUARE:
-      return <Square className={className} />;
+      return <IconSquare className={className} />;
     case SoapShape.CIRCLE:
-      return <Circle className={className} />;
+      return <IconCircle className={className} />;
     case SoapShape.HEART:
-      return <Heart className={className} />;
+      return <IconHeart className={className} />;
     case SoapShape.OVAL_FLAT:
       return (
         <svg
@@ -284,7 +286,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({
       {showAddedToast && (
         <div className="toast-apothecary" role="status" aria-live="polite">
           <div className="w-7 h-7 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
-            <Check className="w-4 h-4" />
+            <IconCheck className="w-4 h-4" />
           </div>
           <span>Added to cart!</span>
         </div>
@@ -323,7 +325,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({
           </div>
 
           <div className="inline-flex items-center gap-3 bg-botanical-100 border border-botanical-300 rounded-2xl px-6 py-4 mb-8">
-            <Leaf className="w-5 h-5 text-botanical-600 flex-shrink-0" />
+            <IconLeaf className="w-5 h-5 text-botanical-600 flex-shrink-0" />
             <p className="text-botanical-700 font-medium text-sm">
               100% natural ingredients — coconut base, botanical add-ins
             </p>
@@ -336,7 +338,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({
               className="btn-apothecary btn-primary btn-full max-w-sm"
             >
               Begin Creating
-              <ArrowRight className="w-5 h-5" />
+              <IconArrowRight className="w-5 h-5" />
             </button>
           </div>
         </div>
@@ -351,7 +353,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({
                 onClick={onGoToCart}
                 className="btn-apothecary btn-secondary flex-1 text-sm py-3"
               >
-                <ShoppingCart className="w-4 h-4" />
+                <IconShoppingCart className="w-4 h-4" />
                 Cart ({cart.totalQuantity})
               </button>
               <button
@@ -403,7 +405,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({
                       </div>
                       {isSelected && (
                         <div className="absolute top-2 right-2 w-5 h-5 bg-terra-400 rounded-full flex items-center justify-center">
-                          <Check className="w-3 h-3 text-white" />
+                          <IconCheck className="w-3 h-3 text-white" />
                         </div>
                       )}
                     </button>
@@ -421,7 +423,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({
                   className="btn-apothecary btn-primary btn-full mt-2"
                 >
                   Choose Scent
-                  <ArrowRight className="w-4 h-4" />
+                  <IconArrowRight className="w-4 h-4" />
                 </button>
               )}
             </div>
@@ -458,7 +460,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({
                         <p className="text-terra-500 text-xs italic">{info.tagline}</p>
                         {isSelected && (
                           <div className="absolute top-2 right-2 w-5 h-5 bg-terra-400 rounded-full flex items-center justify-center">
-                            <Check className="w-3 h-3 text-white" />
+                            <IconCheck className="w-3 h-3 text-white" />
                           </div>
                         )}
                       </button>
@@ -557,7 +559,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({
                         </span>
                       </span>
                       {hasLavenderPieces && (
-                        <Check className="w-5 h-5 text-botanical-500 flex-shrink-0" />
+                        <IconCheck className="w-5 h-5 text-botanical-500 flex-shrink-0" />
                       )}
                     </button>
                   )}
@@ -583,7 +585,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({
                     className="btn-apothecary btn-primary btn-full mt-2"
                   >
                     Choose Color
-                    <ArrowRight className="w-4 h-4" />
+                    <IconArrowRight className="w-4 h-4" />
                   </button>
                 </div>
               </div>
@@ -619,7 +621,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({
                           style={{ backgroundColor: opt.hex }}
                         >
                           {isSelected && (
-                            <Check className="w-5 h-5 text-white" style={{ margin: 'auto' }} />
+                            <IconCheck className="w-5 h-5 text-white" style={{ margin: 'auto' }} />
                           )}
                         </div>
                         <span className="text-xs font-medium text-ink-500">{opt.label}</span>
@@ -634,7 +636,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({
                     onClick={() => setCurrentStep('scent')}
                     className="btn-apothecary btn-secondary flex-1"
                   >
-                    <ArrowLeft className="w-4 h-4" />
+                    <IconArrowLeft className="w-4 h-4" />
                     Back
                   </button>
                   <button
@@ -647,7 +649,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({
                     className="btn-apothecary btn-primary flex-1"
                   >
                     Set Quantity
-                    <ArrowRight className="w-4 h-4" />
+                    <IconArrowRight className="w-4 h-4" />
                   </button>
                 </div>
               </div>
@@ -721,11 +723,11 @@ export const SoapForm: React.FC<SoapFormProps> = ({
                         {discountPercentage > 0 ? (
                           <div className="bg-gradient-to-r from-botanical-100 to-botanical-200 rounded-xl p-4 border border-botanical-300">
                             <div className="flex items-center justify-center gap-2 text-botanical-700 font-semibold mb-1">
-                              <Sparkles className="w-4 h-4" />
+                              <IconSparkles className="w-4 h-4" />
                               <span className="uppercase text-xs tracking-widest font-accent">
                                 Bulk Discount
                               </span>
-                              <Sparkles className="w-4 h-4" />
+                              <IconSparkles className="w-4 h-4" />
                             </div>
                             <p className="text-botanical-600 text-sm text-center">
                               {discountPercentage}% off — you save Rs. {discountAmount}
@@ -753,7 +755,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({
                     onClick={() => setCurrentStep('color')}
                     className="btn-apothecary btn-secondary flex-1"
                   >
-                    <ArrowLeft className="w-4 h-4" />
+                    <IconArrowLeft className="w-4 h-4" />
                     Back
                   </button>
                   <button
@@ -762,7 +764,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({
                     disabled={!isFormValid}
                     className={`btn-apothecary btn-primary flex-1 ${!isFormValid ? 'opacity-40 cursor-not-allowed' : ''}`}
                   >
-                    <ShoppingCart className="w-4 h-4" />
+                    <IconShoppingCart className="w-4 h-4" />
                     Add to Cart
                   </button>
                 </div>
