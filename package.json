@@ -7,18 +7,17 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "lint": "biome lint .",
-    "format": "biome format --write .",
-    "format:check": "biome format .",
-    "test": "vitest run",
-    "test:e2e": "playwright test",
-    "test:ui": "playwright test --ui",
-    "test:watch": "vitest --watch",
-    "test:coverage": "vitest run --coverage",
-    "start": "node server/index.js"
+    "dev": "bun run --filter @organic-soap/app dev",
+    "build": "bun run --filter @organic-soap/app build",
+    "preview": "bun run --filter @organic-soap/app preview",
+    "lint": "bun run --filter @organic-soap/app lint",
+    "format": "bun run --filter @organic-soap/app format",
+    "format:check": "bun run --filter @organic-soap/app format:check",
+    "test": "bun run --filter @organic-soap/app test",
+    "test:e2e": "bun run --filter @organic-soap/app test:e2e",
+    "test:ui": "bun run --filter @organic-soap/app test:ui",
+    "test:watch": "bun run --filter @organic-soap/app test:watch",
+    "test:coverage": "bun run --filter @organic-soap/app test:coverage"
   },
   "dependencies": {
     "@libsql/client": "^0.17.3",
