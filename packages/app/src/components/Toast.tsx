@@ -1,4 +1,4 @@
-import Check from 'lucide-react/dist/esm/icons/check';
+import { IconCheck } from '@tabler/icons-react';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 
@@ -42,7 +42,7 @@ export const Toast: React.FC<ToastProps> = ({
     >
       {type === 'success' && (
         <div className="w-7 h-7 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
-          <Check className="w-4 h-4" />
+          <IconCheck className="w-4 h-4" />
         </div>
       )}
       <span>{message}</span>

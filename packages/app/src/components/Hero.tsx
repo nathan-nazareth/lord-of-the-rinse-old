@@ -1,6 +1,4 @@
-import Droplets from 'lucide-react/dist/esm/icons/droplets';
-import Leaf from 'lucide-react/dist/esm/icons/leaf';
-import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
+import { IconDroplets, IconLeaf, IconSparkles } from '@tabler/icons-react';
 import type React from 'react';
 
 const SCENTS = [
@@ -67,15 +65,15 @@ const Hero: React.FC<{ onShopClick: () => void }> = ({ onShopClick }) => {
         {/* Trust signals */}
         <div className="flex flex-wrap justify-center gap-3 mb-10 animate-enter delay-3">
           <span className="inline-flex items-center gap-1.5 text-xs font-accent uppercase tracking-wider text-botanical-600 bg-botanical-100 border border-botanical-300 rounded-full px-3.5 py-1.5">
-            <Leaf className="w-3.5 h-3.5" />
+            <IconLeaf className="w-3.5 h-3.5" />
             100% Natural
           </span>
           <span className="inline-flex items-center gap-1.5 text-xs font-accent uppercase tracking-wider text-terra-500 bg-terra-100 border border-terra-200 rounded-full px-3.5 py-1.5">
-            <Droplets className="w-3.5 h-3.5" />
+            <IconDroplets className="w-3.5 h-3.5" />
             Handcrafted
           </span>
           <span className="inline-flex items-center gap-1.5 text-xs font-accent uppercase tracking-wider text-ink-500 bg-parchment-200 border border-parchment-400 rounded-full px-3.5 py-1.5">
-            <Sparkles className="w-3.5 h-3.5" />
+            <IconSparkles className="w-3.5 h-3.5" />
             Coconut Base
           </span>
         </div>

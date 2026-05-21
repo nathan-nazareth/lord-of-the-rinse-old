@@ -1,6 +1,4 @@
-import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
-import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
-import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
+import { IconArrowLeft, IconLoader2, IconSparkles } from '@tabler/icons-react';
 import type React from 'react';
 import { useState } from 'react';
 import type { CartItem } from '../types/cart';
@@ -44,7 +42,7 @@ const CheckoutPage: React.FC<{
           onClick={onBack}
           className="flex items-center gap-2 text-terra-500 hover:text-terra-600 font-medium mb-6 transition-colors"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <IconArrowLeft className="w-5 h-5" />
           <span className="text-sm">Back to cart</span>
         </button>
 
@@ -78,7 +76,7 @@ const CheckoutPage: React.FC<{
               {discountPercentage > 0 && (
                 <div className="flex justify-between text-botanical-600 font-medium text-sm">
                   <span className="flex items-center gap-1">
-                    <Sparkles className="w-3.5 h-3.5" />
+                    <IconSparkles className="w-3.5 h-3.5" />
                     Discount ({discountPercentage}%)
                   </span>
                   <span>- Rs. {discountAmount}</span>
@@ -143,7 +141,7 @@ const CheckoutPage: React.FC<{
               >
                 {isSubmitting ? (
                   <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <IconLoader2 className="w-5 h-5 animate-spin" />
                     Processing...
                   </>
                 ) : (

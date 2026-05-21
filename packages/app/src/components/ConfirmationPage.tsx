@@ -1,5 +1,4 @@
-import Check from 'lucide-react/dist/esm/icons/check';
-import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
+import { IconCheck, IconSparkles } from '@tabler/icons-react';
 import type React from 'react';
 
 const ConfirmationPage: React.FC<{
@@ -10,9 +9,9 @@ const ConfirmationPage: React.FC<{
     <div className="card-apothecary p-10 max-w-sm w-full text-center">
       <div className="w-24 h-24 bg-botanical-100 rounded-full flex items-center justify-center mx-auto mb-6">
         <div className="relative">
-          <Check className="w-12 h-12 text-botanical-600" />
+          <IconCheck className="w-12 h-12 text-botanical-600" />
           <div className="absolute -top-1 -right-1">
-            <Sparkles className="w-5 h-5 text-terra-400 animate-pulse-soft" />
+            <IconSparkles className="w-5 h-5 text-terra-400 animate-pulse-soft" />
           </div>
         </div>
       </div>

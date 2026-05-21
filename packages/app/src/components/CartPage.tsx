@@ -1,8 +1,10 @@
-import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
-import Check from 'lucide-react/dist/esm/icons/check';
-import ShoppingCart from 'lucide-react/dist/esm/icons/shopping-cart';
-import Sparkles from 'lucide-react/dist/esm/icons/sparkles';
-import Trash2 from 'lucide-react/dist/esm/icons/trash-2';
+import {
+  IconArrowLeft,
+  IconCheck,
+  IconShoppingCart,
+  IconSparkles,
+  IconTrash,
+} from '@tabler/icons-react';
 import type React from 'react';
 import type { CartItem } from '../types/cart';
 import { calculateDiscount } from '../utils/pricing';
@@ -48,7 +50,7 @@ const CartPage: React.FC<{
             }}
             className="flex items-center gap-2 text-terra-500 hover:text-terra-600 font-medium mb-6 transition-colors"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <IconArrowLeft className="w-5 h-5" />
             <span className="text-sm">Back to form</span>
           </button>
 
@@ -56,9 +58,9 @@ const CartPage: React.FC<{
             <div className="text-center py-16 px-6">
               <div className="w-28 h-28 bg-botanical-100 rounded-full flex items-center justify-center mx-auto mb-8 animate-float">
                 <div className="relative">
-                  <Check className="w-16 h-16 text-botanical-500" />
+                  <IconCheck className="w-16 h-16 text-botanical-500" />
                   <div className="absolute -top-1 -right-1">
-                    <Sparkles className="w-5 h-5 text-terra-400 animate-pulse-soft" />
+                    <IconSparkles className="w-5 h-5 text-terra-400 animate-pulse-soft" />
                   </div>
                 </div>
               </div>
@@ -96,14 +98,14 @@ const CartPage: React.FC<{
             onClick={onBackToForm}
             className="flex items-center gap-2 text-terra-500 hover:text-terra-600 font-medium mb-6 transition-colors"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <IconArrowLeft className="w-5 h-5" />
             <span className="text-sm">Back to form</span>
           </button>
 
           <div className="card-apothecary overflow-hidden">
             <div className="text-center py-16 px-6">
               <div className="w-28 h-28 bg-botanical-100 rounded-full flex items-center justify-center mx-auto mb-8 animate-float">
-                <Check className="w-16 h-16 text-botanical-500" />
+                <IconCheck className="w-16 h-16 text-botanical-500" />
               </div>
               <h2 className="font-display text-3xl font-semibold text-botanical-700 mb-3">
                 Soap added!
@@ -140,7 +142,7 @@ const CartPage: React.FC<{
           onClick={onBackToForm}
           className="flex items-center gap-2 text-terra-500 hover:text-terra-600 font-medium mb-6 transition-colors"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <IconArrowLeft className="w-5 h-5" />
           <span className="text-sm">Back to form</span>
         </button>
 
@@ -155,7 +157,7 @@ const CartPage: React.FC<{
           <div className="p-6">
             {cart.items.length === 0 ? (
               <div className="text-center py-14">
-                <ShoppingCart className="w-16 h-16 text-parchment-400 mx-auto mb-5" />
+                <IconShoppingCart className="w-16 h-16 text-parchment-400 mx-auto mb-5" />
                 <p className="text-xl text-ink-500 font-display mb-2">Nothing here yet</p>
                 <p className="text-ink-300 text-sm mb-8">Start crafting your soaps above</p>
                 <button type="button" onClick={onBackToForm} className="btn-apothecary btn-primary">
@@ -215,7 +217,7 @@ const CartPage: React.FC<{
                             className="p-2.5 bg-red-50 text-red-400 rounded-full hover:bg-red-100 transition-colors"
                             aria-label="Remove item"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <IconTrash className="w-4 h-4" />
                           </button>
                         )}
                       </div>
@@ -226,11 +228,11 @@ const CartPage: React.FC<{
                 {discountPercentage > 0 && (
                   <div className="bg-botanical-100 rounded-2xl p-4 border border-botanical-300 mb-5">
                     <div className="flex items-center justify-center gap-2 text-botanical-700 font-semibold">
-                      <Sparkles className="w-5 h-5" />
+                      <IconSparkles className="w-5 h-5" />
                       <span className="uppercase text-xs tracking-widest font-accent">
                         Bulk Discount Applied
                       </span>
-                      <Sparkles className="w-5 h-5" />
+                      <IconSparkles className="w-5 h-5" />
                     </div>
                     <p className="text-botanical-600 text-sm text-center mt-1">
                       {discountPercentage}% off on {cart.totalQuantity} soaps — you save Rs.{' '}
@@ -247,7 +249,7 @@ const CartPage: React.FC<{
                   {discountPercentage > 0 && (
                     <div className="flex justify-between text-botanical-600 font-medium text-sm">
                       <span className="flex items-center gap-1">
-                        <Sparkles className="w-3.5 h-3.5" />
+                        <IconSparkles className="w-3.5 h-3.5" />
                         Discount ({discountPercentage}%)
                       </span>
                       <span>- Rs. {discountAmount}</span>
