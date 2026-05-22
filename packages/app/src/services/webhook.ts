@@ -130,6 +130,35 @@ export async function submitCartToWebhook(
 
       if (responseData.success) {
         logWeb3FormsSuccess(orderId);
+
+        try {
+          await fetch('/api/orders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              orderId,
+              customer,
+              items: items.map((i) => ({
+                id: i.id,
+                shape: i.shape,
+                scent: i.scent,
+                color: i.color,
+                quantity: i.quantity,
+                size: i.size,
+                price: i.price,
+                hasLavenderPieces: i.hasLavenderPieces,
+              })),
+              totalQuantity,
+              subtotal,
+              discountPercentage,
+              discountAmount,
+              finalTotal,
+            }),
+          });
+        } catch (e) {
+          console.warn('[Webhook] Failed to save order to admin API:', e);
+        }
+
         if (onStatusChange) {
           onStatusChange('submitted');
         }
