@@ -23,3 +23,20 @@ export interface CatalogAttribute {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface VariantAttributeRef {
+  attributeId: string;
+  value: string;
+}
+
+export interface SoapVariant {
+  id: string;
+  name: string;
+  slug: string;
+  unitPrice: string;
+  enabled: boolean;
+  archived: boolean;
+  attributes: VariantAttributeRef[];
+  createdAt: string;
+  updatedAt: string;
+}

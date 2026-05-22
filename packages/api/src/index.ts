@@ -3,6 +3,7 @@ import { cors } from 'hono/cors';
 import health from './routes/health';
 import authRoutes from './routes/auth';
 import attributesRoutes from './routes/attributes';
+import variantsRoutes from './routes/variants';
 import settingsRoutes from './routes/settings';
 import { requireAuth } from './middleware/require-auth';
 
@@ -36,6 +37,7 @@ app.get('/api/admin/session', (c) => {
 });
 app.route('/api/admin/settings', settingsRoutes);
 app.route('/api/admin/attributes', attributesRoutes);
+app.route('/api/admin/variants', variantsRoutes);
 
 const port = Number(process.env.PORT) || 3001;
 

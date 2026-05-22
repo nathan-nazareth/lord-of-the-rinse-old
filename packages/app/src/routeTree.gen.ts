@@ -15,6 +15,7 @@ import { Route as CartRouteImport } from './routes/cart'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminVariantsRouteImport } from './routes/admin/variants'
 import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as AdminAttributesRouteImport } from './routes/admin/attributes'
@@ -49,6 +50,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminVariantsRoute = AdminVariantsRouteImport.update({
+  id: '/variants',
+  path: '/variants',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -74,6 +80,7 @@ export interface FileRoutesByFullPath {
   '/admin/attributes': typeof AdminAttributesRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/variants': typeof AdminVariantsRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
@@ -84,6 +91,7 @@ export interface FileRoutesByTo {
   '/admin/attributes': typeof AdminAttributesRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/variants': typeof AdminVariantsRoute
   '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
@@ -96,6 +104,7 @@ export interface FileRoutesById {
   '/admin/attributes': typeof AdminAttributesRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/variants': typeof AdminVariantsRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
@@ -109,6 +118,7 @@ export interface FileRouteTypes {
     | '/admin/attributes'
     | '/admin/login'
     | '/admin/settings'
+    | '/admin/variants'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -119,6 +129,7 @@ export interface FileRouteTypes {
     | '/admin/attributes'
     | '/admin/login'
     | '/admin/settings'
+    | '/admin/variants'
     | '/admin'
   id:
     | '__root__'
@@ -130,6 +141,7 @@ export interface FileRouteTypes {
     | '/admin/attributes'
     | '/admin/login'
     | '/admin/settings'
+    | '/admin/variants'
     | '/admin/'
   fileRoutesById: FileRoutesById
 }
@@ -185,6 +197,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/variants': {
+      id: '/admin/variants'
+      path: '/variants'
+      fullPath: '/admin/variants'
+      preLoaderRoute: typeof AdminVariantsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/settings': {
       id: '/admin/settings'
       path: '/settings'
@@ -213,6 +232,7 @@ interface AdminRouteChildren {
   AdminAttributesRoute: typeof AdminAttributesRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminVariantsRoute: typeof AdminVariantsRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
@@ -220,6 +240,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAttributesRoute: AdminAttributesRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminSettingsRoute: AdminSettingsRoute,
+  AdminVariantsRoute: AdminVariantsRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
