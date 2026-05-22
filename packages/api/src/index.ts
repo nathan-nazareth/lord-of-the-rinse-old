@@ -2,8 +2,14 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import health from './routes/health';
 import authRoutes from './routes/auth';
+import { requireAuth } from './middleware/require-auth';
 
-export const app = new Hono();
+export const app = new Hono<{
+  Variables: {
+    user: unknown;
+    session: unknown;
+  };
+}>();
 
 app.use(
   '/api/auth/*',
@@ -20,6 +26,12 @@ app.use(
 app.route('/health', health);
 app.route('/api/health', health);
 app.route('/api/auth', authRoutes);
+
+app.use('/api/admin/*', requireAuth);
+app.get('/api/admin/session', (c) => {
+  const user = c.get('user');
+  return c.json({ user });
+});
 
 const port = Number(process.env.PORT) || 3001;
 
