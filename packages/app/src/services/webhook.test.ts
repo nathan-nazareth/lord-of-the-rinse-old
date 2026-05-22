@@ -39,8 +39,9 @@ describe('submitCartToWebhook discount logic', () => {
     items: CartItem[],
   ): Promise<Record<string, string | number | undefined>> {
     await submitCartToWebhook(customer, items);
-    expect(mockFetch).toHaveBeenCalledOnce();
+    // First call is the Web3Forms submission; a second call to /api/orders may follow on success.
     const call = mockFetch.mock.calls[0];
+    expect(call).toBeDefined();
     const body = JSON.parse(call[1].body);
     return body;
   }

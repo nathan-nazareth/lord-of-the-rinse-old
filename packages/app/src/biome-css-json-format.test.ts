@@ -79,8 +79,8 @@ describe('Full-project format idempotency', () => {
 });
 
 describe('Lint still passes after CSS/JSON config changes', () => {
-  it('npm run lint exits with code 0', () => {
-    const result = execSync('npx biome lint .', {
+  it('bun run lint exits with code 0', () => {
+    const result = execSync('bunx biome lint .', {
       encoding: 'utf-8',
       cwd: process.cwd(),
     });

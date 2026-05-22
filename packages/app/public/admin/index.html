@@ -134,13 +134,13 @@
   <div class="card" id="loginCard">
     <h1>Admin Login</h1>
     <div id="loginForm">
-      <input type="password" id="passcode" placeholder="Enter passcode" autofocus>
-      <button class="login-btn" id="loginBtn">Sign in</button>
+      <input type="password" id="passcode" placeholder="Enter passcode">
+      <button type="button" class="login-btn" id="loginBtn">Sign in</button>
       <div class="error" id="error">Incorrect passcode</div>
     </div>
     <div id="welcomeSection" class="hidden">
       <p class="welcome">Hi Nathan and Daniel</p>
-      <button class="logout-btn logout-btn-only" id="logoutBtn" style="width:100%;margin-top:1.5rem">Logout</button>
+      <button type="button" class="logout-btn logout-btn-only" id="logoutBtn" style="width:100%;margin-top:1.5rem">Logout</button>
     </div>
   </div>
 
@@ -148,8 +148,8 @@
     <div class="top-bar">
       <h1>Orders</h1>
       <div style="display:flex;gap:0.5rem">
-        <button class="refresh-btn" id="refreshBtn">Refresh</button>
-        <button class="logout-btn" id="logoutBtn2">Logout</button>
+        <button type="button" class="refresh-btn" id="refreshBtn">Refresh</button>
+        <button type="button" class="logout-btn" id="logoutBtn2">Logout</button>
       </div>
     </div>
     <div id="ordersContainer">
@@ -161,7 +161,7 @@
   </div>
 
   <script>
-    (function() {
+    (() => {
       const passcode = '389276';
 
       const loginCard = document.getElementById('loginCard');
@@ -199,7 +199,7 @@
 
       function formatDate(iso) {
         const d = new Date(iso);
-        return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        return `${d.toLocaleDateString()} ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
       }
 
       function renderOrders(orders) {
@@ -224,14 +224,14 @@
                 <span class="order-id">#${(order.id || '').slice(0, 8)}</span>
               </div>
               <div class="customer-info">
-                <p><strong>${(order.customer && order.customer.name) || 'N/A'}</strong> &mdash; ${(order.customer && order.customer.email) || ''} ${(order.customer && order.customer.phone) ? '| ' + order.customer.phone : ''}</p>
+                <p><strong>${order.customer?.name || 'N/A'}</strong> &mdash; ${order.customer?.email || ''} ${order.customer?.phone ? `| ${order.customer.phone}` : ''}</p>
               </div>
               <table>
                 <thead><tr><th>Shape</th><th>Scent</th><th>Color</th><th>Size</th><th>Qty</th><th>Total</th></tr></thead>
                 <tbody>${itemsHtml}</tbody>
               </table>
               <div style="margin-top:0.5rem;font-size:0.85rem;text-align:right;color:#334155">
-                ${order.discountPercentage > 0 ? 'Discount: ' + order.discountPercentage + '% (-Rs. ' + (order.discountAmount || 0).toLocaleString() + ') &mdash; ' : ''}
+                ${order.discountPercentage > 0 ? `Discount: ${order.discountPercentage}% (-Rs. ${(order.discountAmount || 0).toLocaleString()}) &mdash; ` : ''}
                 <strong>Total: Rs. ${(order.finalTotal || 0).toLocaleString()}</strong>
               </div>
             </div>`;
@@ -249,7 +249,7 @@
                 '<div class="empty-state"><p>Database not configured</p><span>Ask Nathan to add Vercel KV in the Vercel dashboard (Storage &rarr; KV &rarr; Create, free tier). Then deploy once more.</span></div>';
             } else {
               ordersContainer.innerHTML =
-                '<div class="empty-state"><p>Failed to load orders</p><span>Status: ' + res.status + '</span></div>';
+                `<div class="empty-state"><p>Failed to load orders</p><span>Status: ${res.status}</span></div>`;
             }
             return;
           }
@@ -257,7 +257,7 @@
           renderOrders(data.orders);
         } catch (e) {
           ordersContainer.innerHTML =
-            '<div class="empty-state"><p>Failed to load orders</p><span>' + e.message + '</span></div>';
+            `<div class="empty-state"><p>Failed to load orders</p><span>${e.message}</span></div>`;
         }
       }
 
@@ -265,7 +265,7 @@
         showDashboard();
       }
 
-      loginBtn.addEventListener('click', function() {
+      loginBtn.addEventListener('click', () => {
         if (passcodeInput.value === passcode) {
           localStorage.setItem('adminAuth', 'true');
           showDashboard();
@@ -274,7 +274,7 @@
         }
       });
 
-      passcodeInput.addEventListener('keydown', function(e) {
+      passcodeInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') loginBtn.click();
       });
 
