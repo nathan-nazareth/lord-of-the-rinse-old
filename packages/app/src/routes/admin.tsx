@@ -10,8 +10,15 @@ export const Route = createFileRoute('/admin')({
         credentials: 'include',
       });
       const data = await res.json();
-      if (!data?.data?.session) {
+      const user = data?.data?.user;
+      const session = data?.data?.session;
+
+      if (!session) {
         throw redirect({ to: '/admin/login', search: { redirect: location.href } });
+      }
+
+      if (user?.role !== 'admin') {
+        throw redirect({ to: '/' });
       }
     } catch (e) {
       if ((e as { redirect?: unknown }).redirect) throw e;
