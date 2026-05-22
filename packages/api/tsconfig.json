@@ -5,7 +5,8 @@
     "outDir": "dist",
     "paths": {
       "@lotr/db": ["../db/src/index.ts"],
-      "@lotr/db/schema": ["../db/src/schema/index.ts"]
+      "@lotr/db/schema": ["../db/src/schema/index.ts"],
+      "@lotr/shared/schemas": ["../shared/src/schemas/index.ts"]
     }
   },
   "include": ["src"]

@@ -3,6 +3,7 @@ import {
   IconSettings,
   IconChevronLeft,
   IconChevronRight,
+  IconTags,
 } from '@tabler/icons-react';
 import { Link } from '@tanstack/react-router';
 import type { ReactNode } from 'react';
@@ -19,6 +20,11 @@ const navItems: NavItem[] = [
     to: '/admin',
     label: 'Dashboard',
     icon: <IconLayoutDashboard size={20} className="shrink-0" />,
+  },
+  {
+    to: '/admin/attributes',
+    label: 'Attributes',
+    icon: <IconTags size={20} className="shrink-0" />,
   },
   {
     to: '/admin/settings',

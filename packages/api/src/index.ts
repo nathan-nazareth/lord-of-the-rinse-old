@@ -2,6 +2,8 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import health from './routes/health';
 import authRoutes from './routes/auth';
+import attributesRoutes from './routes/attributes';
+import settingsRoutes from './routes/settings';
 import { requireAuth } from './middleware/require-auth';
 
 export const app = new Hono<{
@@ -32,6 +34,8 @@ app.get('/api/admin/session', (c) => {
   const user = c.get('user');
   return c.json({ user });
 });
+app.route('/api/admin/settings', settingsRoutes);
+app.route('/api/admin/attributes', attributesRoutes);
 
 const port = Number(process.env.PORT) || 3001;
 

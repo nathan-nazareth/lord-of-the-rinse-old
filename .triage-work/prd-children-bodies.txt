@@ -1,0 +1,371 @@
+===== 59 =====
+## Parent
+#56
+
+## What to build
+Configure Better Auth with first-user-only signup flow for the admin.
+
+## Dependencies (Updated)
+This ticket is blocked by:
+- Monorepo restructuring (#52–#55)
+- #57 and #58 (monorepo + schema foundation)
+
+## Acceptance criteria
+- [ ] Better Auth is configured
+- [ ] First-user-only signup is enforced
+- [ ] Subsequent signup attempts are rejected
+- [ ] Admin routes are protected
+- [ ] Existing tests still pass
+===== 60 =====
+## Parent
+#56
+
+## What to build
+Add admin login page, session management, and route protection using Better Auth.
+
+## Dependencies (Updated)
+This ticket is blocked by:
+- Monorepo restructuring (#52–#55)
+- #59 (Better Auth configuration)
+
+## Acceptance criteria
+- [ ] Admin login page works
+- [ ] Sessions are properly managed
+- [ ] Protected admin routes require authentication
+- [ ] Unauthenticated users are redirected or get 401
+- [ ] Existing tests still pass
+===== 61 =====
+## Parent
+#56
+
+## What to build
+Build admin shell layout and commerce settings management (shop open/closed, currency, discount tiers, contact info).
+
+## Dependencies (Updated)
+This ticket is blocked by:
+- Monorepo restructuring (#52–#55)
+- Layout Shell (#40–#43)
+- #60 (admin auth)
+
+## Acceptance criteria
+- [ ] Admin uses the Layout Shell
+- [ ] Commerce settings can be viewed and updated
+- [ ] Shop open/closed toggle works
+- [ ] Discount tiers are editable
+- [ ] Existing tests still pass
+===== 62 =====
+## Parent
+#56
+
+## What to build
+Add catalog attributes admin CRUD (shape, scent, color, size, addon).
+
+## Dependencies (Updated)
+This ticket is blocked by:
+- Monorepo restructuring (#52–#55)
+- #58 (Drizzle schemas)
+- #60 (admin auth)
+
+## Acceptance criteria
+- [ ] Admin can create/read/update/archive attributes
+- [ ] Duplicate slugs are rejected
+- [ ] Archived attributes are hidden from catalog but visible in admin
+- [ ] Existing tests still pass
+===== 63 =====
+## Parent
+#56
+
+## What to build
+Add soap variants admin CRUD with attribute references.
+
+## Dependencies (Updated)
+This ticket is blocked by:
+- Monorepo restructuring (#52–#55)
+- #58 (Drizzle schemas)
+- #62 (attributes CRUD)
+- #60 (admin auth)
+
+## Acceptance criteria
+- [ ] Admin can create variants with attribute references
+- [ ] Price and metadata can be updated
+- [ ] Enable/disable works
+- [ ] Archive preserves order history
+- [ ] Existing tests still pass
+===== 64 =====
+## Parent
+#56
+
+## What to build
+Add stock management and inventory movement ledger.
+
+## Dependencies (Updated)
+This ticket is blocked by:
+- Monorepo restructuring (#52–#55)
+- #58 (Drizzle schemas)
+- #63 (variants CRUD)
+- #60 (admin auth)
+
+## Acceptance criteria
+- [ ] Admin can adjust stock with reason
+- [ ] Movements are recorded
+- [ ] Negative stock is rejected
+- [ ] Movements can be listed with filters
+- [ ] Existing tests still pass
+===== 65 =====
+## Parent
+#56
+
+## What to build
+Create `GET /api/catalog` — a public (unauthenticated) endpoint that returns everything the storefront needs to render the soap builder. Response includes: all enabled attributes grouped by type, all enabled (non-archived) variants with their prices and attribute references, public commerce settings, and the shop open/closed flag.
+
+## Dependencies (Updated)
+This ticket is blocked by:
+- Monorepo restructuring (#52–#55)
+- TanStack Query (#28–#31) — recommended
+
+## Acceptance criteria
+- [ ] `GET /api/catalog` is accessible without authentication
+- [ ] Response includes enabled attributes grouped by type
+- [ ] Response includes enabled, non-archived variants with unit prices
+- [ ] Response includes public settings
+- [ ] Response does NOT include stock-on-hand or admin-only data
+- [ ] Response is validated against the shared Zod catalog schema
+- [ ] Existing tests still pass
+
+## Blocked by
+- #64 (variants and stock management must exist for catalog data)
+===== 66 =====
+## Parent
+#56
+
+## What to build
+Replace the hardcoded `SoapShape`, `SoapScent`, `SoapColor` enums and the static `SoapForm` component with a dynamic variant selector driven by `GET /api/catalog`. The builder lets customers pick attributes (shape, scent, color, size, add-ons) and the system finds the matching variant or shows it is unavailable. Display the variant's unit price from the catalog. Remove the free numeric size input; sizes come from variant-defined attribute options.
+
+When the catalog response indicates `shop_open: false` or no variants are enabled, show the shop-closed message from settings instead of the builder.
+
+On catalog load, check localStorage for cart items in the old format (without `variantId`). If found, clear the cart and display a one-time toast: "Product catalog has been updated — your cart was cleared."
+
+## Dependencies (Updated)
+This ticket is blocked by:
+- Monorepo restructuring (#52–#55)
+- TanStack Query (#28–#31) — recommended for fetching catalog data
+- Layout Shell (#40–#43) — will be used in admin
+
+## Acceptance criteria
+- [ ] Storefront fetches `GET /api/catalog` on load
+- [ ] SoapForm renders attribute options from API response (not hardcoded enums)
+- [ ] Selecting attributes filters to matching variants and shows price
+- [ ] Free numeric size input is removed; sizes come from variant attribute options
+- [ ] When no variant matches the selected attribute combination, show "not available"
+- [ ] When `shop_open: false` or no enabled variants, show shop-closed message from settings
+- [ ] Shop-closed message replaces the entire builder section
+- [ ] Legacy localStorage cart items (old format without variantId) are detected and cleared
+- [ ] A toast notification appears when legacy cart is cleared: "Product catalog has been updated — your cart was cleared."
+- [ ] Existing tests still pass (updated for new data flow)
+
+## Blocked by
+- #65 (public catalog API must return data)
+===== 67 =====
+## Parent
+#56
+
+## What to build
+Refactor the cart to store `{ variantId, quantity, displayName, unitPrice }` snapshots from the catalog API (replacing the current shape/scent/color/size/lavenderPieces fields). Build the `POST /api/checkout` endpoint — the checkout engine — which:
+
+1. Validates all variant IDs exist and are enabled
+2. Fetches current variant prices and commerce settings
+3. Calculates subtotal and applies discount tiers from settings (server-authoritative)
+4. Creates an order record with price/settings snapshots
+5. Creates order lines with `allocatedFromStock = min(quantity, stockOnHand)` and `quantityToProduce = quantity - allocatedFromStock`
+6. Deducts allocated stock from variant `stock_on_hand`
+7. Records `checkout_allocation` inventory movements for each stock deduction
+8. Generates a readable order reference `LOR-YYYYMMDD-NNNN` (daily sequential)
+9. Records a `pending` notification attempt for async dispatch
+10. Returns the order reference to the client
+
+Update the checkout page to POST to `/api/checkout` instead of Web3Forms directly. Update the confirmation page to display the order reference.
+
+Create `docs/adr/` ADR for Postgres orders as source of truth with Web3Forms as notification channel.
+
+## Dependencies (Updated)
+This ticket is blocked by:
+- Monorepo restructuring (#52–#55)
+- TanStack Query (#28–#31) — recommended for API calls
+- Layout Shell (#40–#43) — admin features will use it
+
+## Acceptance criteria
+- [ ] Cart items store `variantId`, `quantity`, `displayName`, `unitPrice` (snapshot from catalog)
+- [ ] Cart page, checkout page, and confirmation page work with new cart shape
+- [ ] `POST /api/checkout` accepts `{ items: [{ variantId, quantity }], customer: { name, email, phone } }`
+- [ ] Checkout rejects invalid or disabled variant IDs with clear errors
+- [ ] Checkout rejects zero or negative quantities
+- [ ] Order is created with snapshot of prices and settings at checkout time
+- [ ] Order lines have correct `allocated_from_stock` and `quantity_to_produce` split
+- [ ] Stock is deducted atomically for allocated items
+- [ ] Stock never goes below zero during allocation
+- [ ] `checkout_allocation` inventory movements are recorded for each deduction
+- [ ] Order reference follows `LOR-YYYYMMDD-NNNN` format and is unique
+- [ ] Daily sequential number resets each day
+- [ ] Pending notification attempt is recorded
+- [ ] Response returns `{ orderReference }` to the client
+- [ ] Checkout page posts to `/api/checkout` and receives order reference
+- [ ] Confirmation page displays the order reference
+- [ ] Server-side discount calculation uses editable discount tiers settings
+- [ ] ADR for Postgres orders as source of truth exists in `docs/adr/`
+- [ ] Existing tests still pass
+
+## Blocked by
+- #66 (catalog-driven storefront must use new cart and variant format)
+===== 68 =====
+## Parent
+#56
+
+## What to build
+Build the admin orders view with list and detail pages. The list page shows all orders with filters for status, date range, and customer search. Columns: order reference, customer name, status badge, total, date. Clicking an order opens the detail page showing: customer info, order reference, all line items (variant name/snapshot, quantity, unit price, allocated from stock, quantity to produce), order totals, and current status.
+
+Admin can change order status through valid transitions: `new` → `processing` → `fulfilled`. Status changes are recorded. The detail page also shows the notification attempt status for the order.
+
+## Dependencies (Updated)
+This ticket is blocked by:
+- Monorepo restructuring (#52–#55)
+- Layout Shell (#40–#43) — this is admin UI work
+- TanStack Query (#28–#31) — recommended for data fetching
+
+## Acceptance criteria
+- [ ] `GET /api/admin/orders` returns paginated orders with filters (status, date range, search query)
+- [ ] `GET /api/admin/orders/:id` returns full order detail with line items
+- [ ] `PATCH /api/admin/orders/:id` accepts `{ status }` for valid transitions
+- [ ] Only valid transitions allowed: `new` → `processing`, `processing` → `fulfilled`
+- [ ] Invalid transitions return a clear error
+- [ ] Admin orders list page renders with filter controls
+- [ ] Clicking an order navigates to detail page
+- [ ] Order detail shows customer info, reference, line items with allocation breakdown, totals
+- [ ] Status change buttons appear based on current status
+- [ ] Notification attempt status is visible on order detail
+- [ ] Existing tests still pass
+
+## Blocked by
+- #67 (checkout API must create orders first)
+===== 69 =====
+## Parent
+#56
+
+## What to build
+Implement async Web3Forms notification dispatch. After a successful checkout (order created in DB), the notification service dispatches a Web3Forms submission with order details. This happens asynchronously — it does not block or affect the order creation response. Each notification attempt is recorded in the `notification_attempts` table with status (`pending`, `sent`, `failed`), attempt count, last attempt timestamp, and error message on failure.
+
+If the `web3forms_enabled` setting is false, no notification is dispatched (the attempt record stays `pending` or is not created).
+
+Admin can retry failed notifications from the order detail page via `POST /api/admin/orders/:id/retry-notification`. This re-dispatches the notification and updates the attempt record.
+
+The notification payload includes: order reference, customer info, line items with prices, totals, and discount applied.
+
+## Dependencies (Updated)
+This ticket is blocked by:
+- Monorepo restructuring (#52–#55)
+- Layout Shell (#40–#43)
+- TanStack Query (#28–#31)
+
+## Acceptance criteria
+- [ ] After checkout, Web3Forms notification is dispatched asynchronously
+- [ ] Order creation response is NOT blocked by notification dispatch
+- [ ] Notification attempt record is created with status `pending` on checkout
+- [ ] On successful dispatch, attempt status updates to `sent`
+- [ ] On failed dispatch, attempt status updates to `failed` with error message
+- [ ] Attempt count and last_attempt_at are updated on each try
+- [ ] When `web3forms_enabled` is false, no notification is dispatched
+- [ ] Notification payload includes order reference, customer info, line items, totals
+- [ ] `POST /api/admin/orders/:id/retry-notification` re-dispatches and updates attempt record
+- [ ] Retry button appears in admin order detail when notification failed
+- [ ] Successful retry updates status to `sent`
+- [ ] Notification uses the Web3Forms access key from environment variable
+- [ ] Existing tests still pass
+
+## Blocked by
+- #67 (checkout API must create orders and notification attempt records)
+===== 70 =====
+## Parent
+#56
+
+## What to build
+Implement order cancellation logic. Admin can cancel orders with status `new` or `processing`. Cancellation sets the order status to `canceled` and automatically restores allocated stock: for each order line, the `allocated_from_stock` quantity is added back to the variant's `stock_on_hand`, and a `cancellation_restock` inventory movement is recorded for each variant.
+
+Orders with status `fulfilled` cannot be canceled via automatic restock. If admin needs to handle a fulfilled order return, they must manually adjust stock via the stock adjustment feature.
+
+## Dependencies (Updated)
+This ticket is blocked by:
+- Monorepo restructuring (#52–#55)
+- Layout Shell (#40–#43)
+- TanStack Query (#28–#31)
+
+## Acceptance criteria
+- [ ] Cancel action is available for orders with status `new` or `processing`
+- [ ] Cancel action is NOT available for `fulfilled` or already `canceled` orders
+- [ ] Canceling an order sets status to `canceled`
+- [ ] For each order line, `allocated_from_stock` quantity is restored to variant's `stock_on_hand`
+- [ ] `cancellation_restock` inventory movements are recorded for each restocked variant
+- [ ] Movements include the order reference as context
+- [ ] `quantity_to_produce` lines are NOT restocked
+- [ ] Stock restock happens atomically
+- [ ] Admin sees a confirmation dialog before canceling
+- [ ] After cancellation, order detail shows `canceled` status and the restock is visible in the ledger
+- [ ] Existing tests still pass
+
+## Blocked by
+- #68 (admin order detail and status management must exist)
+===== 71 =====
+## Parent
+#56
+
+## What to build
+Create a derived production queue view in the admin. The production queue is not a separate table — it is a query over order lines where `quantity_to_produce > 0`, joined with variant data and order info. The admin production page shows items grouped by variant (aggregating total quantity to produce across all active orders), with columns: variant name/attributes, total quantity to produce, number of orders, and earliest order date. Expanding a variant shows the individual order lines contributing to the total.
+
+Only orders with status `new` or `processing` are included. Fulfilled and canceled orders are excluded.
+
+## Dependencies (Updated)
+This ticket is blocked by:
+- Monorepo restructuring (#52–#55)
+- Layout Shell (#40–#43)
+- TanStack Query (#28–#31)
+
+## Acceptance criteria
+- [ ] Admin production page renders a table of variants with outstanding production demand
+- [ ] Items are grouped by variant with aggregated `quantity_to_produce` totals
+- [ ] Columns include: variant name, attributes summary, total to produce, order count, earliest order date
+- [ ] Expanding/clicking a variant shows individual order lines with order reference and quantity
+- [ ] Only `new` and `processing` orders are included
+- [ ] `fulfilled` and `canceled` orders are excluded from the production queue
+- [ ] Production queue updates when order status changes or new orders come in
+- [ ] Empty state message when no production demand exists
+- [ ] Existing tests still pass
+
+## Blocked by
+- #68 (admin order detail must exist so production queue can reference orders)
+===== 73 =====
+## Parent
+#56
+
+## What to build
+Write end-to-end tests using Playwright covering both storefront customer flows and admin UI flows. Update Playwright config for the monorepo structure.
+
+**Storefront E2E tests:**
+- Shop closed, Catalog-driven builder, Add to cart, Checkout success, Web3Forms failure resilience, Legacy cart clearing
+
+**Admin UI tests:**
+- Setup, Login, Variant creation, Stock adjustment, Order status, Cancellation restock, Production queue, Settings, Notification retry
+
+## Dependencies (Updated)
+This ticket is blocked by:
+- Monorepo restructuring (#52–#55)
+- Layout Shell (#40–#43)
+- TanStack Query (#28–#31)
+- Error Boundary (#48–#51)
+
+## Acceptance criteria
+- [ ] Playwright config updated for monorepo
+- [ ] `bun run test:e2e` runs all E2E tests
+- [ ] Storefront tests cover listed flows
+- [ ] Admin tests cover listed flows
+- [ ] All tests pass against the running dev environment
+
+## Blocked by
+- #69, #70, #71 (notification, cancellation, and production queue must exist)

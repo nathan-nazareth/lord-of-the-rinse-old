@@ -12,3 +12,14 @@ export interface CartItem {
   displayName: string;
   unitPrice: string;
 }
+
+export interface CatalogAttribute {
+  id: string;
+  type: AttributeType;
+  name: string;
+  slug: string;
+  displayOrder: number;
+  archived: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
