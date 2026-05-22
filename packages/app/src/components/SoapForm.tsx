@@ -509,7 +509,10 @@ export const SoapForm: React.FC<SoapFormProps> = ({
                               handleSizeChange(0);
                               return;
                             }
-                            handleSizeChange(num);
+                            // biome-ignore lint/style/noNonNullAssertion: shape is set when on scent step
+                            const limits = SIZE_LIMITS[shape!];
+                            const clamped = Math.min(Math.max(num, limits.min), limits.max);
+                            handleSizeChange(clamped);
                           }}
                           onBlur={(e) => {
                             const raw = e.target.value.replace(/[^0-9]/g, '');
