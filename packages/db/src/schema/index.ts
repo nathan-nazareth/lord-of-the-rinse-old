@@ -4,3 +4,4 @@ export * from './inventory';
 export * from './settings';
 export * from './notifications';
 export * from './users';
+export * from './auth';

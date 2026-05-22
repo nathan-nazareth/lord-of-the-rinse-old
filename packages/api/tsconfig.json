@@ -2,7 +2,11 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "types": ["node", "vitest/globals"],
-    "outDir": "dist"
+    "outDir": "dist",
+    "paths": {
+      "@lotr/db": ["../db/src/index.ts"],
+      "@lotr/db/schema": ["../db/src/schema/index.ts"]
+    }
   },
   "include": ["src"]
 }
