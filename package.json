@@ -7,17 +7,21 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "bun run --filter @organic-soap/app dev",
-    "build": "bun run --filter @organic-soap/app build",
-    "preview": "bun run --filter @organic-soap/app preview",
-    "lint": "bun run --filter @organic-soap/app lint",
-    "format": "bun run --filter @organic-soap/app format",
-    "format:check": "bun run --filter @organic-soap/app format:check",
-    "test": "bun run --filter @organic-soap/app test",
-    "test:e2e": "bun run --filter @organic-soap/app test:e2e",
-    "test:ui": "bun run --filter @organic-soap/app test:ui",
-    "test:watch": "bun run --filter @organic-soap/app test:watch",
-    "test:coverage": "bun run --filter @organic-soap/app test:coverage"
+    "dev": "bun run --filter @lotr/app dev",
+    "dev:api": "bun run --filter @lotr/api dev",
+    "dev:all": "bun run dev & bun run dev:api",
+    "build": "bun run --filter @lotr/app build",
+    "preview": "bun run --filter @lotr/app preview",
+    "lint": "bun run --filter @lotr/app lint",
+    "format": "bun run --filter @lotr/app format",
+    "format:check": "bun run --filter @lotr/app format:check",
+    "test": "bun run --filter @lotr/app test",
+    "test:api": "bun run --filter @lotr/api test",
+    "test:all": "bun run --filter '*' test",
+    "test:e2e": "bun run --filter @lotr/app test:e2e",
+    "test:ui": "bun run --filter @lotr/app test:ui",
+    "test:watch": "bun run --filter @lotr/app test:watch",
+    "test:coverage": "bun run --filter @lotr/app test:coverage"
   },
   "dependencies": {
     "@libsql/client": "^0.17.3",

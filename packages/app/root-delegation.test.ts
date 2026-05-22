@@ -11,7 +11,7 @@ describe('root package.json delegation', () => {
     const scripts = pkg.scripts;
 
     expect(scripts.dev).toContain('--filter');
-    expect(scripts.dev).toContain('@organic-soap/app');
+    expect(scripts.dev).toContain('@lotr/app');
     expect(scripts.build).toContain('--filter');
     expect(scripts.test).toContain('--filter');
   });
