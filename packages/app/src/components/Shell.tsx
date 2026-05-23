@@ -5,6 +5,7 @@ import {
   IconChevronRight,
   IconTags,
   IconPackages,
+  IconBoxSeam,
 } from '@tabler/icons-react';
 import { Link } from '@tanstack/react-router';
 import type { ReactNode } from 'react';
@@ -31,6 +32,11 @@ const navItems: NavItem[] = [
     to: '/admin/variants',
     label: 'Variants',
     icon: <IconPackages size={20} className="shrink-0" />,
+  },
+  {
+    to: '/admin/stock',
+    label: 'Stock',
+    icon: <IconBoxSeam size={20} className="shrink-0" />,
   },
   {
     to: '/admin/settings',
