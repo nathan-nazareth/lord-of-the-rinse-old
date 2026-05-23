@@ -12,7 +12,9 @@ const CheckoutPage: React.FC<{
   onBack: () => void;
   onSubmit: (customer: Customer) => Promise<void>;
   isSubmitting: boolean;
-}> = ({ cart, onBack, onSubmit, isSubmitting }) => {
+  errorMessage?: string | null;
+  onClearError?: () => void;
+}> = ({ cart, onBack, onSubmit, isSubmitting, errorMessage, onClearError }) => {
   const [formData, setFormData] = useState({ name: '', email: '', phone: '' });
   const [errors, setErrors] = useState<{ name?: string; email?: string; phone?: string }>({});
   const { data: catalog } = useCatalog();
@@ -98,6 +100,15 @@ const CheckoutPage: React.FC<{
             </div>
 
             <form onSubmit={handleSubmit} noValidate className="space-y-5">
+              {errorMessage && (
+                <div
+                  className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm flex items-start gap-2"
+                  role="alert"
+                >
+                  <span className="text-red-500 mt-0.5 shrink-0">!</span>
+                  <span>{errorMessage}</span>
+                </div>
+              )}
               <div>
                 <label htmlFor="checkout-name" className="block text-ink-700 font-medium mb-1.5">
                   Your Name
@@ -106,8 +117,14 @@ const CheckoutPage: React.FC<{
                   id="checkout-name"
                   type="text"
                   value={formData.name}
-                  onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
-                  onFocus={() => setErrors((p) => ({ ...p, name: undefined }))}
+                  onChange={(e) => {
+                    setFormData((p) => ({ ...p, name: e.target.value }));
+                    onClearError?.();
+                  }}
+                  onFocus={() => {
+                    setErrors((p) => ({ ...p, name: undefined }));
+                    onClearError?.();
+                  }}
                   placeholder="Enter your full name"
                   className={`input-apothecary ${errors.name ? 'border-red-400' : ''}`}
                 />
@@ -121,8 +138,14 @@ const CheckoutPage: React.FC<{
                   id="checkout-email"
                   type="email"
                   value={formData.email}
-                  onChange={(e) => setFormData((p) => ({ ...p, email: e.target.value }))}
-                  onFocus={() => setErrors((p) => ({ ...p, email: undefined }))}
+                  onChange={(e) => {
+                    setFormData((p) => ({ ...p, email: e.target.value }));
+                    onClearError?.();
+                  }}
+                  onFocus={() => {
+                    setErrors((p) => ({ ...p, email: undefined }));
+                    onClearError?.();
+                  }}
                   placeholder="Enter your email"
                   className={`input-apothecary ${errors.email ? 'border-red-400' : ''}`}
                 />
@@ -136,8 +159,14 @@ const CheckoutPage: React.FC<{
                   id="checkout-phone"
                   type="tel"
                   value={formData.phone}
-                  onChange={(e) => setFormData((p) => ({ ...p, phone: e.target.value }))}
-                  onFocus={() => setErrors((p) => ({ ...p, phone: undefined }))}
+                  onChange={(e) => {
+                    setFormData((p) => ({ ...p, phone: e.target.value }));
+                    onClearError?.();
+                  }}
+                  onFocus={() => {
+                    setErrors((p) => ({ ...p, phone: undefined }));
+                    onClearError?.();
+                  }}
                   placeholder="Enter your phone number"
                   className={`input-apothecary ${errors.phone ? 'border-red-400' : ''}`}
                 />

@@ -60,7 +60,7 @@ checkoutRoutes.post('/', async (c) => {
     return c.json({ error: 'Validation failed', details: parsed.error.flatten() }, 400);
   }
 
-  const { items, customerName, customerEmail } = parsed.data;
+  const { items, customerName, customerEmail, customerPhone } = parsed.data;
 
   // Look up all requested variants from the database
   const variantIds = items.map((item) => item.variantId);
@@ -115,6 +115,7 @@ checkoutRoutes.post('/', async (c) => {
       status: 'new',
       customerName,
       customerEmail,
+      customerPhone,
       total,
     })
     .returning();

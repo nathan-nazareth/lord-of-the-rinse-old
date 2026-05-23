@@ -11,6 +11,7 @@ export const checkoutRequestSchema = z.object({
   items: z.array(checkoutItemSchema).min(1),
   customerName: z.string().min(1),
   customerEmail: z.string().email(),
+  customerPhone: z.string().optional(),
 });
 
 export const checkoutResponseSchema = z.object({

@@ -122,6 +122,7 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
           body: JSON.stringify({
             customerName: customer.name,
             customerEmail: customer.email,
+            customerPhone: customer.phone,
             items: checkoutItems,
           }),
         });

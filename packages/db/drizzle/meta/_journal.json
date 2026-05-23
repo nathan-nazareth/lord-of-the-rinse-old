@@ -8,6 +8,13 @@
       "when": 1779427240774,
       "tag": "0000_regular_paper_doll",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1779557209804,
+      "tag": "0001_secret_patch",
+      "breakpoints": true
     }
   ]
 }

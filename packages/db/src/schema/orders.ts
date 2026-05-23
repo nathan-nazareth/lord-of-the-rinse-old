@@ -7,6 +7,7 @@ export const orders = pgTable('orders', {
   status: text('status').notNull().default('new'), // new, processing, fulfilled, cancelled
   customerName: text('customer_name').notNull(),
   customerEmail: text('customer_email').notNull(),
+  customerPhone: text('customer_phone'),
   total: text('total').notNull(), // stored as decimal string
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
