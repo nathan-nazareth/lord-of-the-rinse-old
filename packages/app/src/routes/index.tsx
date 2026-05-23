@@ -63,9 +63,6 @@ function IndexContent() {
             >
               Shop Now
             </button>
-            <p className="text-white/90 text-sm mt-4 font-accent tracking-wider border border-white/30 bg-black/40 rounded px-4 py-2">
-              Bulk discounts available — order 2+ and save up to 15%
-            </p>
           </div>
         </div>
       ) : (

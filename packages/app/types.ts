@@ -34,8 +34,6 @@ export const SHAPE_OPTIONS = [
 ];
 
 export const DEFAULT_SIZE = 100;
-export const MAX_SIZE = 100;
-export const BASE_SIZE = 100;
 export const LAVENDER_PIECES_PRICE = 5;
 
 export enum SoapColor {
@@ -45,34 +43,4 @@ export enum SoapColor {
   GREEN = 'Green',
   BLUE = 'Blue',
   PURPLE = 'Purple',
-}
-
-export interface OrderItem {
-  id: string;
-  shape: SoapShape;
-  scent: SoapScent;
-  color: SoapColor;
-  quantity: string;
-  size: number;
-  hasLavenderPieces: boolean;
-  hasRosePieces: boolean;
-  price: number;
-}
-
-export interface OrderFormState {
-  shape: SoapShape | null;
-  scent: SoapScent | null;
-  color: SoapColor | null;
-  quantity: string;
-  size: number;
-  hasLavenderPieces: boolean;
-  customerName: string;
-  customerEmail: string;
-  customerPhone: string;
-}
-
-export interface ContactInfo {
-  name: string;
-  email: string;
-  phone: string;
 }

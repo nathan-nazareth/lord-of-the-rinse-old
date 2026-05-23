@@ -13,15 +13,6 @@ export interface CartItem {
 export interface Cart {
   items: CartItem[];
   totalQuantity: number;
-  updatedAt: string;
-}
-
-export interface CartService {
-  saveCart(cart: Cart): void;
-  loadCart(): Cart | null;
-  removeItem(cart: Cart, itemId: string): Cart;
-  clearCart(): void;
-  calculateTotal(items: CartItem[]): number;
 }
 
 export const CART_KEY = 'organic-soap-cart';
