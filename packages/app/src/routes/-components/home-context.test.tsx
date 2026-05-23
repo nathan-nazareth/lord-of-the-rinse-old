@@ -1,14 +1,9 @@
 import { act, renderHook } from '@testing-library/react';
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { submitCartToWebhook } from '../../services/webhook';
 import { useCartStore } from '../../stores/useCartStore';
 import { MockLocalStorage } from '../../test-utils/mock-local-storage';
 import { HomeProvider, useHomeContext } from './home-context';
-
-vi.mock('../../services/webhook', () => ({
-  submitCartToWebhook: vi.fn(),
-}));
 
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   React.createElement(HomeProvider, null, children);
@@ -94,7 +89,14 @@ describe('HomeProvider cart store wiring', () => {
   });
 
   it('clears cart and form state on successful checkout', async () => {
-    vi.mocked(submitCartToWebhook).mockResolvedValue({ success: true, orderId: 'test-order-1' });
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        status: 201,
+        json: () => Promise.resolve({ reference: 'LOR-20260523-0001', status: 'new' }),
+      }),
+    );
 
     const { result } = renderHook(() => useHomeContext(), { wrapper });
 
@@ -110,6 +112,7 @@ describe('HomeProvider cart store wiring', () => {
     expect(result.current.cart.items).toHaveLength(0);
     expect(result.current.justOrdered).toBe(true);
     expect(result.current.confirmationItemCount).toBe(2);
+    expect(result.current.lastOrderReference).toBe('LOR-20260523-0001');
   });
 
   it('detects legacy cart and sets legacyCartCleared flag', () => {

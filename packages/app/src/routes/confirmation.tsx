@@ -4,10 +4,16 @@ import { useHomeContext } from './-components/home-context';
 
 function ConfirmationContent() {
   const navigate = useNavigate();
-  const { confirmationItemCount } = useHomeContext();
+  const { confirmationItemCount, lastOrderReference } = useHomeContext();
+  const search = Route.useSearch();
+  const orderReference = (search as { ref?: string }).ref || lastOrderReference;
 
   return (
-    <ConfirmationPage itemCount={confirmationItemCount} onContinue={() => navigate({ to: '/' })} />
+    <ConfirmationPage
+      itemCount={confirmationItemCount}
+      orderReference={orderReference}
+      onContinue={() => navigate({ to: '/' })}
+    />
   );
 }
 

@@ -7,6 +7,7 @@ import attributesRoutes from './routes/attributes';
 import variantsRoutes from './routes/variants';
 import settingsRoutes from './routes/settings';
 import stockMovementsRoutes from './routes/stock-movements';
+import checkoutRoutes from './routes/checkout';
 import { requireAuth } from './middleware/require-auth';
 
 export const app = new Hono<{
@@ -31,6 +32,7 @@ app.use(
 app.route('/health', health);
 app.route('/api/health', health);
 app.route('/api/catalog', catalogRoutes);
+app.route('/api/checkout', checkoutRoutes);
 app.route('/api/auth', authRoutes);
 
 app.use('/api/admin/*', requireAuth);

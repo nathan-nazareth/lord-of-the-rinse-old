@@ -3,8 +3,9 @@ import type React from 'react';
 
 const ConfirmationPage: React.FC<{
   itemCount: number;
+  orderReference?: string;
   onContinue: () => void;
-}> = ({ itemCount, onContinue }) => (
+}> = ({ itemCount, orderReference, onContinue }) => (
   <div className="min-h-screen bg-parchment-100 flex items-center justify-center px-4">
     <div className="card-apothecary p-10 max-w-sm w-full text-center">
       <div className="w-24 h-24 bg-botanical-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -19,6 +20,11 @@ const ConfirmationPage: React.FC<{
       <p className="overline mb-3">Order confirmed</p>
       <h1 className="font-display text-3xl font-semibold text-ink-700 mb-3">Thank you!</h1>
       <p className="text-ink-500 text-lg mb-2">Your order has been submitted.</p>
+      {orderReference && (
+        <p className="text-ink-600 font-display font-semibold text-sm mb-2 bg-parchment-200 rounded-lg px-3 py-2 inline-block">
+          Ref: {orderReference}
+        </p>
+      )}
       <p className="text-ink-400 mb-10">
         {itemCount} soap{itemCount !== 1 ? 's' : ''} — we&apos;ll begin crafting them soon.
       </p>

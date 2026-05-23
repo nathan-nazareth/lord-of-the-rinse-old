@@ -15,7 +15,12 @@ function CheckoutContent() {
     <CheckoutPage
       cart={cart}
       onBack={() => navigate({ to: '/cart' })}
-      onSubmit={handleCheckout}
+      onSubmit={async (customer) => {
+        const reference = await handleCheckout(customer);
+        if (reference) {
+          await navigate({ to: '/confirmation', search: { ref: reference } });
+        }
+      }}
       isSubmitting={isSubmitting}
     />
   );

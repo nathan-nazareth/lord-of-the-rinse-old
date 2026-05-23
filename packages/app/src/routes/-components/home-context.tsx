@@ -8,7 +8,6 @@ import {
   useRef,
   useState,
 } from 'react';
-import { submitCartToWebhook } from '../../services/webhook';
 import { detectAndClearLegacyCart, useCartStore } from '../../stores/useCartStore';
 import { useFormStore } from '../../stores/useFormStore';
 import type { CartItem } from '../../types/cart';
@@ -29,11 +28,12 @@ interface HomeContextValue {
     quantity: string,
     size: string,
   ) => void;
-  handleCheckout: (customer: Customer) => Promise<void>;
+  handleCheckout: (customer: Customer) => Promise<string | undefined>;
   handleDismissOrdered: () => void;
   isSubmitting: boolean;
   justOrdered: boolean;
   confirmationItemCount: number;
+  lastOrderReference: string;
   removeItem: (itemId: string) => void;
   updateQuantity: (itemId: string, quantity: number) => void;
   clearCart: () => void;
@@ -62,6 +62,7 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
   const setVisited = useFormStore((s) => s.setVisited);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmationItemCount, setConfirmationItemCount] = useState(0);
+  const [lastOrderReference, setLastOrderReference] = useState('');
   const [justOrdered, setJustOrdered] = useState(false);
   const [showLanding, setShowLanding] = useState(true);
   const [legacyCartCleared, setLegacyCartCleared] = useState(false);
@@ -105,21 +106,42 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
   );
 
   const handleCheckout = useCallback(
-    async (customer: Customer) => {
+    async (customer: Customer): Promise<string | undefined> => {
       setIsSubmitting(true);
       try {
-        const result = await submitCartToWebhook(customer, cart.items);
-        if (result.success) {
-          setConfirmationItemCount(cart.totalQuantity);
-          setJustOrdered(true);
-          clearCart();
-          clearFormState();
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        } else {
-          console.error('Order submission failed');
+        const checkoutItems = cart.items.map((item) => ({
+          variantId: item.variantId,
+          displayName: `${item.scent} (${item.shape}, ${item.color}, ${item.size}g)`,
+          quantity: item.quantity,
+          unitPrice: item.price.toFixed(2),
+        }));
+
+        const response = await fetch('/api/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            customerName: customer.name,
+            customerEmail: customer.email,
+            items: checkoutItems,
+          }),
+        });
+
+        if (!response.ok) {
+          console.error('Checkout API failed:', response.status);
+          return undefined;
         }
+
+        const data = await response.json();
+        setConfirmationItemCount(cart.totalQuantity);
+        setLastOrderReference(data.reference);
+        setJustOrdered(true);
+        clearCart();
+        clearFormState();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return data.reference;
       } catch (err) {
         console.error('Order submission error:', err);
+        return undefined;
       } finally {
         setIsSubmitting(false);
       }
@@ -145,6 +167,7 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
         isSubmitting,
         justOrdered,
         confirmationItemCount,
+        lastOrderReference,
         removeItem,
         updateQuantity,
         clearCart,
