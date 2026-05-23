@@ -174,11 +174,8 @@ const CartPage: React.FC<{
                           {item.shape} · {item.scent}
                         </p>
                         <p className="text-ink-400 text-sm">
-                          {item.color} · {item.size}g
+                          {item.color} · {item.size}
                         </p>
-                        <div className="flex gap-1 mt-1 flex-wrap">
-                          {item.hasLavenderPieces && <span className="badge-tag">Lavender</span>}
-                        </div>
                       </div>
                       <div className="flex items-center gap-3 flex-shrink-0">
                         <span className="font-display font-semibold text-terra-500">

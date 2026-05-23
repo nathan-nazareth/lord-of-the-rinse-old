@@ -67,7 +67,7 @@ export async function submitCartToWebhook(
   const orderItemsFormatted = items
     .map(
       (item, index) =>
-        `${index + 1}. ${item.shape || 'N/A'} | ${item.scent}${item.hasLavenderPieces ? ' w/ Lavender Pieces' : ''} | Size: ${item.size}g | Color: ${item.color} | Qty: ${item.quantity} | Rs. ${item.price * item.quantity}`,
+        `${index + 1}. ${item.shape || 'N/A'} | ${item.scent} | Size: ${item.size} | Color: ${item.color} | Qty: ${item.quantity} | Rs. ${item.price * item.quantity}`,
     )
     .join('\n');
 
@@ -140,13 +140,13 @@ export async function submitCartToWebhook(
               customer,
               items: items.map((i) => ({
                 id: i.id,
+                variantId: i.variantId,
                 shape: i.shape,
                 scent: i.scent,
                 color: i.color,
                 quantity: i.quantity,
                 size: i.size,
                 price: i.price,
-                hasLavenderPieces: i.hasLavenderPieces,
               })),
               totalQuantity,
               subtotal,

@@ -1,12 +1,12 @@
 export interface CartItem {
   id: string;
+  variantId: string;
   shape: string;
   scent: string;
   price: number;
   color: string;
   quantity: number;
-  size: number;
-  hasLavenderPieces: boolean;
+  size: string;
   addedAt: string;
 }
 

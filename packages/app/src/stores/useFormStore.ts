@@ -1,16 +1,14 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { SoapColor, SoapScent, SoapShape } from '../../types';
 
-type FormStep = 'landing' | 'shape' | 'scent' | 'color' | 'quantity';
+type FormStep = 'landing' | 'shape' | 'scent' | 'color' | 'size' | 'quantity';
 
-interface FormState {
-  shape: SoapShape | null;
-  scent: SoapScent | null;
-  color: SoapColor | null;
+export interface FormState {
+  shape: string | null;
+  scent: string | null;
+  color: string | null;
+  size: string | null;
   quantity: string;
-  size: number;
-  hasLavenderPieces: boolean;
   currentStep: FormStep;
   visited: boolean;
 }
@@ -22,15 +20,12 @@ interface FormActions {
   clear: () => void;
 }
 
-const DEFAULT_SIZE = 75;
-
 const initialState: FormState = {
   shape: null,
   scent: null,
   color: null,
+  size: null,
   quantity: '',
-  size: DEFAULT_SIZE,
-  hasLavenderPieces: false,
   currentStep: 'landing',
   visited: false,
 };

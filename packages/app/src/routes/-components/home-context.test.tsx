@@ -35,11 +35,12 @@ describe('HomeProvider cart store wiring', () => {
     const { result } = renderHook(() => useHomeContext(), { wrapper });
 
     act(() => {
-      result.current.handleAddToCart('square', 'lavender', 12.99, 'blue', '2', 75, false);
+      result.current.handleAddToCart('variant-1', 'square', 'lavender', 12.99, 'blue', '2', '75g');
     });
 
     expect(result.current.cart.items).toHaveLength(1);
     expect(result.current.cart.items[0].shape).toBe('square');
+    expect(result.current.cart.items[0].variantId).toBe('variant-1');
     expect(result.current.cart.totalQuantity).toBe(2);
   });
 
@@ -47,7 +48,7 @@ describe('HomeProvider cart store wiring', () => {
     const { result } = renderHook(() => useHomeContext(), { wrapper });
 
     act(() => {
-      result.current.handleAddToCart('square', 'lavender', 12.99, 'blue', '1', 75, false);
+      result.current.handleAddToCart('variant-1', 'square', 'lavender', 12.99, 'blue', '1', '75g');
     });
     const itemId = result.current.cart.items[0].id;
 
@@ -63,7 +64,7 @@ describe('HomeProvider cart store wiring', () => {
     const { result } = renderHook(() => useHomeContext(), { wrapper });
 
     act(() => {
-      result.current.handleAddToCart('square', 'lavender', 12.99, 'blue', '1', 75, false);
+      result.current.handleAddToCart('variant-1', 'square', 'lavender', 12.99, 'blue', '1', '75g');
     });
     const itemId = result.current.cart.items[0].id;
 
@@ -79,8 +80,8 @@ describe('HomeProvider cart store wiring', () => {
     const { result } = renderHook(() => useHomeContext(), { wrapper });
 
     act(() => {
-      result.current.handleAddToCart('square', 'lavender', 12.99, 'blue', '1', 75, false);
-      result.current.handleAddToCart('circle', 'citrus', 9.99, 'red', '2', 50, false);
+      result.current.handleAddToCart('v-1', 'square', 'lavender', 12.99, 'blue', '1', '75g');
+      result.current.handleAddToCart('v-2', 'circle', 'citrus', 9.99, 'red', '2', '50g');
     });
     expect(result.current.cart.items).toHaveLength(2);
 
@@ -98,7 +99,7 @@ describe('HomeProvider cart store wiring', () => {
     const { result } = renderHook(() => useHomeContext(), { wrapper });
 
     act(() => {
-      result.current.handleAddToCart('square', 'lavender', 12.99, 'blue', '2', 75, false);
+      result.current.handleAddToCart('v-1', 'square', 'lavender', 12.99, 'blue', '2', '75g');
     });
     expect(result.current.cart.items).toHaveLength(1);
 
@@ -109,5 +110,33 @@ describe('HomeProvider cart store wiring', () => {
     expect(result.current.cart.items).toHaveLength(0);
     expect(result.current.justOrdered).toBe(true);
     expect(result.current.confirmationItemCount).toBe(2);
+  });
+
+  it('detects legacy cart and sets legacyCartCleared flag', () => {
+    // Put legacy data in localStorage
+    const legacyData = {
+      state: {
+        items: [
+          {
+            id: 'old-1',
+            shape: 'square',
+            scent: 'lavender',
+            price: 12.99,
+            color: 'blue',
+            quantity: 2,
+            size: 75,
+            hasLavenderPieces: false,
+          },
+        ],
+        totalQuantity: 2,
+      },
+      version: 0,
+    };
+    mockStorage.setItem('organic-soap-cart', JSON.stringify(legacyData));
+
+    const { result } = renderHook(() => useHomeContext(), { wrapper });
+
+    expect(result.current.legacyCartCleared).toBe(true);
+    expect(result.current.cart.items).toHaveLength(0);
   });
 });

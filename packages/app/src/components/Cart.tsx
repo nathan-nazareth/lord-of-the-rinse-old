@@ -376,11 +376,8 @@ export const Cart: React.FC<CartProps> = ({
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-ink-700 truncate">{item.scent}</p>
                       <p className="text-ink-400 text-sm truncate">
-                        {item.color} · {item.size}g
+                        {item.color} · {item.size}
                       </p>
-                      <div className="flex gap-1 mt-1 flex-wrap">
-                        {item.hasLavenderPieces && <span className="badge-tag">Lavender</span>}
-                      </div>
                     </div>
                     <div className="flex items-center gap-3 flex-shrink-0">
                       <span className="font-display font-semibold text-ink-700">

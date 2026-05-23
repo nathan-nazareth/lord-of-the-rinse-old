@@ -7,13 +7,13 @@ interface CartState {
   items: CartItem[];
   totalQuantity: number;
   addItem: (
+    variantId: string,
     shape: string,
     scent: string,
     price: number,
     color: string,
     quantity: string,
-    size: number,
-    hasLavenderPieces: boolean,
+    size: string,
   ) => boolean;
   removeItem: (itemId: string) => void;
   updateQuantity: (itemId: string, quantity: number) => void;
@@ -25,19 +25,19 @@ export const useCartStore = create<CartState>()(
     (set, get) => ({
       items: [],
       totalQuantity: 0,
-      addItem: (shape, scent, price, color, quantity, size, hasLavenderPieces) => {
+      addItem: (variantId, shape, scent, price, color, quantity, size) => {
         if (get().items.length >= MAX_CART_ITEMS) {
           return false;
         }
         const newItem: CartItem = {
           id: crypto.randomUUID(),
+          variantId,
           shape,
           scent,
           price,
           color,
           quantity: parseInt(quantity, 10),
           size,
-          hasLavenderPieces,
           addedAt: new Date().toISOString(),
         };
         const newItems = [...get().items, newItem];
@@ -118,3 +118,32 @@ export const useCartStore = create<CartState>()(
     },
   ),
 );
+
+/**
+ * Detect and clear legacy cart items (those without variantId).
+ * Returns true if legacy items were found and cleared.
+ */
+export function detectAndClearLegacyCart(): boolean {
+  try {
+    const raw = localStorage.getItem(CART_KEY);
+    if (!raw) return false;
+
+    const parsed = JSON.parse(raw);
+    const items: unknown[] = parsed?.state?.items ?? parsed?.items ?? [];
+    const hasLegacy = items.some(
+      (item) =>
+        typeof item === 'object' &&
+        item !== null &&
+        !('variantId' in (item as Record<string, unknown>)),
+    );
+
+    if (hasLegacy) {
+      localStorage.removeItem(CART_KEY);
+      useCartStore.getState().clearCart();
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}

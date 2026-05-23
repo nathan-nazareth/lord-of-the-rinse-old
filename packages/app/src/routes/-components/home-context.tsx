@@ -1,7 +1,15 @@
 import type React from 'react';
-import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { submitCartToWebhook } from '../../services/webhook';
-import { useCartStore } from '../../stores/useCartStore';
+import { detectAndClearLegacyCart, useCartStore } from '../../stores/useCartStore';
 import { useFormStore } from '../../stores/useFormStore';
 import type { CartItem } from '../../types/cart';
 import type { Customer } from '../../types/webhook';
@@ -13,13 +21,13 @@ interface HomeContextValue {
   setShowLanding: (v: boolean) => void;
   handleShopClick: () => void;
   handleAddToCart: (
+    variantId: string,
     shape: string,
     scent: string,
     price: number,
     color: string,
     quantity: string,
-    size: number,
-    hasLavenderPieces: boolean,
+    size: string,
   ) => void;
   handleCheckout: (customer: Customer) => Promise<void>;
   handleDismissOrdered: () => void;
@@ -29,6 +37,8 @@ interface HomeContextValue {
   removeItem: (itemId: string) => void;
   updateQuantity: (itemId: string, quantity: number) => void;
   clearCart: () => void;
+  legacyCartCleared: boolean;
+  dismissLegacyToast: () => void;
 }
 
 const HomeContext = createContext<HomeContextValue | null>(null);
@@ -54,6 +64,19 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
   const [confirmationItemCount, setConfirmationItemCount] = useState(0);
   const [justOrdered, setJustOrdered] = useState(false);
   const [showLanding, setShowLanding] = useState(true);
+  const [legacyCartCleared, setLegacyCartCleared] = useState(false);
+
+  // Detect and clear legacy cart items on mount
+  useEffect(() => {
+    const cleared = detectAndClearLegacyCart();
+    if (cleared) {
+      setLegacyCartCleared(true);
+    }
+  }, []);
+
+  const dismissLegacyToast = useCallback(() => {
+    setLegacyCartCleared(false);
+  }, []);
 
   const handleShopClick = useCallback(() => {
     setShowLanding(false);
@@ -65,15 +88,15 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
 
   const handleAddToCart = useCallback(
     (
+      variantId: string,
       shape: string,
       scent: string,
       price: number,
       color: string,
       quantity: string,
-      size: number,
-      hasLavenderPieces: boolean,
+      size: string,
     ) => {
-      const success = addItem(shape, scent, price, color, quantity, size, hasLavenderPieces);
+      const success = addItem(variantId, shape, scent, price, color, quantity, size);
       if (success) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
@@ -125,6 +148,8 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
         removeItem,
         updateQuantity,
         clearCart,
+        legacyCartCleared,
+        dismissLegacyToast,
       }}
     >
       {children}

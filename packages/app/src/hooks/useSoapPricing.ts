@@ -1,22 +1,49 @@
 import { useMemo } from 'react';
-import { LAVENDER_PIECES_PRICE, SOAP_OPTIONS, type SoapScent } from '../../types';
+import type { CatalogVariant, DiscountTier } from '../types/catalog';
 import { calculateDiscount } from '../utils/pricing';
 
-export function useSoapPricing(scent: SoapScent | null, size: number, hasLavenderPieces: boolean) {
-  const unitPrice = useMemo(() => {
-    if (!scent) return 0;
-    const option = SOAP_OPTIONS.find((o) => o.scent === scent);
-    const basePrice = option?.price || 0;
-    return Math.round(basePrice * (size / 100));
-  }, [scent, size]);
+export function useVariantPrice(
+  selectedAttributes: Record<string, string | null>,
+  variants: CatalogVariant[],
+) {
+  return useMemo(() => {
+    const selectedEntries = Object.entries(selectedAttributes).filter(([, v]) => v !== null);
+    if (selectedEntries.length === 0) return { unitPrice: 0, matchedVariant: null };
 
-  const totalPrice = useMemo(() => {
-    let total = unitPrice;
-    if (hasLavenderPieces) total += LAVENDER_PIECES_PRICE;
-    return total;
-  }, [unitPrice, hasLavenderPieces]);
+    const matched = variants.find((v) => {
+      if (!v.enabled) return false;
+      return selectedEntries.every(([, selectedValue]) =>
+        v.attributes.some((a) => a.value === selectedValue),
+      );
+    });
 
-  return { unitPrice, totalPrice };
+    if (!matched) return { unitPrice: 0, matchedVariant: null };
+    return { unitPrice: Number.parseFloat(matched.unitPrice), matchedVariant: matched };
+  }, [selectedAttributes, variants]);
+}
+
+export function useCatalogTotals(
+  items: { price: number; quantity: number }[],
+  totalQuantity: number,
+  discountTiers: DiscountTier[],
+) {
+  return useMemo(() => {
+    const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    return calculateCatalogDiscount(subtotal, totalQuantity, discountTiers);
+  }, [items, totalQuantity, discountTiers]);
+}
+
+export function calculateCatalogDiscount(
+  subtotal: number,
+  totalQuantity: number,
+  discountTiers: DiscountTier[],
+) {
+  const sortedTiers = [...discountTiers].sort((a, b) => b.minItems - a.minItems);
+  const applicableTier = sortedTiers.find((t) => totalQuantity >= t.minItems);
+  const discountPercentage = applicableTier?.percent ?? 0;
+  const discountAmount = Math.round(subtotal * (discountPercentage / 100));
+  const total = subtotal - discountAmount;
+  return { discountPercentage, discountAmount, total };
 }
 
 export function useCartTotals(items: { price: number; quantity: number }[], totalQuantity: number) {

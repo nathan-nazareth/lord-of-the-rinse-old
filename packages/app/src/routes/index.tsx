@@ -1,13 +1,36 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { IconAlertCircle } from '@tabler/icons-react';
 import { SoapForm } from '../components/SoapForm';
 import { useHomeContext } from './-components/home-context';
 
 function IndexContent() {
-  const { cart, formSectionRef, showLanding, handleShopClick, handleAddToCart } = useHomeContext();
+  const {
+    cart,
+    formSectionRef,
+    showLanding,
+    handleShopClick,
+    handleAddToCart,
+    legacyCartCleared,
+    dismissLegacyToast,
+  } = useHomeContext();
   const navigate = useNavigate();
 
   return (
     <div className="apothecary-bg">
+      {/* Legacy cart toast */}
+      {legacyCartCleared && (
+        <button
+          type="button"
+          className="toast-apothecary"
+          aria-label="Dismiss notification: Your cart was cleared due to a format update"
+          onClick={dismissLegacyToast}
+        >
+          <div className="w-7 h-7 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
+            <IconAlertCircle className="w-4 h-4" />
+          </div>
+          <span>Your cart was cleared due to a format update. Please add items again.</span>
+        </button>
+      )}
       {showLanding ? (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center animate-enter"
