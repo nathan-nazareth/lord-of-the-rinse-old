@@ -136,6 +136,7 @@ function AdminOrderDetail() {
   const { orderId } = Route.useParams();
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
+  const [pendingCancel, setPendingCancel] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ['admin-order', orderId],
@@ -148,8 +149,12 @@ function AdminOrderDetail() {
       queryClient.invalidateQueries({ queryKey: ['admin-order', orderId] });
       queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
       setError(null);
+      setPendingCancel(false);
     },
-    onError: (err: Error) => setError(err.message),
+    onError: (err: Error) => {
+      setError(err.message);
+      setPendingCancel(false);
+    },
   });
 
   const retryMutation = useMutation({
@@ -211,7 +216,13 @@ function AdminOrderDetail() {
                 key={t.status}
                 variant={t.variant === 'destructive' ? 'destructive' : 'default'}
                 disabled={statusMutation.isPending}
-                onClick={() => statusMutation.mutate(t.status)}
+                onClick={() => {
+                  if (t.status === 'cancelled') {
+                    setPendingCancel(true);
+                  } else {
+                    statusMutation.mutate(t.status);
+                  }
+                }}
               >
                 {statusMutation.isPending ? (
                   <IconLoader2 size={16} className="animate-spin" />
@@ -370,6 +381,48 @@ function AdminOrderDetail() {
           </table>
         </CardContent>
       </Card>
+
+      {/* Cancel Confirmation Dialog */}
+      {pendingCancel && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <Card className="mx-4 w-full max-w-md">
+            <CardHeader>
+              <CardTitle>Cancel Order</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-sm text-ink/80">
+                Are you sure you want to cancel order{' '}
+                <span className="font-semibold text-ink">{order.reference}</span>?
+              </p>
+              {(() => {
+                const restockCount = lines.reduce((sum, line) => sum + line.allocatedFromStock, 0);
+                return (
+                  <p className="text-sm text-ink/60">
+                    {restockCount > 0
+                      ? `${restockCount} item${restockCount !== 1 ? 's' : ''} will be restocked to inventory.`
+                      : 'No items were allocated from stock.'}
+                  </p>
+                );
+              })()}
+            </CardContent>
+            <div className="flex justify-end gap-2 border-t px-4 py-3">
+              <Button variant="outline" onClick={() => setPendingCancel(false)}>
+                Go Back
+              </Button>
+              <Button
+                variant="destructive"
+                disabled={statusMutation.isPending}
+                onClick={() => statusMutation.mutate('cancelled')}
+              >
+                {statusMutation.isPending ? (
+                  <IconLoader2 size={16} className="animate-spin" />
+                ) : null}
+                Confirm Cancellation
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
