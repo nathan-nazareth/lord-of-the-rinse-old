@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import health from './routes/health';
 import authRoutes from './routes/auth';
+import catalogRoutes from './routes/catalog';
 import attributesRoutes from './routes/attributes';
 import variantsRoutes from './routes/variants';
 import settingsRoutes from './routes/settings';
@@ -29,6 +30,7 @@ app.use(
 
 app.route('/health', health);
 app.route('/api/health', health);
+app.route('/api/catalog', catalogRoutes);
 app.route('/api/auth', authRoutes);
 
 app.use('/api/admin/*', requireAuth);
