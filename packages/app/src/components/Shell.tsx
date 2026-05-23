@@ -8,9 +8,10 @@ import {
   IconBoxSeam,
   IconReceipt,
   IconHammer,
+  IconArrowLeft,
 } from '@tabler/icons-react';
-import { Link } from '@tanstack/react-router';
 import type { ReactNode } from 'react';
+import { Link, useLocation } from '@tanstack/react-router';
 import { useLayoutStore } from '../stores/useLayoutStore';
 
 interface NavItem {
@@ -64,19 +65,39 @@ interface ShellProps {
 export function Shell({ children }: ShellProps) {
   const collapsed = useLayoutStore((s) => s.collapsed);
   const toggle = useLayoutStore((s) => s.toggle);
+  const location = useLocation();
+
+  const isActive = (to: string) => {
+    if (to === '/admin') return location.pathname === '/admin';
+    return location.pathname.startsWith(to);
+  };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-parchment">
+    <div className="flex h-screen overflow-hidden bg-parchment-100">
       {/* Sidebar */}
       <aside
-        className={`flex flex-col border-r border-ink/10 bg-parchment transition-all duration-300 ease-in-out ${
-          collapsed ? 'w-[52px]' : 'w-[240px]'
+        className={`flex flex-col border-r border-parchment-300/60 bg-parchment-50 transition-all duration-300 ease-in-out ${
+          collapsed ? 'w-[56px]' : 'w-[240px]'
         }`}
       >
         {/* Sidebar header */}
-        <div className="flex h-12 items-center justify-between border-b border-ink/10 px-3">
+        <div className="flex h-14 items-center justify-between border-b border-parchment-300/60 px-3">
           {!collapsed && (
-            <span className="font-display text-sm font-semibold tracking-wide text-ink">Admin</span>
+            <div className="flex items-center gap-2.5 pl-1">
+              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-terra-400">
+                <span className="text-[10px] font-bold text-white font-accent">LR</span>
+              </div>
+              <span className="font-display text-sm font-semibold tracking-wide text-ink-700">
+                Lord of the Rinse
+              </span>
+            </div>
+          )}
+          {collapsed && (
+            <div className="flex w-full justify-center">
+              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-terra-400">
+                <span className="text-[10px] font-bold text-white font-accent">LR</span>
+              </div>
+            </div>
           )}
           <button
             type="button"
@@ -89,23 +110,37 @@ export function Shell({ children }: ShellProps) {
         </div>
 
         {/* Sidebar nav */}
-        <nav className="flex-1 px-2 py-3" aria-label="Admin navigation">
+        <nav className="flex-1 px-2 py-4 space-y-1" aria-label="Admin navigation">
           {navItems.map((item) => (
             <Link
               key={item.to}
               to={item.to}
-              className="flex items-center gap-3 rounded px-2 py-2 text-ink/60 transition-colors hover:bg-botanical/10 hover:text-ink"
-              activeOptions={{ exact: item.to === '/admin' }}
-              activeProps={{
-                className: 'bg-botanical/15 text-ink font-medium',
-                'aria-current': 'page' as const,
-              }}
+              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-200 ${
+                isActive(item.to)
+                  ? 'bg-terra-100/80 text-terra-600 font-medium'
+                  : 'text-ink-500 hover:bg-parchment-200/60 hover:text-ink-700'
+              }`}
+              aria-current={isActive(item.to) ? 'page' : undefined}
             >
               {item.icon}
-              {!collapsed && <span className="text-sm">{item.label}</span>}
+              {!collapsed && <span>{item.label}</span>}
             </Link>
           ))}
         </nav>
+
+        {/* Bottom section */}
+        <div className="border-t border-parchment-300/60 px-2 py-3 space-y-1">
+          <Link
+            to="/"
+            className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-ink-400 transition-all duration-200 hover:bg-parchment-200/60 hover:text-ink-600 ${
+              collapsed ? 'justify-center' : ''
+            }`}
+            title={collapsed ? 'Back to Store' : undefined}
+          >
+            <IconArrowLeft size={18} className="shrink-0" />
+            {!collapsed && <span>Back to Store</span>}
+          </Link>
+        </div>
       </aside>
 
       {/* Main content */}
