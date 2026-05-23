@@ -3,6 +3,7 @@ import { db, sql } from '@lotr/db';
 import { orders, orderLines, stockMovements, notificationAttempts } from '@lotr/db/schema';
 import { eq, and, desc } from 'drizzle-orm';
 import { statusTransitionSchema, validTransitions } from '@lotr/shared';
+import { dispatchNotification } from '../lib/notifications';
 
 const ordersRoutes = new Hono<{
   Variables: {
@@ -114,6 +115,54 @@ ordersRoutes.patch('/:id/status', async (c) => {
   }
 
   return c.json({ order: updated });
+});
+
+// Retry notification dispatch for an order
+ordersRoutes.post('/:id/retry-notification', async (c) => {
+  const id = c.req.param('id');
+
+  // Verify order exists
+  const [order] = await db
+    .select()
+    .from(orders)
+    .where(eq(orders.id, id));
+
+  if (!order) {
+    return c.json({ error: 'Order not found' }, 404);
+  }
+
+  // Find the notification attempt
+  const [attempt] = await db
+    .select()
+    .from(notificationAttempts)
+    .where(eq(notificationAttempts.orderId, id))
+    .limit(1);
+
+  if (!attempt) {
+    return c.json({ error: 'No notification attempt found for this order' }, 404);
+  }
+
+  // Only allow retry for pending or failed
+  if (attempt.status !== 'pending' && attempt.status !== 'failed') {
+    return c.json({ error: `Cannot retry notification with status '${attempt.status}'` }, 400);
+  }
+
+  // Reset status to pending before dispatch
+  await db
+    .update(notificationAttempts)
+    .set({ status: 'pending', updatedAt: new Date() })
+    .where(eq(notificationAttempts.id, attempt.id));
+
+  // Await the dispatch so we can return the result
+  await dispatchNotification(id);
+
+  // Fetch updated attempt
+  const [updated] = await db
+    .select()
+    .from(notificationAttempts)
+    .where(eq(notificationAttempts.id, attempt.id));
+
+  return c.json({ notification: updated });
 });
 
 export default ordersRoutes;

@@ -3,6 +3,7 @@ import { db, sql } from '@lotr/db';
 import { orders, orderLines, stockMovements, notificationAttempts } from '@lotr/db/schema';
 import { checkoutRequestSchema } from '@lotr/shared';
 import { eq, and, gte, lte, like, desc } from 'drizzle-orm';
+import { dispatchNotification } from '../lib/notifications';
 
 const checkoutRoutes = new Hono();
 
@@ -124,6 +125,9 @@ checkoutRoutes.post('/', async (c) => {
     status: 'pending',
     attempts: 0,
   });
+
+  // Fire-and-forget notification dispatch
+  dispatchNotification(order.id).catch(() => {});
 
   return c.json({ reference, status: 'new' }, 201);
 });

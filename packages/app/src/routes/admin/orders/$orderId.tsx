@@ -103,6 +103,19 @@ async function updateOrderStatus(orderId: string, status: string): Promise<Order
   return body.order;
 }
 
+async function retryNotification(orderId: string): Promise<NotificationAttempt> {
+  const res = await fetch(`${API_BASE}/api/admin/orders/${orderId}/retry-notification`, {
+    method: 'POST',
+    credentials: 'include',
+  });
+  if (!res.ok) {
+    const body = await res.json();
+    throw new Error(body.error || 'Failed to retry notification');
+  }
+  const body = await res.json();
+  return body.notification;
+}
+
 function formatPrice(price: string): string {
   const num = parseFloat(price);
   if (Number.isNaN(num)) return price;
@@ -134,6 +147,15 @@ function AdminOrderDetail() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-order', orderId] });
       queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
+      setError(null);
+    },
+    onError: (err: Error) => setError(err.message),
+  });
+
+  const retryMutation = useMutation({
+    mutationFn: () => retryNotification(orderId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-order', orderId] });
       setError(null);
     },
     onError: (err: Error) => setError(err.message),
@@ -249,6 +271,7 @@ function AdminOrderDetail() {
               <div className="space-y-3">
                 {notifications.map((n) => {
                   const nBadge = NOTIF_STATUS_BADGE[n.status] || NOTIF_STATUS_BADGE.pending;
+                  const canRetry = n.status === 'pending' || n.status === 'failed';
                   return (
                     <div key={n.id} className="space-y-1">
                       <div className="flex items-center gap-2">
@@ -258,6 +281,20 @@ function AdminOrderDetail() {
                         >
                           {n.status}
                         </span>
+                        {canRetry && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="ml-auto h-7 text-xs"
+                            disabled={retryMutation.isPending}
+                            onClick={() => retryMutation.mutate()}
+                          >
+                            {retryMutation.isPending ? (
+                              <IconLoader2 size={12} className="animate-spin" />
+                            ) : null}
+                            Retry
+                          </Button>
+                        )}
                       </div>
                       <div className="text-xs text-ink/50">
                         {n.attempts} attempt{n.attempts !== 1 ? 's' : ''}
