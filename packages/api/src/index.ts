@@ -9,6 +9,7 @@ import settingsRoutes from './routes/settings';
 import stockMovementsRoutes from './routes/stock-movements';
 import checkoutRoutes from './routes/checkout';
 import ordersRoutes from './routes/orders';
+import productionQueueRoutes from './routes/production-queue';
 import { requireAuth } from './middleware/require-auth';
 
 export const app = new Hono<{
@@ -46,6 +47,7 @@ app.route('/api/admin/attributes', attributesRoutes);
 app.route('/api/admin/variants', variantsRoutes);
 app.route('/api/admin/stock-movements', stockMovementsRoutes);
 app.route('/api/admin/orders', ordersRoutes);
+app.route('/api/admin/production-queue', productionQueueRoutes);
 
 const port = Number(process.env.PORT) || 3001;
 

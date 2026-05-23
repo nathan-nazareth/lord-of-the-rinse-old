@@ -7,6 +7,7 @@ import {
   IconPackages,
   IconBoxSeam,
   IconReceipt,
+  IconHammer,
 } from '@tabler/icons-react';
 import { Link } from '@tanstack/react-router';
 import type { ReactNode } from 'react';
@@ -38,6 +39,11 @@ const navItems: NavItem[] = [
     to: '/admin/orders',
     label: 'Orders',
     icon: <IconReceipt size={20} className="shrink-0" />,
+  },
+  {
+    to: '/admin/production',
+    label: 'Production',
+    icon: <IconHammer size={20} className="shrink-0" />,
   },
   {
     to: '/admin/stock',
