@@ -101,6 +101,14 @@ function setupStockLevelChain(stockLevel: number) {
   });
 }
 
+function setupVariantLookup(variants: Array<{ id: string; name: string; unitPrice: string; enabled: boolean; archived: boolean }>) {
+  mocks.db.select.mockReturnValueOnce({
+    from: vi.fn(() => ({
+      where: vi.fn(() => Promise.resolve(variants)),
+    })),
+  });
+}
+
 describe('POST /api/checkout', () => {
   beforeEach(() => {
     vi.resetAllMocks();
@@ -133,6 +141,9 @@ describe('POST /api/checkout', () => {
   it('creates an order with stock allocation', async () => {
     const orderId = 'order-uuid-1';
     const variantId = '550e8400-e29b-41d4-a716-446655440000';
+
+    // 0. Variant lookup
+    setupVariantLookup([{ id: variantId, name: 'Lavender Dreams', unitPrice: '12.99', enabled: true, archived: false }]);
 
     // 1. Select for reference generation (no existing orders today)
     setupSelectChain([]);
@@ -171,6 +182,9 @@ describe('POST /api/checkout', () => {
   it('handles zero stock (all items need production)', async () => {
     const orderId = 'order-uuid-2';
     const variantId = '550e8400-e29b-41d4-a716-446655440000';
+
+    // Variant lookup
+    setupVariantLookup([{ id: variantId, name: 'Lavender Dreams', unitPrice: '8.66', enabled: true, archived: false }]);
 
     // Reference generation: one existing order
     setupSelectChain([{ reference: 'LOR-20260523-0001' }]);
@@ -218,6 +232,9 @@ describe('POST /api/checkout', () => {
   it('increments reference number for same day', async () => {
     const variantId = '550e8400-e29b-41d4-a716-446655440000';
 
+    // Variant lookup
+    setupVariantLookup([{ id: variantId, name: 'Test Soap', unitPrice: '10.00', enabled: true, archived: false }]);
+
     const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     // Max reference today is LOR-<today>-0005
     setupSelectChain([{ reference: `LOR-${today}-0005` }]);
@@ -250,5 +267,101 @@ describe('POST /api/checkout', () => {
     expect(res.status).toBe(201);
     const body = await res.json();
     expect(body.reference).toBe(`LOR-${today}-0006`);
+  });
+
+  it('rejects checkout with non-existent variant', async () => {
+    const variantId = '550e8400-e29b-41d4-a716-446655440000';
+
+    // Variant lookup returns empty (variant not found)
+    setupVariantLookup([]);
+
+    const res = await app.request('/api/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        items: [{ variantId, quantity: 1, displayName: 'Fake Soap', unitPrice: '0.01' }],
+        customerName: 'Attacker',
+        customerEmail: 'attacker@example.com',
+      }),
+    });
+
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toBe('Invalid items in cart');
+    expect(body.details).toHaveLength(1);
+    expect(body.details[0]).toContain('not found');
+  });
+
+  it('rejects checkout with disabled variant', async () => {
+    const variantId = '550e8400-e29b-41d4-a716-446655440000';
+
+    setupVariantLookup([{ id: variantId, name: 'Disabled Soap', unitPrice: '10.00', enabled: false, archived: false }]);
+
+    const res = await app.request('/api/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        items: [{ variantId, quantity: 1, displayName: 'Disabled Soap', unitPrice: '10.00' }],
+        customerName: 'Test',
+        customerEmail: 'test@example.com',
+      }),
+    });
+
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toBe('Invalid items in cart');
+    expect(body.details[0]).toContain('not available');
+  });
+
+  it('rejects checkout with archived variant', async () => {
+    const variantId = '550e8400-e29b-41d4-a716-446655440000';
+
+    setupVariantLookup([{ id: variantId, name: 'Old Soap', unitPrice: '10.00', enabled: true, archived: true }]);
+
+    const res = await app.request('/api/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        items: [{ variantId, quantity: 1, displayName: 'Old Soap', unitPrice: '10.00' }],
+        customerName: 'Test',
+        customerEmail: 'test@example.com',
+      }),
+    });
+
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toBe('Invalid items in cart');
+    expect(body.details[0]).toContain('no longer available');
+  });
+
+  it('uses server-side price ignoring client-supplied price', async () => {
+    const variantId = '550e8400-e29b-41d4-a716-446655440000';
+
+    // Variant has price 12.99 but client sends 0.01
+    setupVariantLookup([{ id: variantId, name: 'Lavender Dreams', unitPrice: '12.99', enabled: true, archived: false }]);
+
+    // Reference generation
+    setupSelectChain([]);
+    // Order insert — server computes total from variant price (12.99 * 1)
+    setupInsertChain([{ id: 'order-1', reference: 'LOR-20260524-0001', status: 'new', total: '12.99' }]);
+    // Stock level
+    setupStockLevelChain(0);
+    // Order line insert (uses server-side variant name and price)
+    setupInsertChain([{ id: 'line-1' }]);
+    // Notification insert
+    setupInsertChain([{ id: 'notif-1' }]);
+
+    const res = await app.request('/api/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        items: [{ variantId, quantity: 1, displayName: 'Fake Name', unitPrice: '0.01' }],
+        customerName: 'Test',
+        customerEmail: 'test@example.com',
+      }),
+    });
+
+    // Checkout succeeds because variant is valid — price comes from DB, not the 0.01 sent by client
+    expect(res.status).toBe(201);
   });
 });

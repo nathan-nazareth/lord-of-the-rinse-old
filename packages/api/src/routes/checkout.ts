@@ -1,8 +1,8 @@
 import { Hono } from 'hono';
 import { db, sql } from '@lotr/db';
-import { orders, orderLines, stockMovements, notificationAttempts } from '@lotr/db/schema';
+import { orders, orderLines, stockMovements, notificationAttempts, soapVariants } from '@lotr/db/schema';
 import { checkoutRequestSchema } from '@lotr/shared';
-import { eq, and, gte, lte, like, desc } from 'drizzle-orm';
+import { eq, and, gte, lte, like, desc, inArray } from 'drizzle-orm';
 import { dispatchNotification } from '../lib/notifications';
 
 const checkoutRoutes = new Hono();
@@ -62,13 +62,43 @@ checkoutRoutes.post('/', async (c) => {
 
   const { items, customerName, customerEmail } = parsed.data;
 
-  // Calculate total from line items
+  // Look up all requested variants from the database
+  const variantIds = items.map((item) => item.variantId);
+  const variantRows = await db
+    .select({
+      id: soapVariants.id,
+      name: soapVariants.name,
+      unitPrice: soapVariants.unitPrice,
+      enabled: soapVariants.enabled,
+      archived: soapVariants.archived,
+    })
+    .from(soapVariants)
+    .where(inArray(soapVariants.id, variantIds));
+
+  const variantMap = new Map(variantRows.map((v) => [v.id, v]));
+
+  // Validate all variants exist and are purchasable
+  const invalidItems: string[] = [];
+  for (const item of items) {
+    const variant = variantMap.get(item.variantId);
+    if (!variant) {
+      invalidItems.push(`Variant ${item.variantId} not found`);
+    } else if (!variant.enabled) {
+      invalidItems.push(`Variant "${variant.name}" is not available`);
+    } else if (variant.archived) {
+      invalidItems.push(`Variant "${variant.name}" is no longer available`);
+    }
+  }
+
+  if (invalidItems.length > 0) {
+    return c.json({ error: 'Invalid items in cart', details: invalidItems }, 400);
+  }
+
+  // Calculate total using server-side prices
   let totalCents = 0;
   for (const item of items) {
-    const price = Number.parseFloat(item.unitPrice);
-    if (Number.isNaN(price) || price < 0) {
-      return c.json({ error: `Invalid unitPrice for item: ${item.displayName}` }, 400);
-    }
+    const variant = variantMap.get(item.variantId)!;
+    const price = Number.parseFloat(variant.unitPrice);
     totalCents += Math.round(price * 100) * item.quantity;
   }
 
@@ -95,13 +125,14 @@ checkoutRoutes.post('/', async (c) => {
     const allocatedFromStock = Math.min(currentStock, item.quantity);
     const quantityToProduce = item.quantity - allocatedFromStock;
 
-    // Create order line
+    // Create order line using server-side variant data
+    const variant = variantMap.get(item.variantId)!;
     await db.insert(orderLines).values({
       orderId: order.id,
       variantId: item.variantId,
-      displayName: item.displayName,
+      displayName: variant.name,
       quantity: item.quantity,
-      unitPrice: item.unitPrice,
+      unitPrice: variant.unitPrice,
       allocatedFromStock,
       quantityToProduce,
     });
