@@ -35,11 +35,46 @@ const stats: Stat[] = [
 ];
 
 const recentOrders: Order[] = [
-  { id: '#ORD-0421', customer: 'Eleanor Vance', items: 'Lavender Dream × 2', total: '$58.00', status: 'confirmed', date: '2 min ago' },
-  { id: '#ORD-0420', customer: 'Marcus Webb', items: 'Charcoal Detox × 1', total: '$32.00', status: 'shipped', date: '18 min ago' },
-  { id: '#ORD-0419', customer: 'Sylvia Park', items: 'Rose Petal × 3, Honey Oat × 1', total: '$112.00', status: 'confirmed', date: '1 hr ago' },
-  { id: '#ORD-0418', customer: 'Julian Hart', items: 'Tea Tree Mint × 2', total: '$54.00', status: 'pending', date: '2 hr ago' },
-  { id: '#ORD-0417', customer: 'Clara Moss', items: 'Citrus Burst × 1, Lavender × 1', total: '$64.00', status: 'confirmed', date: '3 hr ago' },
+  {
+    id: '#ORD-0421',
+    customer: 'Eleanor Vance',
+    items: 'Lavender Dream × 2',
+    total: '$58.00',
+    status: 'confirmed',
+    date: '2 min ago',
+  },
+  {
+    id: '#ORD-0420',
+    customer: 'Marcus Webb',
+    items: 'Charcoal Detox × 1',
+    total: '$32.00',
+    status: 'shipped',
+    date: '18 min ago',
+  },
+  {
+    id: '#ORD-0419',
+    customer: 'Sylvia Park',
+    items: 'Rose Petal × 3, Honey Oat × 1',
+    total: '$112.00',
+    status: 'confirmed',
+    date: '1 hr ago',
+  },
+  {
+    id: '#ORD-0418',
+    customer: 'Julian Hart',
+    items: 'Tea Tree Mint × 2',
+    total: '$54.00',
+    status: 'pending',
+    date: '2 hr ago',
+  },
+  {
+    id: '#ORD-0417',
+    customer: 'Clara Moss',
+    items: 'Citrus Burst × 1, Lavender × 1',
+    total: '$64.00',
+    status: 'confirmed',
+    date: '3 hr ago',
+  },
 ];
 
 const topProducts = [
@@ -72,8 +107,12 @@ function StatCard({ stat, index }: { stat: Stat; index: number }) {
       <div className="flex items-start justify-between">
         <div className="space-y-2">
           <p className="text-xs font-accent tracking-widest uppercase text-ink-400">{stat.label}</p>
-          <p className="font-display text-3xl font-semibold text-ink-800 tracking-tight">{stat.value}</p>
-          <div className={`flex items-center gap-1 text-xs font-medium ${stat.change >= 0 ? 'text-botanical-600' : 'text-terra-500'}`}>
+          <p className="font-display text-3xl font-semibold text-ink-800 tracking-tight">
+            {stat.value}
+          </p>
+          <div
+            className={`flex items-center gap-1 text-xs font-medium ${stat.change >= 0 ? 'text-botanical-600' : 'text-terra-500'}`}
+          >
             {stat.change >= 0 ? <IconArrowUpRight size={14} /> : <IconArrowDownRight size={14} />}
             <span>{Math.abs(stat.change)}%</span>
             <span className="text-ink-400 font-normal">vs last month</span>
@@ -89,7 +128,9 @@ function StatCard({ stat, index }: { stat: Stat; index: number }) {
 
 function StatusBadge({ status }: { status: Order['status'] }) {
   return (
-    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-accent font-medium tracking-wide border ${statusColor[status]}`}>
+    <span
+      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-accent font-medium tracking-wide border ${statusColor[status]}`}
+    >
       {status === 'confirmed' && <IconCheck size={12} />}
       {status === 'pending' && <IconClock size={12} />}
       {status === 'shipped' && <IconPackage size={12} />}
@@ -136,7 +177,10 @@ function AdminDashboard() {
           <div className="lg:col-span-2 card-apothecary p-6 animate-enter delay-3">
             <div className="flex items-center justify-between mb-5">
               <h2 className="font-display text-xl font-semibold text-ink-700">Recent Orders</h2>
-              <button type="button" className="text-sm font-accent tracking-wide text-terra-400 hover:text-terra-500 transition-colors">
+              <button
+                type="button"
+                className="text-sm font-accent tracking-wide text-terra-400 hover:text-terra-500 transition-colors"
+              >
                 View All &rarr;
               </button>
             </div>
@@ -144,20 +188,35 @@ function AdminDashboard() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-parchment-300">
-                    <th className="text-left pb-3 font-accent text-xs tracking-widest uppercase text-ink-400 font-medium">Order</th>
-                    <th className="text-left pb-3 font-accent text-xs tracking-widest uppercase text-ink-400 font-medium">Customer</th>
-                    <th className="text-left pb-3 font-accent text-xs tracking-widest uppercase text-ink-400 font-medium">Items</th>
-                    <th className="text-right pb-3 font-accent text-xs tracking-widest uppercase text-ink-400 font-medium">Total</th>
-                    <th className="text-center pb-3 font-accent text-xs tracking-widest uppercase text-ink-400 font-medium">Status</th>
+                    <th className="text-left pb-3 font-accent text-xs tracking-widest uppercase text-ink-400 font-medium">
+                      Order
+                    </th>
+                    <th className="text-left pb-3 font-accent text-xs tracking-widest uppercase text-ink-400 font-medium">
+                      Customer
+                    </th>
+                    <th className="text-left pb-3 font-accent text-xs tracking-widest uppercase text-ink-400 font-medium">
+                      Items
+                    </th>
+                    <th className="text-right pb-3 font-accent text-xs tracking-widest uppercase text-ink-400 font-medium">
+                      Total
+                    </th>
+                    <th className="text-center pb-3 font-accent text-xs tracking-widest uppercase text-ink-400 font-medium">
+                      Status
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {recentOrders.map((order) => (
-                    <tr key={order.id} className="border-b border-parchment-200/60 last:border-0 group transition-colors hover:bg-parchment-100/50">
+                    <tr
+                      key={order.id}
+                      className="border-b border-parchment-200/60 last:border-0 group transition-colors hover:bg-parchment-100/50"
+                    >
                       <td className="py-3.5 font-accent text-xs text-ink-600">{order.id}</td>
                       <td className="py-3.5 font-medium text-ink-700">{order.customer}</td>
                       <td className="py-3.5 text-ink-500 max-w-[200px] truncate">{order.items}</td>
-                      <td className="py-3.5 text-right font-accent font-medium text-ink-700">{order.total}</td>
+                      <td className="py-3.5 text-right font-accent font-medium text-ink-700">
+                        {order.total}
+                      </td>
                       <td className="py-3.5 text-center">
                         <StatusBadge status={order.status} />
                       </td>
@@ -174,14 +233,18 @@ function AdminDashboard() {
             <div className="space-y-4">
               {topProducts.map((product, i) => (
                 <div key={product.name} className="flex items-center gap-4 group cursor-pointer">
-                  <span className="font-accent text-xs text-ink-400 w-5 shrink-0">{String(i + 1).padStart(2, '0')}</span>
+                  <span className="font-accent text-xs text-ink-400 w-5 shrink-0">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-ink-700 truncate group-hover:text-terra-500 transition-colors">
                       {product.name}
                     </p>
                     <div className="flex items-center gap-3 mt-1">
                       <span className="text-xs text-ink-400 font-accent">{product.sold} sold</span>
-                      <span className="text-xs font-accent font-medium text-botanical-600">{product.revenue}</span>
+                      <span className="text-xs font-accent font-medium text-botanical-600">
+                        {product.revenue}
+                      </span>
                     </div>
                   </div>
                   {product.trend === 'up' ? (
@@ -193,7 +256,10 @@ function AdminDashboard() {
               ))}
             </div>
             <div className="mt-6 pt-4 border-t border-parchment-300">
-              <button type="button" className="w-full text-sm font-accent tracking-wide text-terra-400 hover:text-terra-500 transition-colors text-center">
+              <button
+                type="button"
+                className="w-full text-sm font-accent tracking-wide text-terra-400 hover:text-terra-500 transition-colors text-center"
+              >
                 View All Products &rarr;
               </button>
             </div>

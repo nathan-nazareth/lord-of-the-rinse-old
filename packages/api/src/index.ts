@@ -20,7 +20,7 @@ export const app = new Hono<{
 }>();
 
 app.use(
-  '/api/auth/*',
+  '/api/*',
   cors({
     origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
     allowHeaders: ['Content-Type', 'Authorization'],
@@ -30,6 +30,16 @@ app.use(
     credentials: true,
   }),
 );
+
+app.onError((err, c) => {
+  console.error('Unhandled error:', err);
+
+  if (err instanceof SyntaxError) {
+    return c.json({ error: 'Invalid JSON body' }, 400);
+  }
+
+  return c.json({ error: 'Internal server error' }, 500);
+});
 
 app.route('/health', health);
 app.route('/api/health', health);

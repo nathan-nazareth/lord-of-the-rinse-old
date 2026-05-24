@@ -1,6 +1,7 @@
 import { IconArrowLeft, IconLoader2, IconSparkles } from '@tabler/icons-react';
 import type React from 'react';
 import { useState } from 'react';
+import { useCatalog } from '../hooks/useCatalog';
 import type { CartItem } from '../types/cart';
 import type { Customer } from '../types/webhook';
 import { calculateDiscount } from '../utils/pricing';
@@ -14,6 +15,8 @@ const CheckoutPage: React.FC<{
 }> = ({ cart, onBack, onSubmit, isSubmitting }) => {
   const [formData, setFormData] = useState({ name: '', email: '', phone: '' });
   const [errors, setErrors] = useState<{ name?: string; email?: string; phone?: string }>({});
+  const { data: catalog } = useCatalog();
+  const currency = catalog?.settings?.currency ?? 'USD';
 
   const subtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const { discountPercentage, discountAmount, total } = calculateDiscount(
@@ -65,13 +68,15 @@ const CheckoutPage: React.FC<{
                     </p>
                   </div>
                   <span className="font-display font-semibold text-ink-700">
-                    Rs. {item.price * item.quantity}
+                    {currency} {item.price * item.quantity}
                   </span>
                 </div>
               ))}
               <div className="border-t border-parchment-300 pt-2 flex justify-between text-sm text-ink-500">
                 <span>Subtotal</span>
-                <span className="font-medium">Rs. {subtotal}</span>
+                <span className="font-medium">
+                  {currency} {subtotal}
+                </span>
               </div>
               {discountPercentage > 0 && (
                 <div className="flex justify-between text-botanical-600 font-medium text-sm">
@@ -79,12 +84,16 @@ const CheckoutPage: React.FC<{
                     <IconSparkles className="w-3.5 h-3.5" />
                     Discount ({discountPercentage}%)
                   </span>
-                  <span>- Rs. {discountAmount}</span>
+                  <span>
+                    - {currency} {discountAmount}
+                  </span>
                 </div>
               )}
               <div className="flex justify-between text-lg font-display font-semibold text-ink-700 border-t border-parchment-300 pt-2">
                 <span>Total</span>
-                <span className="text-terra-500">Rs. {total}</span>
+                <span className="text-terra-500">
+                  {currency} {total}
+                </span>
               </div>
             </div>
 
@@ -145,7 +154,9 @@ const CheckoutPage: React.FC<{
                     Processing...
                   </>
                 ) : (
-                  <>Submit Order — Rs. {total}</>
+                  <>
+                    Submit Order — {currency} {total}
+                  </>
                 )}
               </button>
             </form>

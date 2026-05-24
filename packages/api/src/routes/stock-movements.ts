@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { db, sql } from '@lotr/db';
 import { stockMovements, soapVariants } from '@lotr/db/schema';
-import { eq, and, desc, gte, lte } from 'drizzle-orm';
+import { eq, and, desc, gte, lte, inArray } from 'drizzle-orm';
 import { stockAdjustmentSchema, movementTypeSchema } from '@lotr/shared';
 
 const stockMovementsRoutes = new Hono<{
@@ -93,11 +93,7 @@ stockMovementsRoutes.get('/stock-levels', async (c) => {
       total: sql<number>`coalesce(sum(${stockMovements.quantity}), 0)`,
     })
     .from(stockMovements)
-    .where(
-      and(
-        ...variantIds.map((id) => eq(stockMovements.variantId, id)),
-      ),
-    )
+    .where(inArray(stockMovements.variantId, variantIds))
     .groupBy(stockMovements.variantId);
 
   const totalsMap = new Map(totals.map((t) => [t.variantId, Number(t.total)]));
