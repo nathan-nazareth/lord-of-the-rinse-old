@@ -11,6 +11,7 @@ import {
 } from '@tabler/icons-react';
 import React, { useState } from 'react';
 import { submitCartToWebhook } from '../services/webhook';
+import { useCatalog } from '../hooks/useCatalog';
 import { useRateLimitStore } from '../stores/useRateLimitStore';
 import type { CartItem as CartItemType } from '../types/cart';
 import type { Customer } from '../types/webhook';
@@ -203,6 +204,8 @@ export const Cart: React.FC<CartProps> = ({
   const [showRateLimitModal, setShowRateLimitModal] = useState(false);
   const closeButtonRef = React.useRef<HTMLButtonElement>(null);
   const rateLimitStore = useRateLimitStore();
+  const { data: catalog } = useCatalog();
+  const currency = catalog?.settings?.currency ?? 'USD';
   const maxSubmissions = 10;
   const windowMs = 300000;
   const isAllowed = rateLimitStore.isAllowed(maxSubmissions, windowMs);
@@ -381,7 +384,7 @@ export const Cart: React.FC<CartProps> = ({
                     </div>
                     <div className="flex items-center gap-3 flex-shrink-0">
                       <span className="font-display font-semibold text-ink-700">
-                        Rs. {item.price * item.quantity}
+                        {currency} {item.price * item.quantity}
                       </span>
                       {onUpdateQuantity ? (
                         <div className="flex items-center gap-1 bg-parchment-100 rounded-full px-1 py-0.5">
@@ -457,12 +460,16 @@ export const Cart: React.FC<CartProps> = ({
               {discountPercentage > 0 && (
                 <div className="flex justify-between text-botanical-600 font-medium">
                   <span>Discount ({discountPercentage}%)</span>
-                  <span>- Rs. {discountAmount}</span>
+                  <span>
+                    - {currency} {discountAmount}
+                  </span>
                 </div>
               )}
               <div className="flex justify-between text-lg font-display font-semibold text-ink-700 pt-2 border-t border-parchment-300">
                 <span>Total</span>
-                <span className="text-terra-500">Rs. {total}</span>
+                <span className="text-terra-500">
+                  {currency} {total}
+                </span>
               </div>
             </div>
             <div className="space-y-2">
@@ -472,7 +479,7 @@ export const Cart: React.FC<CartProps> = ({
                 className="btn-apothecary btn-primary btn-full"
               >
                 <IconShoppingCart className="w-4 h-4" />
-                Checkout — Rs. {total}
+                Checkout — {currency} {total}
               </button>
               <button
                 type="button"
