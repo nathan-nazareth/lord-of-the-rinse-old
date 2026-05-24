@@ -201,7 +201,7 @@ describe('POST /api/checkout', () => {
 
     expect(res.status).toBe(201);
     const body = await res.json();
-    expect(body.reference).toBe('LOR-20260523-0002');
+    expect(body.reference).toBe(`LOR-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-0002`);
   });
 
   it('is accessible without authentication', async () => {
@@ -218,11 +218,12 @@ describe('POST /api/checkout', () => {
   it('increments reference number for same day', async () => {
     const variantId = '550e8400-e29b-41d4-a716-446655440000';
 
-    // Max reference today is LOR-20260523-0005
-    setupSelectChain([{ reference: 'LOR-20260523-0005' }]);
+    const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    // Max reference today is LOR-<today>-0005
+    setupSelectChain([{ reference: `LOR-${today}-0005` }]);
 
     // Insert order
-    setupInsertChain([{ id: 'order-3', reference: 'LOR-20260523-0006', status: 'new', total: '10.00' }]);
+    setupInsertChain([{ id: 'order-3', reference: `LOR-${today}-0006`, status: 'new', total: '10.00' }]);
 
     // Stock level
     setupStockLevelChain(10);
@@ -248,6 +249,6 @@ describe('POST /api/checkout', () => {
 
     expect(res.status).toBe(201);
     const body = await res.json();
-    expect(body.reference).toBe('LOR-20260523-0006');
+    expect(body.reference).toBe(`LOR-${today}-0006`);
   });
 });
