@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { db, sql } from '@lotr/db';
 import { soapVariants, variantAttributes, catalogAttributes } from '@lotr/db/schema';
-import { eq, and, desc, asc } from 'drizzle-orm';
+import { eq, and, desc, asc, inArray } from 'drizzle-orm';
 import { createVariantSchema, updateVariantSchema } from '@lotr/shared';
 
 const variantsRoutes = new Hono<{
@@ -37,11 +37,7 @@ variantsRoutes.get('/', async (c) => {
       ? await db
           .select()
           .from(variantAttributes)
-          .where(
-            and(
-              ...variantIds.map((id) => eq(variantAttributes.variantId, id)),
-            ),
-          )
+          .where(inArray(variantAttributes.variantId, variantIds))
       : [];
 
   // Group attributes by variant
@@ -110,11 +106,7 @@ variantsRoutes.post('/', async (c) => {
   const foundAttrs = await db
     .select({ id: catalogAttributes.id })
     .from(catalogAttributes)
-    .where(
-      and(
-        ...attrIds.map((aid) => eq(catalogAttributes.id, aid)),
-      ),
-    );
+    .where(inArray(catalogAttributes.id, attrIds));
 
   if (foundAttrs.length !== attrIds.length) {
     return c.json({ error: 'One or more attribute IDs are invalid' }, 400);
@@ -184,11 +176,7 @@ variantsRoutes.patch('/:id', async (c) => {
     const foundAttrs = await db
       .select({ id: catalogAttributes.id })
       .from(catalogAttributes)
-      .where(
-        and(
-          ...attrIds.map((aid) => eq(catalogAttributes.id, aid)),
-        ),
-      );
+      .where(inArray(catalogAttributes.id, attrIds));
 
     if (foundAttrs.length !== attrIds.length) {
       return c.json({ error: 'One or more attribute IDs are invalid' }, 400);
