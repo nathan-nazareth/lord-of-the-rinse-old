@@ -1,6 +1,6 @@
 {
   "framework": "vite",
-  "installCommand": "npm install",
-  "buildCommand": "cd packages/app && npx vite build",
+  "installCommand": "cd packages/app && npm install",
+  "buildCommand": "cd packages/app && npm run build",
   "outputDirectory": "packages/app/dist"
 }
