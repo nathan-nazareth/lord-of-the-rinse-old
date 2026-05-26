@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import type { CatalogVariant, DiscountTier } from '../types/catalog';
-import { calculateDiscount } from '../utils/pricing';
+import { calculateDiscount, getDiscountPercentage } from '../utils/pricing';
+import { SOAP_OPTIONS } from '../../types';
 
 export function useVariantPrice(
   selectedAttributes: Record<string, string | null>,
@@ -20,17 +21,6 @@ export function useVariantPrice(
     if (!matched) return { unitPrice: 0, matchedVariant: null };
     return { unitPrice: Number.parseFloat(matched.unitPrice), matchedVariant: matched };
   }, [selectedAttributes, variants]);
-}
-
-export function useCatalogTotals(
-  items: { price: number; quantity: number }[],
-  totalQuantity: number,
-  discountTiers: DiscountTier[],
-) {
-  return useMemo(() => {
-    const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    return calculateCatalogDiscount(subtotal, totalQuantity, discountTiers);
-  }, [items, totalQuantity, discountTiers]);
 }
 
 export function calculateCatalogDiscount(
@@ -53,10 +43,13 @@ export function useCartTotals(items: { price: number; quantity: number }[], tota
   }, [items, totalQuantity]);
 }
 
-export function useSoapPricing(
-  _scent: string,
-  _size: number,
-  _hasLavenderPieces: boolean,
-) {
-  return useMemo(() => ({ totalPrice: 0 }), []);
+export function useSoapPricing(scent: string | null, size: number, hasLavenderPieces: boolean) {
+  return useMemo(() => {
+    const baseOption = SOAP_OPTIONS.find((o) => o.scent === scent);
+    let totalPrice = baseOption?.price ?? 100;
+    if (hasLavenderPieces) totalPrice += 5;
+    return { totalPrice };
+  }, [scent, hasLavenderPieces]);
 }
+
+export { calculateDiscount, getDiscountPercentage };
