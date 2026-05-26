@@ -21,7 +21,6 @@ interface HomeContextValue {
   setShowLanding: (v: boolean) => void;
   handleShopClick: () => void;
   handleAddToCart: (
-    variantId: string,
     shape: string,
     scent: string,
     price: number,
@@ -89,7 +88,6 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
 
   const handleAddToCart = useCallback(
     (
-      variantId: string,
       shape: string,
       scent: string,
       price: number,
@@ -97,7 +95,7 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
       quantity: string,
       size: string,
     ) => {
-      const success = addItem(variantId, shape, scent, price, color, quantity, size);
+      const success = addItem(shape, scent, price, color, quantity, size);
       if (success) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }

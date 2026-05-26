@@ -7,7 +7,6 @@ interface CartState {
   items: CartItem[];
   totalQuantity: number;
   addItem: (
-    variantId: string,
     shape: string,
     scent: string,
     price: number,
@@ -33,12 +32,13 @@ export const useCartStore = create<CartState>()(
       items: [],
       totalQuantity: 0,
 
-      addItem: (variantId, shape, scent, price, color, quantity, size) => {
+      addItem: (shape, scent, price, color, quantity, size) => {
         if (get().items.length >= MAX_CART_ITEMS) {
           return false;
         }
         const q = parseInt(quantity, 10);
         const cleanPrice = Number.isFinite(price) && price >= 0 ? price : 0;
+        const variantId = `${shape}-${scent}-${color}-${size}`.toLowerCase().replace(/\s+/g, '-');
         const newItem: CartItem = {
           id: crypto.randomUUID(),
           variantId,

@@ -20,7 +20,7 @@ describe('useCartStore', () => {
 
   it('adds an item and increments totalQuantity', () => {
     const { addItem } = useCartStore.getState();
-    const result = addItem('variant-1', 'square', 'lavender', 12.99, 'blue', '2', '75g');
+    const result = addItem('square', 'lavender', 12.99, 'blue', '2', '75g');
 
     expect(result).toBe(true);
     const state = useCartStore.getState();
@@ -28,7 +28,7 @@ describe('useCartStore', () => {
     expect(state.items[0].shape).toBe('square');
     expect(state.items[0].scent).toBe('lavender');
     expect(state.items[0].quantity).toBe(2);
-    expect(state.items[0].variantId).toBe('variant-1');
+    expect(state.items[0].variantId).toBe('square-lavender-blue-75g');
     expect(state.items[0].id).toBeDefined();
     expect(state.totalQuantity).toBe(2);
   });
@@ -36,20 +36,20 @@ describe('useCartStore', () => {
   it('rejects adding when cart has 20 items', () => {
     const store = useCartStore.getState();
     for (let i = 0; i < 20; i++) {
-      store.addItem(`v-${i}`, 'square', 'lavender', 12.99, 'blue', '1', '75g');
+      store.addItem('square', 'lavender', 12.99, 'blue', '1', '75g');
     }
     expect(useCartStore.getState().items).toHaveLength(20);
 
     const result = useCartStore
       .getState()
-      .addItem('v-x', 'square', 'lavender', 12.99, 'blue', '1', '75g');
+      .addItem('square', 'lavender', 12.99, 'blue', '1', '75g');
     expect(result).toBe(false);
     expect(useCartStore.getState().items).toHaveLength(20);
   });
 
   it('removes an item by ID and recalculates totalQuantity', () => {
-    useCartStore.getState().addItem('v-1', 'square', 'lavender', 12.99, 'blue', '3', '75g');
-    useCartStore.getState().addItem('v-2', 'circle', 'citrus', 9.99, 'red', '2', '50g');
+    useCartStore.getState().addItem('square', 'lavender', 12.99, 'blue', '3', '75g');
+    useCartStore.getState().addItem('circle', 'citrus', 9.99, 'red', '2', '50g');
 
     const itemId = useCartStore.getState().items[0].id;
     useCartStore.getState().removeItem(itemId);
@@ -61,7 +61,7 @@ describe('useCartStore', () => {
   });
 
   it('updates item quantity and recalculates totalQuantity', () => {
-    useCartStore.getState().addItem('v-1', 'square', 'lavender', 12.99, 'blue', '3', '75g');
+    useCartStore.getState().addItem('square', 'lavender', 12.99, 'blue', '3', '75g');
     const itemId = useCartStore.getState().items[0].id;
 
     useCartStore.getState().updateQuantity(itemId, 5);
@@ -72,7 +72,7 @@ describe('useCartStore', () => {
   });
 
   it('removes item when quantity set below 1', () => {
-    useCartStore.getState().addItem('v-1', 'square', 'lavender', 12.99, 'blue', '3', '75g');
+    useCartStore.getState().addItem('square', 'lavender', 12.99, 'blue', '3', '75g');
     const itemId = useCartStore.getState().items[0].id;
 
     useCartStore.getState().updateQuantity(itemId, 0);
@@ -83,8 +83,8 @@ describe('useCartStore', () => {
   });
 
   it('clears all items from cart', () => {
-    useCartStore.getState().addItem('v-1', 'square', 'lavender', 12.99, 'blue', '3', '75g');
-    useCartStore.getState().addItem('v-2', 'circle', 'citrus', 9.99, 'red', '2', '50g');
+    useCartStore.getState().addItem('square', 'lavender', 12.99, 'blue', '3', '75g');
+    useCartStore.getState().addItem('circle', 'citrus', 9.99, 'red', '2', '50g');
 
     useCartStore.getState().clearCart();
 
@@ -94,14 +94,14 @@ describe('useCartStore', () => {
   });
 
   it('persists state to localStorage', () => {
-    useCartStore.getState().addItem('v-1', 'square', 'lavender', 12.99, 'blue', '2', '75g');
+    useCartStore.getState().addItem('square', 'lavender', 12.99, 'blue', '2', '75g');
 
     const stored = mockStorage.getItem('organic-soap-cart');
     expect(stored).not.toBeNull();
     const parsed = JSON.parse(stored as string);
     expect(parsed.state.items).toHaveLength(1);
     expect(parsed.state.items[0].shape).toBe('square');
-    expect(parsed.state.items[0].variantId).toBe('v-1');
+    expect(parsed.state.items[0].variantId).toBe('square-lavender-blue-75g');
   });
 
   it('restores state from localStorage on re-hydrate', async () => {
