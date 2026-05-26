@@ -86,7 +86,15 @@ export const useCartStore = create<CartState>()(
               localStorage.removeItem(name);
               return null;
             }
-            return parsed;
+            return {
+              state: {
+                items: state.items,
+                totalQuantity: Array.isArray(state.items)
+                  ? state.items.reduce((sum: number, item: CartItem) => sum + (item.quantity || 0), 0)
+                  : 0,
+              },
+              version: 0,
+            };
           }
 
           if (parsed.items && parsed.updatedAt) {
@@ -97,10 +105,9 @@ export const useCartStore = create<CartState>()(
             return {
               state: {
                 items: parsed.items,
-                totalQuantity: parsed.items.reduce(
-                  (sum: number, item: CartItem) => sum + item.quantity,
-                  0,
-                ),
+                totalQuantity: Array.isArray(parsed.items)
+                  ? parsed.items.reduce((sum: number, item: CartItem) => sum + (item.quantity || 0), 0)
+                  : 0,
               },
               version: 0,
             };
@@ -120,7 +127,8 @@ export const useCartStore = create<CartState>()(
 );
 
 /**
- * Detect and clear legacy cart items (those without variantId).
+ * Detect legacy cart items (those without variantId or without string size).
+ * Clears the stored cart if found.
  * Returns true if legacy items were found and cleared.
  */
 export function detectAndClearLegacyCart(): boolean {
@@ -130,12 +138,17 @@ export function detectAndClearLegacyCart(): boolean {
 
     const parsed = JSON.parse(raw);
     const items: unknown[] = parsed?.state?.items ?? parsed?.items ?? [];
-    const hasLegacy = items.some(
-      (item) =>
-        typeof item === 'object' &&
-        item !== null &&
-        !('variantId' in (item as Record<string, unknown>)),
-    );
+
+    const hasLegacy =
+      items.length > 0 &&
+      items.some(
+        (item) =>
+          typeof item === 'object' &&
+          item !== null &&
+          (!('variantId' in (item as Record<string, unknown>)) ||
+            !('size' in (item as Record<string, unknown>)) ||
+            typeof (item as Record<string, unknown>).size !== 'string'),
+      );
 
     if (hasLegacy) {
       localStorage.removeItem(CART_KEY);

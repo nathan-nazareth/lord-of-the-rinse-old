@@ -68,7 +68,7 @@ const CheckoutPage: React.FC<{
                     </p>
                   </div>
                   <span className="font-display font-semibold text-ink-700">
-                    {currency} {item.price * item.quantity}
+                    {currency} {(item.price * item.quantity).toFixed(2)}
                   </span>
                 </div>
               ))}
