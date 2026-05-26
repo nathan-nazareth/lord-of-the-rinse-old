@@ -1,0 +1,122 @@
+- generic [ref=e9]:
+  - main "Build your soap" [ref=e10]:
+    - generic [ref=e13]:
+      - generic [ref=e112]:
+        - button "shape step" [ref=e113]:
+          - img [ref=e115]
+          - text: Shape
+        - button "scent step" [ref=e118]:
+          - img [ref=e120]
+          - text: Scent
+        - button "color step" [ref=e123]:
+          - img [ref=e125]
+          - text: Color
+        - button "quantity step" [ref=e128]:
+          - generic [ref=e129]: "4"
+          - text: Quantity
+      - generic [ref=e14]:
+        - generic [ref=e15]:
+          - generic [ref=e16]:
+            - paragraph [ref=e17]: Step 1 of 4
+            - heading "Select your shape" [level=2] [ref=e18]
+            - paragraph [ref=e19]: Choose the form of your handcrafted soap
+          - generic [ref=e20]:
+            - button "Square" [pressed] [ref=e21] [cursor=pointer]:
+              - generic [ref=e22]:
+                - img [ref=e23]
+                - paragraph [ref=e25]: Square
+              - img [ref=e50]
+            - button "Circle" [ref=e26] [cursor=pointer]:
+              - generic [ref=e27]:
+                - img [ref=e28]
+                - paragraph [ref=e30]: Circle
+            - button "Heart" [ref=e31] [cursor=pointer]:
+              - generic [ref=e32]:
+                - img [ref=e33]
+                - paragraph [ref=e35]: Heart
+            - button "Oval Flat" [ref=e36] [cursor=pointer]:
+              - generic [ref=e37]:
+                - img [ref=e38]
+                - paragraph [ref=e40]: Oval Flat
+            - button "Oval with Dip" [ref=e41] [cursor=pointer]:
+              - generic [ref=e42]:
+                - img [ref=e43]
+                - paragraph [ref=e46]: Oval with Dip
+          - button "Choose Scent" [ref=e52] [cursor=pointer]:
+            - text: Choose Scent
+            - img [ref=e53]
+        - generic [ref=e56]:
+          - generic [ref=e57]:
+            - paragraph [ref=e58]: Step 2 of 4
+            - heading "Choose your scent" [level=2] [ref=e59]
+            - paragraph [ref=e60]: Select the botanical fragrance for your Square soap
+          - generic [ref=e61]:
+            - button "Lavender Calming & relaxing For a restful ritual" [ref=e62] [cursor=pointer]:
+              - paragraph [ref=e63]: Lavender
+              - paragraph [ref=e64]: Calming & relaxing
+              - paragraph [ref=e65]: For a restful ritual
+            - button "Coconut Tropical & hydrating Silky smooth finish" [pressed] [ref=e66] [cursor=pointer]:
+              - paragraph [ref=e67]: Coconut
+              - paragraph [ref=e68]: Tropical & hydrating
+              - paragraph [ref=e69]: Silky smooth finish
+              - img [ref=e71]
+            - button "Citronella Fresh & mosquito-repelling Outdoor protection" [ref=e73] [cursor=pointer]:
+              - paragraph [ref=e74]: Citronella
+              - paragraph [ref=e75]: Fresh & mosquito-repelling
+              - paragraph [ref=e76]: Outdoor protection
+            - button "Lemongrass Invigorating & cleansing Natural energy boost" [ref=e77] [cursor=pointer]:
+              - paragraph [ref=e78]: Lemongrass
+              - paragraph [ref=e79]: Invigorating & cleansing
+              - paragraph [ref=e80]: Natural energy boost
+        - generic [ref=e81]:
+          - generic [ref=e82]:
+            - generic [ref=e83]:
+              - generic [ref=e84]:
+                - paragraph [ref=e85]: Step 2a
+                - heading "Select size" [level=2] [ref=e86]
+              - generic [ref=e87]:
+                - generic [ref=e88]: Square
+                - generic [ref=e89]: Coconut
+            - generic [ref=e90]:
+              - paragraph [ref=e91]: Enter weight in grams (50–100g for Square)
+              - generic [ref=e92]:
+                - textbox "50–100g" [ref=e93]: "100"
+                - generic [ref=e94]: g
+              - slider [ref=e95] [cursor=pointer]: "100"
+          - generic [ref=e96]:
+            - button "Dried Lavender Pieces +Rs. 5 — calming botanicals" [pressed] [ref=e97] [cursor=pointer]:
+              - generic [ref=e98]:
+                - img [ref=e99]
+                - generic [ref=e102]:
+                  - generic [ref=e103]: Dried Lavender Pieces
+                  - generic [ref=e104]: +Rs. 5 — calming botanicals
+              - img [ref=e130]
+            - generic [ref=e105]:
+              - generic [ref=e106]: 100g Coconut + Lavender
+              - generic [ref=e107]: Rs. 105
+            - button "Choose Color" [ref=e108] [cursor=pointer]:
+              - text: Choose Color
+              - img [ref=e109]
+        - generic [ref=e132]:
+          - generic [ref=e133]:
+            - paragraph [ref=e134]: Step 4 of 4
+            - heading "How many soaps?" [level=2] [ref=e135]
+            - paragraph [ref=e136]: Square · Coconut · Blue · 100g · Rs. 105 each
+          - generic [ref=e137]:
+            - textbox "0" [ref=e138]
+            - generic [ref=e139]: soaps
+          - generic [ref=e140]:
+            - button "1" [ref=e141] [cursor=pointer]
+            - button "2" [ref=e142] [cursor=pointer]
+            - button "3" [ref=e143] [cursor=pointer]
+            - button "5" [ref=e144] [cursor=pointer]
+            - button "10" [ref=e145] [cursor=pointer]
+          - generic [ref=e146]:
+            - button "Back" [ref=e147] [cursor=pointer]:
+              - img [ref=e148]
+              - text: Back
+            - button "Add to Cart" [disabled] [ref=e151] [cursor=pointer]:
+              - img [ref=e152]
+              - text: Add to Cart
+  - contentinfo [ref=e47]:
+    - paragraph [ref=e48]: “Made with love and nature's botanicals”

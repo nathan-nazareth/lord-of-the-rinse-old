@@ -1,0 +1,13 @@
+- generic [ref=e4]:
+  - button "Back to form" [ref=e5]:
+    - img [ref=e6]
+    - generic [ref=e9]: Back to form
+  - generic [ref=e10]:
+    - generic [ref=e11]:
+      - heading "Your Cart" [level=1] [ref=e12]
+      - paragraph [ref=e13]: 0 soaps in your order
+    - generic [ref=e15]:
+      - img [ref=e16]
+      - paragraph [ref=e21]: Nothing here yet
+      - paragraph [ref=e22]: Start crafting your soaps above
+      - button "Start Ordering" [ref=e23] [cursor=pointer]

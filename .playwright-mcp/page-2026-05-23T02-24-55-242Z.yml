@@ -1,0 +1,43 @@
+- generic [ref=e4]:
+  - button "Back to cart" [ref=e5]:
+    - img [ref=e6]
+    - generic [ref=e9]: Back to cart
+  - generic [ref=e10]:
+    - generic [ref=e11]:
+      - heading "Checkout" [level=1] [ref=e12]
+      - paragraph [ref=e13]: 10 soaps in your order
+    - generic [ref=e14]:
+      - generic [ref=e15]:
+        - generic [ref=e16]:
+          - generic [ref=e17]:
+            - paragraph [ref=e18]: Coconut
+            - paragraph [ref=e19]: Blue · 100g × 10
+          - generic [ref=e20]: Rs. 1050
+        - generic [ref=e21]:
+          - generic [ref=e22]: Subtotal
+          - generic [ref=e23]: Rs. 1050
+        - generic [ref=e24]:
+          - generic [ref=e25]:
+            - img [ref=e26]
+            - text: Discount (15%)
+          - generic [ref=e28]: "- Rs. 158"
+        - generic [ref=e29]:
+          - generic [ref=e30]: Total
+          - generic [ref=e31]: Rs. 892
+      - generic [ref=e32]:
+        - generic [ref=e33]:
+          - generic [ref=e34]: Your Name
+          - textbox "Your Name" [ref=e35]:
+            - /placeholder: Enter your full name
+            - text: Test User
+        - generic [ref=e36]:
+          - generic [ref=e37]: Email Address
+          - textbox "Email Address" [ref=e38]:
+            - /placeholder: Enter your email
+            - text: test@example.com
+        - generic [ref=e39]:
+          - generic [ref=e40]: Phone Number
+          - textbox "Phone Number" [ref=e41]:
+            - /placeholder: Enter your phone number
+            - text: "1234567890"
+        - button "Submit Order — Rs. 892" [ref=e42] [cursor=pointer]

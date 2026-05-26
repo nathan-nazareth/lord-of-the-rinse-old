@@ -12,6 +12,7 @@ import { detectAndClearLegacyCart, useCartStore } from '../../stores/useCartStor
 import { useFormStore } from '../../stores/useFormStore';
 import type { CartItem } from '../../types/cart';
 import type { Customer } from '../../types/webhook';
+import { submitCartToWebhook } from '../../services/webhook';
 
 interface HomeContextValue {
   cart: { items: CartItem[]; totalQuantity: number };
@@ -67,7 +68,6 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
   const [showLanding, setShowLanding] = useState(true);
   const [legacyCartCleared, setLegacyCartCleared] = useState(false);
 
-  // Detect and clear legacy cart items on mount
   useEffect(() => {
     const cleared = detectAndClearLegacyCart();
     if (cleared) {
@@ -126,25 +126,40 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
           }),
         });
 
-        if (!response.ok) {
-          console.error('Checkout API failed:', response.status);
-          return undefined;
+        if (response.ok) {
+          const data = await response.json();
+          setConfirmationItemCount(cart.totalQuantity);
+          setLastOrderReference(data.reference);
+          setJustOrdered(true);
+          clearCart();
+          clearFormState();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return data.reference;
         }
 
-        const data = await response.json();
-        setConfirmationItemCount(cart.totalQuantity);
-        setLastOrderReference(data.reference);
-        setJustOrdered(true);
-        clearCart();
-        clearFormState();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        return data.reference;
+        console.warn('[Checkout] API unavailable, falling back to Web3Forms');
+      } catch (err) {
+        console.warn('[Checkout] API error, falling back to Web3Forms:', err);
+      }
+
+      try {
+        const result = await submitCartToWebhook(customer, cart.items);
+        if (result.success) {
+          const ref = `LTR-${result.orderId.slice(0, 8).toUpperCase()}`;
+          setConfirmationItemCount(cart.totalQuantity);
+          setLastOrderReference(ref);
+          setJustOrdered(true);
+          clearCart();
+          clearFormState();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return ref;
+        }
       } catch (err) {
         console.error('Order submission error:', err);
-        return undefined;
       } finally {
         setIsSubmitting(false);
       }
+      return undefined;
     },
     [cart, clearCart, clearFormState],
   );

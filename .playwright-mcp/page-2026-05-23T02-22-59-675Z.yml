@@ -1,0 +1,30 @@
+- generic [ref=e9]:
+  - main "Build your soap" [ref=e10]:
+    - generic [ref=e15]:
+      - generic [ref=e16]:
+        - paragraph [ref=e17]: Step 1 of 4
+        - heading "Select your shape" [level=2] [ref=e18]
+        - paragraph [ref=e19]: Choose the form of your handcrafted soap
+      - generic [ref=e20]:
+        - button "Square" [ref=e21] [cursor=pointer]:
+          - generic [ref=e22]:
+            - img [ref=e23]
+            - paragraph [ref=e25]: Square
+        - button "Circle" [ref=e26] [cursor=pointer]:
+          - generic [ref=e27]:
+            - img [ref=e28]
+            - paragraph [ref=e30]: Circle
+        - button "Heart" [ref=e31] [cursor=pointer]:
+          - generic [ref=e32]:
+            - img [ref=e33]
+            - paragraph [ref=e35]: Heart
+        - button "Oval Flat" [ref=e36] [cursor=pointer]:
+          - generic [ref=e37]:
+            - img [ref=e38]
+            - paragraph [ref=e40]: Oval Flat
+        - button "Oval with Dip" [ref=e41] [cursor=pointer]:
+          - generic [ref=e42]:
+            - img [ref=e43]
+            - paragraph [ref=e46]: Oval with Dip
+  - contentinfo [ref=e47]:
+    - paragraph [ref=e48]: “Made with love and nature's botanicals”
