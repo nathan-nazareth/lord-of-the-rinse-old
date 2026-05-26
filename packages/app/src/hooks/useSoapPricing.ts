@@ -52,3 +52,11 @@ export function useCartTotals(items: { price: number; quantity: number }[], tota
     return calculateDiscount(subtotal, totalQuantity);
   }, [items, totalQuantity]);
 }
+
+export function useSoapPricing(
+  _scent: string,
+  _size: number,
+  _hasLavenderPieces: boolean,
+) {
+  return useMemo(() => ({ totalPrice: 0 }), []);
+}
