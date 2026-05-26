@@ -20,43 +20,56 @@ interface CartState {
   clearCart: () => void;
 }
 
+function computeTotalQuantity(items: CartItem[]): number {
+  return items.reduce((sum, item) => {
+    const q = Number(item.quantity);
+    return sum + (Number.isFinite(q) && q > 0 ? q : 0);
+  }, 0);
+}
+
 export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
       items: [],
       totalQuantity: 0,
+
       addItem: (variantId, shape, scent, price, color, quantity, size) => {
         if (get().items.length >= MAX_CART_ITEMS) {
           return false;
         }
+        const q = parseInt(quantity, 10);
+        const cleanPrice = Number.isFinite(price) && price >= 0 ? price : 0;
         const newItem: CartItem = {
           id: crypto.randomUUID(),
           variantId,
           shape,
           scent,
-          price,
+          price: cleanPrice,
           color,
-          quantity: parseInt(quantity, 10),
-          size,
+          quantity: Number.isFinite(q) && q > 0 ? q : 1,
+          size: typeof size === 'string' && size.length > 0 ? size : '100',
           addedAt: new Date().toISOString(),
         };
         const newItems = [...get().items, newItem];
         set({
           items: newItems,
-          totalQuantity: newItems.reduce((sum, item) => sum + item.quantity, 0),
+          totalQuantity: computeTotalQuantity(newItems),
         });
         return true;
       },
+
       clearCart: () => {
         set({ items: [], totalQuantity: 0 });
       },
+
       removeItem: (itemId) => {
         const newItems = get().items.filter((item) => item.id !== itemId);
         set({
           items: newItems,
-          totalQuantity: newItems.reduce((sum, item) => sum + item.quantity, 0),
+          totalQuantity: computeTotalQuantity(newItems),
         });
       },
+
       updateQuantity: (itemId, quantity) => {
         if (quantity < 1) {
           get().removeItem(itemId);
@@ -67,7 +80,7 @@ export const useCartStore = create<CartState>()(
         );
         set({
           items: newItems,
-          totalQuantity: newItems.reduce((sum, item) => sum + item.quantity, 0),
+          totalQuantity: computeTotalQuantity(newItems),
         });
       },
     }),
@@ -75,45 +88,57 @@ export const useCartStore = create<CartState>()(
       name: CART_KEY,
       storage: {
         getItem: (name) => {
-          const item = localStorage.getItem(name);
-          if (!item) return null;
+          try {
+            const item = localStorage.getItem(name);
+            if (!item) return null;
 
-          const parsed = JSON.parse(item);
+            const parsed = JSON.parse(item);
+            const stateOrItems = parsed?.state ?? parsed;
 
-          if (parsed.state) {
-            const state = parsed.state;
-            if (state.updatedAt && Date.now() - state.updatedAt > CART_EXPIRY_MS) {
-              localStorage.removeItem(name);
-              return null;
+            if (!stateOrItems) return null;
+
+            const rawItems: unknown = stateOrItems.items;
+            if (!Array.isArray(rawItems)) return null;
+
+            if (stateOrItems.updatedAt) {
+              if (Date.now() - stateOrItems.updatedAt > CART_EXPIRY_MS) {
+                localStorage.removeItem(name);
+                return null;
+              }
             }
+
+            const cleanItems: CartItem[] = rawItems
+              .filter((raw): raw is Record<string, unknown> =>
+                typeof raw === 'object' && raw !== null,
+              )
+              .map((raw) => {
+                const q = parseInt(String(raw.quantity), 10);
+                const p = parseFloat(String(raw.price));
+
+                return {
+                  id: typeof raw.id === 'string' ? raw.id : crypto.randomUUID(),
+                  variantId:
+                    typeof raw.variantId === 'string' ? raw.variantId : 'unknown',
+                  shape: typeof raw.shape === 'string' ? raw.shape : 'Unknown',
+                  scent: typeof raw.scent === 'string' ? raw.scent : 'Unknown',
+                  price: Number.isFinite(p) && p >= 0 ? p : 0,
+                  color: typeof raw.color === 'string' ? raw.color : 'Unknown',
+                  quantity: Number.isFinite(q) && q > 0 ? q : 1,
+                  size: typeof raw.size === 'string' && raw.size.length > 0 ? raw.size : '100',
+                  addedAt:
+                    typeof raw.addedAt === 'string' ? raw.addedAt : new Date().toISOString(),
+                };
+              });
+
+            const totalQuantity = computeTotalQuantity(cleanItems);
+
             return {
-              state: {
-                items: state.items,
-                totalQuantity: Array.isArray(state.items)
-                  ? state.items.reduce((sum: number, item: CartItem) => sum + (item.quantity || 0), 0)
-                  : 0,
-              },
+              state: { items: cleanItems, totalQuantity },
               version: 0,
             };
+          } catch {
+            return null;
           }
-
-          if (parsed.items && parsed.updatedAt) {
-            if (Date.now() - parsed.updatedAt > CART_EXPIRY_MS) {
-              localStorage.removeItem(name);
-              return null;
-            }
-            return {
-              state: {
-                items: parsed.items,
-                totalQuantity: Array.isArray(parsed.items)
-                  ? parsed.items.reduce((sum: number, item: CartItem) => sum + (item.quantity || 0), 0)
-                  : 0,
-              },
-              version: 0,
-            };
-          }
-
-          return null;
         },
         setItem: (name, value) => {
           localStorage.setItem(name, JSON.stringify(value));
@@ -126,11 +151,6 @@ export const useCartStore = create<CartState>()(
   ),
 );
 
-/**
- * Detect legacy cart items (those without variantId or without string size).
- * Clears the stored cart if found.
- * Returns true if legacy items were found and cleared.
- */
 export function detectAndClearLegacyCart(): boolean {
   try {
     const raw = localStorage.getItem(CART_KEY);
@@ -139,16 +159,14 @@ export function detectAndClearLegacyCart(): boolean {
     const parsed = JSON.parse(raw);
     const items: unknown[] = parsed?.state?.items ?? parsed?.items ?? [];
 
-    const hasLegacy =
-      items.length > 0 &&
-      items.some(
-        (item) =>
-          typeof item === 'object' &&
-          item !== null &&
-          (!('variantId' in (item as Record<string, unknown>)) ||
-            !('size' in (item as Record<string, unknown>)) ||
-            typeof (item as Record<string, unknown>).size !== 'string'),
-      );
+    const hasLegacy = items.some(
+      (item) =>
+        typeof item === 'object' &&
+        item !== null &&
+        (!('variantId' in (item as Record<string, unknown>)) ||
+          !('size' in (item as Record<string, unknown>)) ||
+          typeof (item as Record<string, unknown>).size !== 'string'),
+    );
 
     if (hasLegacy) {
       localStorage.removeItem(CART_KEY);

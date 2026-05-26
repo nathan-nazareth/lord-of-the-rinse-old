@@ -34,10 +34,11 @@ const CartPage: React.FC<{
   onDismissOrdered,
 }) => {
   const { data: catalog } = useCatalog();
-  const currency = catalog?.settings?.currency ?? 'USD';
-  const subtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const currency = catalog?.settings?.currency ?? 'Rs. ';
+  const subtotal = cart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const safesubtotal = Number.isFinite(subtotal) ? subtotal : 0;
   const { discountPercentage, discountAmount, total } = calculateDiscount(
-    subtotal,
+    safesubtotal,
     cart.totalQuantity,
   );
 
@@ -182,7 +183,7 @@ const CartPage: React.FC<{
                       </div>
                       <div className="flex items-center gap-3 flex-shrink-0">
                         <span className="font-display font-semibold text-terra-500">
-                          {currency} {item.price * item.quantity}
+                          {currency} {(item.price * item.quantity).toFixed(2)}
                         </span>
                         {onUpdateQuantity ? (
                           <div className="flex items-center gap-1 bg-parchment-100 rounded-full px-1 py-0.5">
@@ -199,7 +200,7 @@ const CartPage: React.FC<{
                               −
                             </button>
                             <span className="w-8 text-center font-semibold text-ink-700">
-                              {item.quantity}
+                              {Number.isFinite(item.quantity) ? item.quantity : 0}
                             </span>
                             <button
                               type="button"
@@ -236,7 +237,7 @@ const CartPage: React.FC<{
                     </div>
                     <p className="text-botanical-600 text-sm text-center mt-1">
                       {discountPercentage}% off on {cart.totalQuantity} soaps — you save {currency}{' '}
-                      {discountAmount}
+                      {(discountAmount || 0).toFixed(2)}
                     </p>
                   </div>
                 )}
@@ -245,7 +246,7 @@ const CartPage: React.FC<{
                   <div className="flex justify-between text-ink-500 text-sm">
                     <span>Subtotal</span>
                     <span>
-                      {currency} {subtotal}
+                      {currency} {safesubtotal.toFixed(2)}
                     </span>
                   </div>
                   {discountPercentage > 0 && (
@@ -254,15 +255,15 @@ const CartPage: React.FC<{
                         <IconSparkles className="w-3.5 h-3.5" />
                         Discount ({discountPercentage}%)
                       </span>
-                      <span>
-                        - {currency} {discountAmount}
-                      </span>
+                        <span>
+                          - {currency} {(discountAmount || 0).toFixed(2)}
+                        </span>
                     </div>
                   )}
                   <div className="flex justify-between text-xl font-display font-semibold text-ink-700 pt-3 border-t border-parchment-300">
                     <span>Total</span>
                     <span className="text-terra-500">
-                      {currency} {total}
+                      {currency} {(total || 0).toFixed(2)}
                     </span>
                   </div>
                 </div>
@@ -273,7 +274,7 @@ const CartPage: React.FC<{
                     onClick={onCheckout}
                     className="btn-apothecary btn-primary btn-full text-base py-4"
                   >
-                    Checkout — {currency} {total}
+                    Checkout — {currency} {(total || 0).toFixed(2)}
                   </button>
                   <button
                     type="button"
