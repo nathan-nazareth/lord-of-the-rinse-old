@@ -18,7 +18,7 @@ const CheckoutPage: React.FC<{
   const [formData, setFormData] = useState({ name: '', email: '', phone: '' });
   const [errors, setErrors] = useState<{ name?: string; email?: string; phone?: string }>({});
   const { data: catalog } = useCatalog();
-  const currency = catalog?.settings?.currency ?? 'USD';
+  const currency = catalog?.settings?.currency ?? 'Rs. ';
 
   const subtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const { discountPercentage, discountAmount, total } = calculateDiscount(
