@@ -59,3 +59,9 @@ Organic soap builder — a React SPA where customers configure custom soaps (sha
 - Example: `feat: replace useFormRateLimit hook with useRateLimitStore Zustand store`.
 - Reference issue numbers in parentheses when applicable: `test: add localStorage mock and cart item factory (#19)`.
 - Keep commits focused and atomic — one logical change per commit.
+
+<!-- SPECKIT START -->
+[Plan: Admin Catalog Management](./specs/002-admin-catalog-management/plan.md)
+[Data Model: Admin Catalog](./specs/002-admin-catalog-management/data-model.md)
+[API Contracts: Admin](./specs/002-admin-catalog-management/contracts/admin-api.md)
+<!-- SPECKIT END -->
