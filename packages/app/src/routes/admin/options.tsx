@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState, useEffect } from 'react';
-import { useAdminOptions, useUpdateAdminOptions } from '@/hooks/useAdminCatalog';
+import { useAdminOptions, useUpdateAdminOptions } from '@/hooks/useAdminCatalog.ts';
 
 export const Route = createFileRoute('/admin/options')({
   component: AdminOptions,

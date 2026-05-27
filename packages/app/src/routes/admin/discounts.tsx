@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
-import { useAdminDiscounts, useCreateDiscount, useUpdateDiscount, useDeleteDiscount } from '@/hooks/useAdminCatalog';
+import { useAdminDiscounts, useCreateDiscount, useUpdateDiscount, useDeleteDiscount } from '@/hooks/useAdminCatalog.ts';
 import { IconTrash, IconEdit } from '@tabler/icons-react';
 
 export const Route = createFileRoute('/admin/discounts')({
