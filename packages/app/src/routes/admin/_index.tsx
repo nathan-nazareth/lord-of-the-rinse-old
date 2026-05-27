@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, Link, useNavigate } from '@tanstack/react-router';
-import { useAdminStore } from '@/stores/useAdminStore';
-import { LoginForm } from '@/components/admin/LoginForm';
+import { useAdminStore } from '@/stores/useAdminStore.ts';
+import { LoginForm } from '@/components/admin/LoginForm.tsx';
 import { useEffect } from 'react';
 
 export const Route = createFileRoute('/admin/_index')({

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAdminStore } from '@/stores/useAdminStore';
+import { useAdminStore } from '@/stores/useAdminStore.ts';
 
 export function LoginForm() {
   const [password, setPassword] = useState('');
