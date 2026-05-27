@@ -7,6 +7,8 @@ import type {
 } from '@/types/admin';
 
 interface AdminState {
+  isAuthenticated: boolean;
+  authToken: string | null;
   products: AdminProduct[];
   options: CatalogOption[];
   discounts: Discount[];
@@ -14,6 +16,8 @@ interface AdminState {
   isLoading: boolean;
   error: string | null;
 
+  setAuth: (token: string) => void;
+  clearAuth: () => void;
   setProducts: (products: AdminProduct[]) => void;
   setOptions: (options: CatalogOption[]) => void;
   setDiscounts: (discounts: Discount[]) => void;
@@ -24,6 +28,8 @@ interface AdminState {
 }
 
 export const useAdminStore = create<AdminState>((set) => ({
+  isAuthenticated: false,
+  authToken: null,
   products: [],
   options: [],
   discounts: [],
@@ -31,6 +37,8 @@ export const useAdminStore = create<AdminState>((set) => ({
   isLoading: false,
   error: null,
 
+  setAuth: (token) => set({ isAuthenticated: true, authToken: token }),
+  clearAuth: () => set({ isAuthenticated: false, authToken: null }),
   setProducts: (products) => set({ products }),
   setOptions: (options) => set({ options }),
   setDiscounts: (discounts) => set({ discounts }),

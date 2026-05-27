@@ -61,7 +61,7 @@ Organic soap builder — a React SPA where customers configure custom soaps (sha
 - Keep commits focused and atomic — one logical change per commit.
 
 <!-- SPECKIT START -->
-[Plan: Admin Catalog Management](./specs/002-admin-catalog-management/plan.md)
-[Data Model: Admin Catalog](./specs/002-admin-catalog-management/data-model.md)
-[API Contracts: Admin](./specs/002-admin-catalog-management/contracts/admin-api.md)
+[Plan: Admin Catalog Management](./specs/001-admin-catalog-management/plan.md)
+[Data Model: Admin Catalog](./specs/001-admin-catalog-management/data-model.md)
+[API Contracts: Admin](./specs/001-admin-catalog-management/contracts/admin-api.md)
 <!-- SPECKIT END -->

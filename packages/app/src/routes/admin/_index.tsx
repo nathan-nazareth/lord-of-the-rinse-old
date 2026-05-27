@@ -1,10 +1,27 @@
-import { createFileRoute, Outlet, Link } from '@tanstack/react-router';
+import { createFileRoute, Outlet, Link, useNavigate } from '@tanstack/react-router';
+import { useAdminStore } from '@/stores/useAdminStore';
+import { LoginForm } from '@/components/admin/LoginForm';
+import { useEffect } from 'react';
 
 export const Route = createFileRoute('/admin/_index')({
   component: AdminWrapper,
 });
 
 function AdminWrapper() {
+  const isAuthenticated = useAdminStore((s) => s.isAuthenticated);
+  const clearAuth = useAdminStore((s) => s.clearAuth);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate({ to: '/admin' });
+    }
+  }, [isAuthenticated, navigate]);
+
+  if (!isAuthenticated) {
+    return <LoginForm />;
+  }
+
   return (
     <div className="min-h-screen bg-stone-50">
       <header className="bg-white border-b border-stone-200">
@@ -13,7 +30,8 @@ function AdminWrapper() {
             <h1 className="text-xl font-semibold text-stone-800">Admin</h1>
             <div className="flex items-center gap-4">
               <Link
-                to="/admin/"
+                to="/"
+                onClick={() => clearAuth()}
                 className="text-sm text-stone-600 hover:text-stone-900 px-3 py-2 rounded-md hover:bg-stone-100"
               >
                 Dashboard

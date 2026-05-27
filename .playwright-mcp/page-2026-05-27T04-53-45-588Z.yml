@@ -1,0 +1,3 @@
+- generic [ref=e10]:
+  - button "Shop Now" [ref=e11] [cursor=pointer]
+  - paragraph [ref=e12]: Bulk discounts available — order 3+ and save up to 15%

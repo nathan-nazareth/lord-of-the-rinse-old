@@ -5,15 +5,20 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./schema": "./src/schema/index.ts"
+    "./schema": "./src/schema/index.ts",
+    "./admin": "./src/admin.ts"
   },
   "scripts": {
     "generate": "drizzle-kit generate",
     "migrate": "drizzle-kit migrate",
     "test": "vitest run",
-    "test:watch": "vitest --watch"
+    "test:watch": "vitest --watch",
+    "admin:generate": "drizzle-kit generate --config=drizzle.admin.config.ts",
+    "admin:push": "drizzle-kit push --config=drizzle.admin.config.ts",
+    "admin:seed": "bun run src/admin-seed.ts"
   },
   "dependencies": {
+    "@libsql/client": "^0.17.3",
     "drizzle-orm": "^0.44.0",
     "postgres": "^3.4.5"
   },

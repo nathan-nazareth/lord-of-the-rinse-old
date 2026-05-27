@@ -1,0 +1,14 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - navigation [ref=e6]:
+      - heading "Admin" [level=1] [ref=e7]
+      - generic [ref=e8]:
+        - link "Dashboard" [ref=e9] [cursor=pointer]:
+          - /url: /admin
+        - link "Products" [ref=e10] [cursor=pointer]:
+          - /url: /admin/products
+        - link "Options" [ref=e11] [cursor=pointer]:
+          - /url: /admin/options
+        - link "Discounts" [ref=e12] [cursor=pointer]:
+          - /url: /admin/discounts
+  - main [ref=e13]
