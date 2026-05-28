@@ -13,7 +13,7 @@ function jsonResponse(data, status = 200) {
   });
 }
 
-export default function handler(req) {
+export default async function handler(req) {
   const url = new URL(req.url);
   const pathname = url.pathname;
 
@@ -25,7 +25,8 @@ export default function handler(req) {
       return jsonResponse({ error: 'Method not allowed' }, 405);
     }
 
-    return req.json().then(body => {
+    try {
+      const body = await req.json();
       if (!body || !body.password) {
         return jsonResponse({ error: 'Password is required' }, 400);
       }
@@ -33,7 +34,9 @@ export default function handler(req) {
         return jsonResponse({ error: 'Invalid password' }, 401);
       }
       return jsonResponse({ token: `admin-${ADMIN_PASSWORD}` });
-    }).catch(() => jsonResponse({ error: 'Invalid JSON' }, 400));
+    } catch {
+      return jsonResponse({ error: 'Invalid JSON' }, 400);
+    }
   }
 
   if (pathname === '/api/admin/products') {
@@ -47,12 +50,17 @@ export default function handler(req) {
       return jsonResponse([]);
     }
     if (req.method === 'POST') {
-      return req.json().then(body => jsonResponse({
-        id: 1, name: body?.name || 'Test', color: body?.color || 'blue',
-        scent: body?.scent || 'lavender', shape: body?.shape || 'round',
-        weight: body?.weight || 100, price: body?.price || 999,
-        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
-      }, 201)).catch(() => jsonResponse({ error: 'Invalid JSON' }, 400));
+      try {
+        const body = await req.json();
+        return jsonResponse({
+          id: 1, name: body?.name || 'Test', color: body?.color || 'blue',
+          scent: body?.scent || 'lavender', shape: body?.shape || 'round',
+          weight: body?.weight || 100, price: body?.price || 999,
+          createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
+        }, 201);
+      } catch {
+        return jsonResponse({ error: 'Invalid JSON' }, 400);
+      }
     }
     if (req.method === 'DELETE') {
       return jsonResponse({ success: true });
@@ -71,8 +79,12 @@ export default function handler(req) {
       return jsonResponse({ minPrice: 100, maxPrice: 10000, minSize: 50, maxSize: 500 });
     }
     if (req.method === 'PUT') {
-      return req.json().then(body => jsonResponse({ ...body, updatedAt: new Date().toISOString() }))
-        .catch(() => jsonResponse({ error: 'Invalid JSON' }, 400));
+      try {
+        const body = await req.json();
+        return jsonResponse({ ...body, updatedAt: new Date().toISOString() });
+      } catch {
+        return jsonResponse({ error: 'Invalid JSON' }, 400);
+      }
     }
     return jsonResponse({ error: 'Method not allowed' }, 405);
   }
@@ -88,12 +100,17 @@ export default function handler(req) {
       return jsonResponse([]);
     }
     if (req.method === 'POST') {
-      return req.json().then(body => jsonResponse({
-        id: 1, percentage: body?.percentage || 10,
-        description: body?.description || 'Discount',
-        active: 1, createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }, 201)).catch(() => jsonResponse({ error: 'Invalid JSON' }, 400));
+      try {
+        const body = await req.json();
+        return jsonResponse({
+          id: 1, percentage: body?.percentage || 10,
+          description: body?.description || 'Discount',
+          active: 1, createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }, 201);
+      } catch {
+        return jsonResponse({ error: 'Invalid JSON' }, 400);
+      }
     }
     return jsonResponse({ error: 'Method not allowed' }, 405);
   }
