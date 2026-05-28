@@ -1,32 +1,53 @@
-import { Hono } from 'hono';
+export default async function handler(req: Request) {
+  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '3984';
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '3984';
-
-const app = new Hono();
-
-app.use('*', async (c, next) => {
-  await next();
-  c.res.headers.set('Access-Control-Allow-Origin', '*');
-  c.res.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  c.res.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-});
-
-app.options('/', (c) => {
-  return c.text('', 204);
-});
-
-app.post('/', (c) => {
-  const { password } = c.req.json<{ password?: string }>();
-
-  if (!password) {
-    return c.json({ error: 'Password is required' }, 400);
+  if (req.method === 'OPTIONS') {
+    return new Response(null, {
+      status: 204,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      },
+    });
   }
 
-  if (password !== ADMIN_PASSWORD) {
-    return c.json({ error: 'Invalid password' }, 401);
+  if (req.method !== 'POST') {
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
-  return c.json({ token: `admin-${ADMIN_PASSWORD}` });
-});
+  let body: { password?: string };
+  try {
+    body = await req.json();
+  } catch {
+    return new Response(JSON.stringify({ error: 'Invalid JSON' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
 
-export default app;
+  if (!body.password) {
+    return new Response(JSON.stringify({ error: 'Password is required' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  if (body.password !== ADMIN_PASSWORD) {
+    return new Response(JSON.stringify({ error: 'Invalid password' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  return new Response(JSON.stringify({ token: `admin-${ADMIN_PASSWORD}` }), {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+    },
+  });
+}

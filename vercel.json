@@ -4,11 +4,9 @@
   "buildCommand": "cd packages/app && npm run build",
   "outputDirectory": "packages/app/dist",
   "rewrites": [
-    { "source": "/api/admin/(.*)", "destination": "/api/admin/$1" },
-    { "source": "/admin", "destination": "/index.html" },
-    { "source": "/admin/(.*)", "destination": "/index.html" },
-    { "source": "/cart", "destination": "/index.html" },
-    { "source": "/checkout", "destination": "/index.html" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/admin/**", "destination": "/index.html" },
+    { "source": "/cart/**", "destination": "/index.html" },
+    { "source": "/checkout/**", "destination": "/index.html" },
+    { "source": "/(.*)", "destination": "/index.html", "continue": true }
   ]
 }
