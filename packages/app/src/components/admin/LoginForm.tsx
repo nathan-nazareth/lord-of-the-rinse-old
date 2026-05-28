@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useAdminStore } from '@/stores/useAdminStore';
+import { useNavigate } from '@tanstack/react-router';
 
 export function LoginForm() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const setAuth = useAdminStore((s) => s.setAuth);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,13 +21,14 @@ export function LoginForm() {
         body: JSON.stringify({ password }),
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Login failed');
+        throw new Error(data.error || `Login failed (${res.status})`);
       }
 
-      const data = await res.json();
       setAuth(data.token);
+      navigate({ to: '/admin' });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
     } finally {
