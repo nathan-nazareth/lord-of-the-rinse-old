@@ -4,17 +4,16 @@
   "buildCommand": "cd packages/app && npm run build",
   "outputDirectory": "packages/app/dist",
   "routes": [
-    { "src": "/api/admin/auth/login", "dest": "/api/admin/auth/login.js" },
-    { "src": "/api/admin/products", "dest": "/api/admin/products.js" },
-    { "src": "/api/admin/options", "dest": "/api/admin/options.js" },
-    { "src": "/api/admin/discounts", "dest": "/api/admin/discounts.js" },
-    { "src": "/api/test", "dest": "/api/test.js" },
-    { "src": "/admin", "dest": "/index.html" },
+    { "src": "/api/admin/auth/login", "dest": "/api/admin/auth/login" },
+    { "src": "/api/admin/products", "dest": "/api/admin/products" },
+    { "src": "/api/admin/options", "dest": "/api/admin/options" },
+    { "src": "/api/admin/discounts", "dest": "/api/admin/discounts" },
+    { "src": "/api/test", "dest": "/api/test" },
+    { "src": "/admin/?$", "dest": "/index.html" },
     { "src": "/admin/(.*)", "dest": "/index.html" },
-    { "src": "/cart", "dest": "/index.html" },
+    { "src": "/cart/?$", "dest": "/index.html" },
     { "src": "/cart/(.*)", "dest": "/index.html" },
-    { "src": "/checkout", "dest": "/index.html" },
-    { "src": "/checkout/(.*)", "dest": "/index.html" },
-    { "src": "/(.*)", "dest": "/index.html" }
+    { "src": "/checkout/?$", "dest": "/index.html" },
+    { "src": "/checkout/(.*)", "dest": "/index.html" }
   ]
 }
