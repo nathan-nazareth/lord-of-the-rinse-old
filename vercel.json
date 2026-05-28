@@ -4,11 +4,7 @@
   "buildCommand": "cd packages/app && npm run build",
   "outputDirectory": "packages/app/dist",
   "routes": [
-    { "src": "/api/test", "dest": "/api/test/index.js" },
-    { "src": "/api/admin/auth/login", "dest": "/api/admin/auth/login/index.js" },
-    { "src": "/api/admin/products", "dest": "/api/admin/products/index.js" },
-    { "src": "/api/admin/options", "dest": "/api/admin/options/index.js" },
-    { "src": "/api/admin/discounts", "dest": "/api/admin/discounts/index.js" },
+    { "src": "/api/(.*)", "dest": "/api/index.js" },
     { "src": "/admin/?$", "dest": "/index.html" },
     { "src": "/admin/(.*)", "dest": "/index.html" },
     { "src": "/cart/?$", "dest": "/index.html" },
