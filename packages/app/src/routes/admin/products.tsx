@@ -141,6 +141,7 @@ export function AdminProducts() {
                 <td className="px-4 py-3 text-stone-600">${(product.price / 100).toFixed(2)}</td>
                 <td className="px-4 py-3">
                   <button
+                    type="button"
                     onClick={() => handleDelete(product.id)}
                     className="text-red-600 hover:text-red-700"
                   >

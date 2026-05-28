@@ -4,8 +4,8 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '3984';
 
 const adminAuthRoutes = new Hono();
 
-adminAuthRoutes.post('/login', (c) => {
-  const { password } = c.req.json<{ password?: string }>();
+adminAuthRoutes.post('/login', async (c) => {
+  const { password } = await c.req.json<{ password?: string }>();
 
   if (!password) {
     return c.json({ error: 'Password is required' }, 400);

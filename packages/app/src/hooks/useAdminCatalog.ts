@@ -8,7 +8,7 @@ async function fetchWithAuth<T>(url: string, options: RequestInit = {}, token?: 
     'Content-Type': 'application/json',
   };
   if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+    headers.Authorization = `Bearer ${token}`;
   }
   const response = await fetch(url, {
     ...options,

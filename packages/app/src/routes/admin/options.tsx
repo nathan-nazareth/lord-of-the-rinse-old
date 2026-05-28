@@ -52,8 +52,9 @@ export function AdminOptions() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">Min Price (cents)</label>
+              <label htmlFor="min-price" className="block text-sm font-medium text-stone-700 mb-1">Min Price (cents)</label>
               <input
+                id="min-price"
                 type="number"
                 value={form.minPrice}
                 onChange={(e) => setForm({ ...form, minPrice: e.target.value })}
@@ -62,8 +63,9 @@ export function AdminOptions() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">Max Price (cents)</label>
+              <label htmlFor="max-price" className="block text-sm font-medium text-stone-700 mb-1">Max Price (cents)</label>
               <input
+                id="max-price"
                 type="number"
                 value={form.maxPrice}
                 onChange={(e) => setForm({ ...form, maxPrice: e.target.value })}
@@ -72,8 +74,9 @@ export function AdminOptions() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">Min Size (grams)</label>
+              <label htmlFor="min-size" className="block text-sm font-medium text-stone-700 mb-1">Min Size (grams)</label>
               <input
+                id="min-size"
                 type="number"
                 value={form.minSize}
                 onChange={(e) => setForm({ ...form, minSize: e.target.value })}
@@ -82,8 +85,9 @@ export function AdminOptions() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">Max Size (grams)</label>
+              <label htmlFor="max-size" className="block text-sm font-medium text-stone-700 mb-1">Max Size (grams)</label>
               <input
+                id="max-size"
                 type="number"
                 value={form.maxSize}
                 onChange={(e) => setForm({ ...form, maxSize: e.target.value })}
