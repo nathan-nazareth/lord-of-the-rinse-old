@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "bunx --bun vite",
-    "build": "bunx --bun vite build && node -e \"require('fs').cpSync('../../api','./dist/api',{recursive:true})\"",
+    "build": "bunx --bun vite build",
     "build-e2e": "bunx --bun vite build && node -e \"require('fs').cpSync('../../api','./dist/api',{recursive:true})\"",
     "preview": "bunx --bun vite preview",
     "lint": "biome lint .",
