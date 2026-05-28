@@ -4,7 +4,18 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '3984';
 
 const app = new Hono();
 
-app.post('/login', (c) => {
+app.use('*', async (c, next) => {
+  await next();
+  c.res.headers.set('Access-Control-Allow-Origin', '*');
+  c.res.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  c.res.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+});
+
+app.options('/', (c) => {
+  return c.text('', 204);
+});
+
+app.post('/', (c) => {
   const { password } = c.req.json<{ password?: string }>();
 
   if (!password) {
