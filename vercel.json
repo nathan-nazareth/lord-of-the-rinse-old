@@ -4,7 +4,7 @@
   "buildCommand": "cd packages/app && npm run build",
   "outputDirectory": "packages/app/dist",
   "routes": [
-    { "src": "/api/(.*)", "dest": "/api/index.js" },
+    { "src": "/api/(.*)", "dest": "/api/index.mjs" },
     { "src": "/admin/?$", "dest": "/index.html" },
     { "src": "/admin/(.*)", "dest": "/index.html" },
     { "src": "/cart/?$", "dest": "/index.html" },
