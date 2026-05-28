@@ -2,5 +2,11 @@
   "framework": "vite",
   "installCommand": "cd packages/app && npm install --no-workspaces",
   "buildCommand": "cd packages/app && npm run build",
-  "outputDirectory": "packages/app/dist"
+  "outputDirectory": "packages/app/dist",
+  "rewrites": [
+    { "source": "/api/admin/auth/login", "destination": "/api/admin/auth/login" },
+    { "source": "/api/admin/products", "destination": "/api/admin/products" },
+    { "source": "/api/admin/options", "destination": "/api/admin/options" },
+    { "source": "/api/admin/discounts", "destination": "/api/admin/discounts" }
+  ]
 }
