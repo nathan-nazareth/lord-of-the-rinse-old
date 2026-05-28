@@ -1,5 +1,5 @@
 {
-  "framework": "vite",
+  "version": 2,
   "installCommand": "cd packages/app && npm install --no-workspaces",
   "buildCommand": "cd packages/app && npm run build",
   "outputDirectory": "packages/app/dist",
