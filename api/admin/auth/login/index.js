@@ -1,4 +1,4 @@
-module.exports = async function handler(req) {
+const handler = async (req) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
@@ -46,3 +46,6 @@ module.exports = async function handler(req) {
     headers: { ...headers, 'Content-Type': 'application/json' },
   });
 };
+
+module.exports = handler;
+exports.default = handler;
