@@ -252,7 +252,8 @@ export const Cart: React.FC<CartProps> = ({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  const subtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const rawSubtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const subtotal = Number.isFinite(rawSubtotal) ? rawSubtotal : 0;
   const { discountPercentage, discountAmount, total } = calculateDiscount(
     subtotal,
     cart.totalQuantity,

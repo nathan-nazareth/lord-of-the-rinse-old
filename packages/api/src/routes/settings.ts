@@ -61,14 +61,14 @@ settings.put('/batch', async (c) => {
 
   const validated = body
     .map((item: unknown) => settingsUpdateSchema.safeParse(item))
-    .filter((r: { success: boolean }) => r.success)
-    .map((r: { data: { key: string; value: string } }) => r.data);
+    .filter((r): r is { success: true; data: { key: string; value: string } } => r.success)
+    .map((r) => r.data);
 
   if (validated.length === 0) {
     return c.json({ error: 'No valid settings provided' }, 400);
   }
 
-  const results = [];
+  const results: { key: string; value: string }[] = [];
   for (const { key, value } of validated) {
     const [upserted] = await db
       .insert(commerceSettings)

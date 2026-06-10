@@ -1,7 +1,7 @@
 import { db, sql } from '@lotr/db';
 import { catalogAttributes, soapVariants, variantAttributes } from '@lotr/db/schema';
 import { createVariantSchema, updateVariantSchema } from '@lotr/shared';
-import { and, desc, eq, inArray } from 'drizzle-orm';
+import { and, desc, eq, inArray, type SQL } from 'drizzle-orm';
 import { Hono } from 'hono';
 
 const variantsRoutes = new Hono<{
@@ -16,7 +16,7 @@ variantsRoutes.get('/', async (c) => {
   const includeArchived = c.req.query('includeArchived') === 'true';
   const enabledOnly = c.req.query('enabledOnly') === 'true';
 
-  const conditions = [];
+  const conditions: SQL[] = [];
   if (!includeArchived) {
     conditions.push(eq(soapVariants.archived, false));
   }

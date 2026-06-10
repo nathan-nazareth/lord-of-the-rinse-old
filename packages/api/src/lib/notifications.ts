@@ -2,6 +2,19 @@ import { db, sql } from '@lotr/db';
 import { commerceSettings, notificationAttempts, orderLines, orders } from '@lotr/db/schema';
 import { eq } from 'drizzle-orm';
 
+const CURRENCY_SYMBOLS: Record<string, string> = {
+  USD: '$',
+  LKR: 'Rs. ',
+  EUR: '€',
+  GBP: '£',
+  INR: '₹',
+};
+
+function resolveCurrencySymbol(isoCode: string | null | undefined): string {
+  if (!isoCode) return '$';
+  return CURRENCY_SYMBOLS[isoCode.toUpperCase()] ?? `${isoCode} `;
+}
+
 /**
  * Check if Web3Forms notifications are enabled via commerceSettings.
  * Defaults to true if the setting is absent or not explicitly "false".
@@ -17,26 +30,43 @@ async function isWeb3FormsEnabled(): Promise<boolean> {
   return row.value !== 'false';
 }
 
+async function getCurrencySymbol(): Promise<string> {
+  const [row] = await db
+    .select()
+    .from(commerceSettings)
+    .where(eq(commerceSettings.key, 'currency'))
+    .limit(1);
+  if (!row) return '$';
+  try {
+    const parsed: unknown = JSON.parse(row.value);
+    if (typeof parsed === 'string') return resolveCurrencySymbol(parsed);
+  } catch {
+    return resolveCurrencySymbol(row.value);
+  }
+  return '$';
+}
+
 /**
  * Build the email payload from order data for Web3Forms submission.
  */
-function buildWeb3FormsPayload(
+async function buildWeb3FormsPayload(
   order: { reference: string; customerName: string; customerEmail: string; total: string },
   lines: { displayName: string; quantity: number; unitPrice: string }[],
-): Record<string, string> {
+): Promise<Record<string, string>> {
   const fmtPrice = (raw: string): string => {
     const n = Number.parseFloat(raw);
     return Number.isFinite(n) ? n.toFixed(2) : '0.00';
   };
+  const symbol = await getCurrencySymbol();
   const itemsList = lines
-    .map((l) => `- ${l.displayName} x${l.quantity} @ $${fmtPrice(l.unitPrice)}`)
+    .map((l) => `- ${l.displayName} x${l.quantity} @ ${symbol}${fmtPrice(l.unitPrice)}`)
     .join('\n');
 
   const message = [
     `New order: ${order.reference}`,
     '',
     `Customer: ${order.customerName} (${order.customerEmail})`,
-    `Total: $${fmtPrice(order.total)}`,
+    `Total: ${symbol}${fmtPrice(order.total)}`,
     '',
     'Items:',
     itemsList,
@@ -94,7 +124,7 @@ export async function dispatchNotification(orderId: string): Promise<void> {
   if (!attempt) return;
 
   // Build and send
-  const payload = { ...buildWeb3FormsPayload(order, lines), access_key: accessKey };
+  const payload = { ...(await buildWeb3FormsPayload(order, lines)), access_key: accessKey };
 
   try {
     const response = await fetch('https://api.web3forms.com/submit', {

@@ -1,7 +1,7 @@
 import { db, sql } from '@lotr/db';
 import { notificationAttempts, orderLines, orders, stockMovements } from '@lotr/db/schema';
 import { statusTransitionSchema, validTransitions } from '@lotr/shared';
-import { and, desc, eq } from 'drizzle-orm';
+import { and, desc, eq, type SQL } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { dispatchNotification } from '../lib/notifications';
 
@@ -16,7 +16,7 @@ const ordersRoutes = new Hono<{
 ordersRoutes.get('/', async (c) => {
   const status = c.req.query('status');
 
-  const conditions = [];
+  const conditions: SQL[] = [];
   if (status) {
     conditions.push(eq(orders.status, status));
   }

@@ -8,9 +8,11 @@ const adminClient = createClient({ url: adminDbUrl });
 export const adminDb = drizzle(adminClient, { schema: adminSchema });
 
 const shutdown = () => {
-  adminClient.close().catch((err) => {
+  try {
+    adminClient.close();
+  } catch (err) {
     console.error('Failed to close libsql client:', err);
-  });
+  }
 };
 
 process.once('SIGINT', shutdown);

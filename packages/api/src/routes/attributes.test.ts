@@ -8,7 +8,7 @@ const { mocks } = vi.hoisted(() => {
   // update().set().where().returning() -> resolves after returning
   // insert().values().returning()     -> resolves after returning
   const chain = () => {
-    const c = {} as Record<string, ReturnType<typeof vi.fn>>;
+    const c = {} as Record<string, unknown>;
     // Make it thenable so `await chain()` resolves
     let _resolve: (v: unknown) => void;
     const _promise = new Promise((r) => {

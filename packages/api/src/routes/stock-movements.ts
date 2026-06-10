@@ -1,7 +1,7 @@
 import { db, sql } from '@lotr/db';
 import { soapVariants, stockMovements } from '@lotr/db/schema';
 import { movementTypeSchema, stockAdjustmentSchema } from '@lotr/shared';
-import { and, desc, eq, gte, inArray, lte } from 'drizzle-orm';
+import { and, desc, eq, gte, inArray, lte, type SQL } from 'drizzle-orm';
 import { Hono } from 'hono';
 
 const stockMovementsRoutes = new Hono<{
@@ -18,7 +18,7 @@ stockMovementsRoutes.get('/', async (c) => {
   const from = c.req.query('from');
   const to = c.req.query('to');
 
-  const conditions = [];
+  const conditions: SQL[] = [];
 
   if (variantId) {
     conditions.push(eq(stockMovements.variantId, variantId));

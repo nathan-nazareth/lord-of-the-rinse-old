@@ -5,11 +5,15 @@ import {
   soapVariants,
   variantAttributes,
 } from '@lotr/db/schema';
-import type { AttributeType, CatalogAttribute, SoapVariant } from '@lotr/shared';
+import { attributeTypeSchema, type AttributeType, type CatalogAttribute, type SoapVariant } from '@lotr/shared';
 import { and, asc, eq, inArray } from 'drizzle-orm';
 import { Hono } from 'hono';
 
 const PUBLIC_SETTINGS = new Set(['shop_open', 'currency', 'discount_tiers']);
+
+function isAttributeType(value: string): value is AttributeType {
+  return attributeTypeSchema.safeParse(value).success;
+}
 
 const catalog = new Hono();
 
@@ -24,9 +28,29 @@ catalog.get('/', async (c) => {
   // Group attributes by type
   const grouped: Partial<Record<AttributeType, CatalogAttribute[]>> = {};
   for (const attr of attributes) {
-    const group = grouped[attr.type as AttributeType] || [];
-    group.push(attr);
-    grouped[attr.type as AttributeType] = group;
+    if (!isAttributeType(attr.type)) continue;
+    const group = grouped[attr.type] || [];
+    group.push({
+      id: attr.id,
+      type: attr.type,
+      name: attr.name,
+      slug: attr.slug,
+      displayOrder: attr.displayOrder ?? 0,
+      archived: attr.archived,
+      createdAt:
+        attr.createdAt instanceof Date
+          ? attr.createdAt.toISOString()
+          : typeof attr.createdAt === 'string'
+            ? attr.createdAt
+            : new Date().toISOString(),
+      updatedAt:
+        attr.updatedAt instanceof Date
+          ? attr.updatedAt.toISOString()
+          : typeof attr.updatedAt === 'string'
+            ? attr.updatedAt
+            : new Date().toISOString(),
+    });
+    grouped[attr.type] = group;
   }
 
   // Fetch enabled, non-archived variants
@@ -55,8 +79,25 @@ catalog.get('/', async (c) => {
   }
 
   const variantsResult: SoapVariant[] = variants.map((v) => ({
-    ...v,
+    id: v.id,
+    name: v.name,
+    slug: v.slug,
+    unitPrice: v.unitPrice,
+    enabled: v.enabled,
+    archived: v.archived,
     attributes: attrsByVariant.get(v.id) || [],
+    createdAt:
+      v.createdAt instanceof Date
+        ? v.createdAt.toISOString()
+        : typeof v.createdAt === 'string'
+          ? v.createdAt
+          : new Date().toISOString(),
+    updatedAt:
+      v.updatedAt instanceof Date
+        ? v.updatedAt.toISOString()
+        : typeof v.updatedAt === 'string'
+          ? v.updatedAt
+          : new Date().toISOString(),
   }));
 
   // Fetch public settings only

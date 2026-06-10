@@ -26,7 +26,10 @@ adminAuthRoutes.post('/login', rateLimit({ windowMs: 60_000, max: 5 }), async (c
     return c.json({ error: 'Invalid JSON body' }, 400);
   }
 
-  const password = (body as { password?: unknown })?.password;
+  const password =
+    typeof body === 'object' && body !== null
+      ? (body as { password?: unknown }).password
+      : undefined;
   if (typeof password !== 'string' || password.length === 0) {
     return c.json({ error: 'Password is required' }, 400);
   }

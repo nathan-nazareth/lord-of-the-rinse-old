@@ -1,7 +1,7 @@
 import { db, sql } from '@lotr/db';
 import { catalogAttributes } from '@lotr/db/schema';
 import { attributeTypeSchema, createAttributeSchema, updateAttributeSchema } from '@lotr/shared';
-import { and, asc, eq } from 'drizzle-orm';
+import { and, asc, eq, type SQL } from 'drizzle-orm';
 import { Hono } from 'hono';
 
 const attributesRoutes = new Hono<{
@@ -16,13 +16,13 @@ attributesRoutes.get('/', async (c) => {
   const typeFilter = c.req.query('type');
   const includeArchived = c.req.query('includeArchived') === 'true';
 
-  const conditions = [];
+  const conditions: SQL[] = [];
   if (typeFilter) {
     const parsed = attributeTypeSchema.safeParse(typeFilter);
     if (!parsed.success) {
       return c.json({ error: 'Invalid type filter' }, 400);
     }
-    conditions.push(eq(catalogAttributes.type, typeFilter));
+    conditions.push(eq(catalogAttributes.type, parsed.data));
   }
   if (!includeArchived) {
     conditions.push(eq(catalogAttributes.archived, false));

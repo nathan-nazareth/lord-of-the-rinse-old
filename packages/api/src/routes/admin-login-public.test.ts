@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { mocks } = vi.hoisted(() => {
   const chain = () => {
-    const c = {} as Record<string, ReturnType<typeof vi.fn>>;
+    const c = {} as Record<string, unknown>;
     c.orderBy = vi.fn(() => chain());
     c.returning = vi.fn(() => chain());
     c.where = vi.fn(() => chain());

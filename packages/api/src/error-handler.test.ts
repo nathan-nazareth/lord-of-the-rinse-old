@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { mocks } = vi.hoisted(() => {
   const chain = () => {
-    const c = {} as Record<string, ReturnType<typeof vi.fn>>;
+    const c = {} as Record<string, unknown>;
     let _resolve: (v: unknown) => void;
     const _promise = new Promise((r) => {
       _resolve = r;

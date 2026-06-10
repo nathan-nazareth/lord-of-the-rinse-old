@@ -137,14 +137,14 @@ function setupSelectChain(result: unknown) {
   // select().from().where().orderBy().limit(1) — the .where() call returns
   // a fresh chain via the chain factory, so we have to override orderBy on it.
   const whereResult = mocks.chain();
-  whereResult.orderBy.mockReturnValueOnce({
+  (whereResult.orderBy as ReturnType<typeof vi.fn>).mockReturnValueOnce({
     limit: vi.fn(() => Promise.resolve(result)),
     then: (onFulfilled: (v: unknown) => unknown) => Promise.resolve(result).then(onFulfilled),
   });
   const c = mocks.chain();
-  c.where.mockReturnValueOnce(whereResult);
+  (c.where as ReturnType<typeof vi.fn>).mockReturnValueOnce(whereResult);
   c.then = (onFulfilled: (v: unknown) => unknown) => Promise.resolve([]).then(onFulfilled);
-  c.groupBy.mockReturnValueOnce(Promise.resolve(result));
+  (c.groupBy as ReturnType<typeof vi.fn>).mockReturnValueOnce(Promise.resolve(result));
   mocks.txStub.select.mockReturnValueOnce({
     from: vi.fn(() => c),
   });
@@ -179,11 +179,11 @@ function setupVariantLookup(
   // Variant lookup is select().from().where().for('update') — we need
   // .for() to return a thenable resolving to the variant rows.
   const whereResult = mocks.chain();
-  whereResult.for.mockReturnValueOnce({
+  (whereResult.for as ReturnType<typeof vi.fn>).mockReturnValueOnce({
     then: (onFulfilled: (v: unknown) => unknown) => Promise.resolve(variants).then(onFulfilled),
   });
   const c = mocks.chain();
-  c.where.mockReturnValueOnce(whereResult);
+  (c.where as ReturnType<typeof vi.fn>).mockReturnValueOnce(whereResult);
   mocks.txStub.select.mockReturnValueOnce({
     from: vi.fn(() => c),
   });

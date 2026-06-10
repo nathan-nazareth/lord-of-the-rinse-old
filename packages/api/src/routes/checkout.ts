@@ -7,7 +7,8 @@ import {
   stockMovements,
 } from '@lotr/db/schema';
 import { checkoutRequestSchema } from '@lotr/shared';
-import { desc, sql as drizzleSql, eq, inArray, like } from 'drizzle-orm';
+import { desc, eq, inArray, like, sql as drizzleSql } from 'drizzle-orm';
+import type { Context } from 'hono';
 import { Hono } from 'hono';
 import { dispatchNotification } from '../lib/notifications';
 import { rateLimit } from '../middleware/rate-limit';
@@ -66,7 +67,7 @@ async function generateOrderReferenceTx(tx: TxClient): Promise<string> {
   return `${prefix}${String(nextNum).padStart(4, '0')}`;
 }
 
-async function readJsonBody(c: Parameters<Parameters<Hono['post']>[1]>[0]): Promise<unknown> {
+async function readJsonBody(c: Context): Promise<unknown> {
   try {
     return await c.req.json();
   } catch (err) {
