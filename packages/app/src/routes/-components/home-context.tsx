@@ -27,6 +27,8 @@ interface HomeContextValue {
     color: string,
     quantity: string,
     size: string,
+    hasLavenderPieces: boolean,
+    variantId?: string,
   ) => void;
   handleCheckout: (customer: Customer) => Promise<string | undefined>;
   handleDismissOrdered: () => void;
@@ -67,11 +69,23 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
   const [showLanding, setShowLanding] = useState(true);
   const [legacyCartCleared, setLegacyCartCleared] = useState(false);
 
+  // AbortController for in-flight checkout so the request is cancelled on
+  // unmount or when the user navigates away mid-submission.
+  const inFlightController = useRef<AbortController | null>(null);
+
   useEffect(() => {
     const cleared = detectAndClearLegacyCart();
     if (cleared) {
       setLegacyCartCleared(true);
     }
+  }, []);
+
+  // Cancel any pending checkout on unmount.
+  useEffect(() => {
+    return () => {
+      inFlightController.current?.abort();
+      inFlightController.current = null;
+    };
   }, []);
 
   const dismissLegacyToast = useCallback(() => {
@@ -94,8 +108,19 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
       color: string,
       quantity: string,
       size: string,
+      hasLavenderPieces: boolean,
+      variantId?: string,
     ) => {
-      const success = addItem(shape, scent, price, color, quantity, size);
+      const success = addItem(
+        shape,
+        scent,
+        price,
+        color,
+        quantity,
+        size,
+        hasLavenderPieces,
+        variantId,
+      );
       if (success) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
@@ -105,8 +130,16 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
 
   const handleCheckout = useCallback(
     async (customer: Customer): Promise<string | undefined> => {
+      // Cancel any previous in-flight request before starting a new one.
+      inFlightController.current?.abort();
+      const controller = new AbortController();
+      inFlightController.current = controller;
+
       setIsSubmitting(true);
       const finalizeSuccess = (ref: string) => {
+        if (inFlightController.current === controller) {
+          inFlightController.current = null;
+        }
         setConfirmationItemCount(cart.totalQuantity);
         setLastOrderReference(ref);
         setJustOrdered(true);
@@ -116,10 +149,17 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
         return ref;
       };
 
+      const fail = () => {
+        if (inFlightController.current === controller) {
+          inFlightController.current = null;
+        }
+        return undefined;
+      };
+
       try {
         const checkoutItems = cart.items.map((item) => ({
           variantId: item.variantId,
-          displayName: `${item.scent} (${item.shape}, ${item.color}, ${item.size}g)`,
+          displayName: `${item.scent} (${item.shape}, ${item.color}, ${item.size}g${item.hasLavenderPieces ? ', lavender pieces' : ''})`,
           quantity: item.quantity,
           unitPrice: item.price.toFixed(2),
         }));
@@ -133,40 +173,53 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
             customerPhone: customer.phone,
             items: checkoutItems,
           }),
+          signal: controller.signal,
         });
 
         if (response.ok) {
           let data: { reference?: string } = {};
           try {
             data = (await response.json()) as { reference?: string };
-          } catch {
-            console.error('[Checkout] Server returned a non-JSON success response');
-            return undefined;
+          } catch (err) {
+            console.error('[Checkout] Server returned a non-JSON success response', err);
+            return fail();
           }
           if (!data.reference) {
             console.error('[Checkout] Server response missing reference');
-            return undefined;
+            return fail();
           }
           return finalizeSuccess(data.reference);
         }
 
         console.warn(`[Checkout] API responded ${response.status}, falling back to Web3Forms`);
       } catch (err) {
+        if ((err as { name?: string })?.name === 'AbortError') {
+          return fail();
+        }
         console.warn('[Checkout] API error, falling back to Web3Forms:', err);
       }
 
       try {
-        const result = await submitCartToWebhook(customer, cart.items);
+        const result = await submitCartToWebhook(customer, cart.items, undefined, undefined, {
+          signal: controller.signal,
+        });
         if (result.success) {
           const ref = `LTR-${result.orderId.slice(0, 8).toUpperCase()}`;
           return finalizeSuccess(ref);
         }
+        console.error('[Checkout] Web3Forms submission did not succeed');
       } catch (err) {
+        if ((err as { name?: string })?.name === 'AbortError') return fail();
         console.error('Order submission error:', err);
       } finally {
-        setIsSubmitting(false);
+        // CRITICAL: clear submitting in BOTH success and failure paths so the
+        // loading spinner doesn't get stuck forever after a successful order.
+        if (inFlightController.current === controller) {
+          inFlightController.current = null;
+          setIsSubmitting(false);
+        }
       }
-      return undefined;
+      return fail();
     },
     [cart, clearCart, clearFormState],
   );

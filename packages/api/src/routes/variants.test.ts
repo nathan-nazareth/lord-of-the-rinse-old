@@ -112,8 +112,8 @@ vi.mock('@lotr/shared', () => {
   };
 });
 
-vi.mock('../middleware/require-auth', () => ({
-  requireAuth: async (_c: unknown, next: () => Promise<void>) => {
+vi.mock('../middleware/admin-auth', () => ({
+  adminAuth: async (_c: unknown, next: () => Promise<void>) => {
     await next();
   },
 }));

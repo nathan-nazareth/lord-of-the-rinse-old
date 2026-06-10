@@ -1,7 +1,13 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute, redirect } from '@tanstack/react-router';
 import { useAdminStore } from '@/stores/useAdminStore';
+import { LoginForm } from '@/components/admin/LoginForm';
 
 export const Route = createFileRoute('/admin/_index')({
+  beforeLoad: () => {
+    if (useAdminStore.getState().isAuthenticated) {
+      throw redirect({ to: '/admin/products' });
+    }
+  },
   component: AdminIndex,
 });
 
@@ -10,17 +16,7 @@ function AdminIndex() {
   const clearAuth = useAdminStore((s) => s.clearAuth);
 
   if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-stone-50">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-stone-800 mb-4">Admin Login</h1>
-          <p className="text-stone-600 mb-4">Please log in to access the admin dashboard.</p>
-          <Link to="/admin" className="text-amber-600 hover:text-amber-700">
-            Go to Login
-          </Link>
-        </div>
-      </div>
-    );
+    return <LoginForm />;
   }
 
   return (

@@ -30,12 +30,21 @@ describe('HomeProvider cart store wiring', () => {
     const { result } = renderHook(() => useHomeContext(), { wrapper });
 
     act(() => {
-      result.current.handleAddToCart('square', 'lavender', 12.99, 'blue', '2', '75g');
+      result.current.handleAddToCart(
+        'square',
+        'lavender',
+        12.99,
+        'blue',
+        '2',
+        '75g',
+        false,
+        '550e8400-e29b-41d4-a716-446655440000',
+      );
     });
 
     expect(result.current.cart.items).toHaveLength(1);
     expect(result.current.cart.items[0].shape).toBe('square');
-    expect(result.current.cart.items[0].variantId).toBe('square-lavender-blue-75g');
+    expect(result.current.cart.items[0].variantId).toBe('550e8400-e29b-41d4-a716-446655440000');
     expect(result.current.cart.totalQuantity).toBe(2);
   });
 
@@ -43,7 +52,7 @@ describe('HomeProvider cart store wiring', () => {
     const { result } = renderHook(() => useHomeContext(), { wrapper });
 
     act(() => {
-      result.current.handleAddToCart('square', 'lavender', 12.99, 'blue', '1', '75g');
+      result.current.handleAddToCart('square', 'lavender', 12.99, 'blue', '1', '75g', false);
     });
     const itemId = result.current.cart.items[0].id;
 
@@ -59,7 +68,7 @@ describe('HomeProvider cart store wiring', () => {
     const { result } = renderHook(() => useHomeContext(), { wrapper });
 
     act(() => {
-      result.current.handleAddToCart('square', 'lavender', 12.99, 'blue', '1', '75g');
+      result.current.handleAddToCart('square', 'lavender', 12.99, 'blue', '1', '75g', false);
     });
     const itemId = result.current.cart.items[0].id;
 
@@ -75,8 +84,8 @@ describe('HomeProvider cart store wiring', () => {
     const { result } = renderHook(() => useHomeContext(), { wrapper });
 
     act(() => {
-      result.current.handleAddToCart('square', 'lavender', 12.99, 'blue', '1', '75g');
-      result.current.handleAddToCart('circle', 'citrus', 9.99, 'red', '2', '50g');
+      result.current.handleAddToCart('square', 'lavender', 12.99, 'blue', '1', '75g', false);
+      result.current.handleAddToCart('circle', 'citrus', 9.99, 'red', '2', '50g', false);
     });
     expect(result.current.cart.items).toHaveLength(2);
 
@@ -101,7 +110,7 @@ describe('HomeProvider cart store wiring', () => {
     const { result } = renderHook(() => useHomeContext(), { wrapper });
 
     act(() => {
-      result.current.handleAddToCart('square', 'lavender', 12.99, 'blue', '2', '75g');
+      result.current.handleAddToCart('square', 'lavender', 12.99, 'blue', '2', '75g', false);
     });
     expect(result.current.cart.items).toHaveLength(1);
 

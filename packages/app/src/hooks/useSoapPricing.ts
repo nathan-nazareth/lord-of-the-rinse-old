@@ -5,6 +5,12 @@ import { LAVENDER_PIECES_PRICE, SOAP_OPTIONS } from '../../types';
 
 const SIZE_PRICE_PER_GRAM = 0.6;
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export function isUuid(value: string | null | undefined): value is string {
+  return typeof value === 'string' && UUID_REGEX.test(value);
+}
+
 export function useVariantPrice(
   selectedAttributes: Record<string, string | null>,
   variants: CatalogVariant[],
@@ -21,7 +27,11 @@ export function useVariantPrice(
     });
 
     if (!matched) return { unitPrice: 0, matchedVariant: null };
-    return { unitPrice: Number.parseFloat(matched.unitPrice), matchedVariant: matched };
+    const unitPrice = Number.parseFloat(matched.unitPrice);
+    return {
+      unitPrice: Number.isFinite(unitPrice) ? unitPrice : 0,
+      matchedVariant: matched,
+    };
   }, [selectedAttributes, variants]);
 }
 

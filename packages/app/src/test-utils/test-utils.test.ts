@@ -64,7 +64,7 @@ describe('createCartItem', () => {
     expect(item.color).toBe('white');
     expect(item.quantity).toBe(1);
     expect(item.size).toBe('100g');
-    expect(item.variantId).toBe('variant-1');
+    expect(item.variantId).toBe('550e8400-e29b-41d4-a716-446655440000');
     expect(typeof item.id).toBe('string');
     expect(item.id.length).toBeGreaterThan(0);
     expect(typeof item.addedAt).toBe('string');

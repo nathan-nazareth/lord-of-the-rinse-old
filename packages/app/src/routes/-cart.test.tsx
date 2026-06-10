@@ -85,7 +85,7 @@ describe('cart route', () => {
       data: MOCK_CATALOG,
       isLoading: false,
       error: null,
-    } as ReturnType<typeof useCatalog>);
+    } as unknown as ReturnType<typeof useCatalog>);
   });
 
   it('has meta title for the cart page', () => {
@@ -117,13 +117,14 @@ describe('cart route', () => {
   it('renders cart with items showing item details', async () => {
     const testItem = {
       id: 'test-item-1',
-      variantId: 'variant-1',
+      variantId: '550e8400-e29b-41d4-a716-446655440000',
       shape: 'Rectangle',
       scent: 'Lavender',
       price: 150,
       color: 'Purple',
       quantity: 2,
       size: '100g',
+      hasLavenderPieces: false,
       addedAt: new Date().toISOString(),
     };
 

@@ -40,7 +40,7 @@ export function LoginForm() {
       }
 
       setAuth(data.token);
-      navigate({ to: '/admin' });
+      navigate({ to: '/admin/products' });
     } catch {
       setError('Network error. Please try again.');
     } finally {

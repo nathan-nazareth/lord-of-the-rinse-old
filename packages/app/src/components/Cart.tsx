@@ -217,14 +217,30 @@ export const Cart: React.FC<CartProps> = ({
     return null;
   })();
 
+  // Auto-open the rate limit modal when the user gets blocked.
   React.useEffect(() => {
     if (cooldownRemaining !== null) setShowRateLimitModal(true);
   }, [cooldownRemaining]);
 
+  // Auto-close the modal once the cooldown has fully expired.
+  React.useEffect(() => {
+    if (cooldownRemaining === null) {
+      setShowRateLimitModal(false);
+      return;
+    }
+    const timeoutId = window.setTimeout(
+      () => setShowRateLimitModal(false),
+      cooldownRemaining * 1000,
+    );
+    return () => window.clearTimeout(timeoutId);
+  }, [cooldownRemaining]);
+
   React.useEffect(() => {
     if (isOpen && !showConfirmation && !showCheckout && !showAddedToCart) {
-      setTimeout(() => closeButtonRef.current?.focus(), 100);
+      const focusTimeout = window.setTimeout(() => closeButtonRef.current?.focus(), 100);
+      return () => window.clearTimeout(focusTimeout);
     }
+    return undefined;
   }, [isOpen, showConfirmation, showCheckout, showAddedToCart]);
 
   React.useEffect(() => {
@@ -254,7 +270,6 @@ export const Cart: React.FC<CartProps> = ({
   const handleCheckout = async (customer: Customer) => {
     if (!isAllowed) {
       setShowRateLimitModal(true);
-      setIsSubmitting(false);
       return;
     }
     setIsSubmitting(true);
@@ -262,6 +277,9 @@ export const Cart: React.FC<CartProps> = ({
     try {
       const result = await submitCartToWebhook(customer, cart.items);
       if (result.success) {
+        // Only record the rate-limit hit on a confirmed success. Failed
+        // attempts must NOT consume the budget, otherwise a flapping
+        // network would lock the user out.
         rateLimitStore.recordSubmission(windowMs);
         const itemsOrdered = cart.totalQuantity;
         setOrderItemCount(itemsOrdered);
@@ -270,7 +288,8 @@ export const Cart: React.FC<CartProps> = ({
       } else {
         setErrorMessage('Failed to send order. Please try again.');
       }
-    } catch {
+    } catch (err) {
+      console.error('[Cart] Checkout error:', err);
       setErrorMessage('An error occurred. Please try again.');
     } finally {
       setIsSubmitting(false);
@@ -375,7 +394,10 @@ export const Cart: React.FC<CartProps> = ({
                 cart.items.map((item) => (
                   <div key={item.id} className="cart-item">
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-ink-700 truncate">{item.scent}</p>
+                      <p className="font-medium text-ink-700 truncate">
+                        {item.scent}
+                        {item.hasLavenderPieces ? ' · +Lavender' : ''}
+                      </p>
                       <p className="text-ink-400 text-sm truncate">
                         {item.color} · {item.size}
                       </p>

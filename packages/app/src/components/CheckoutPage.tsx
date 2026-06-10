@@ -7,6 +7,19 @@ import type { Customer } from '../types/webhook';
 import { calculateDiscount } from '../utils/pricing';
 import { validateEmail, validateName, validatePhone } from '../utils/validators';
 
+const CURRENCY_SYMBOLS: Record<string, string> = {
+  USD: '$',
+  LKR: 'Rs. ',
+  EUR: '€',
+  GBP: '£',
+  INR: '₹',
+};
+
+function resolveCurrencySymbol(isoCode: string | null | undefined): string {
+  if (!isoCode) return 'Rs. ';
+  return CURRENCY_SYMBOLS[isoCode.toUpperCase()] ?? `${isoCode} `;
+}
+
 const CheckoutPage: React.FC<{
   cart: { items: CartItem[]; totalQuantity: number };
   onBack: () => void;
@@ -18,7 +31,7 @@ const CheckoutPage: React.FC<{
   const [formData, setFormData] = useState({ name: '', email: '', phone: '' });
   const [errors, setErrors] = useState<{ name?: string; email?: string; phone?: string }>({});
   const { data: catalog } = useCatalog();
-  const currency = catalog?.settings?.currency ?? 'Rs. ';
+  const currency = resolveCurrencySymbol(catalog?.settings?.currency);
 
   const subtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const { discountPercentage, discountAmount, total } = calculateDiscount(

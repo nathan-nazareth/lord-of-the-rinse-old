@@ -142,8 +142,8 @@ vi.mock('@lotr/shared', () => {
 });
 
 // Mock auth middleware to bypass auth checks
-vi.mock('../middleware/require-auth', () => ({
-  requireAuth: async (_c: unknown, next: () => Promise<void>) => {
+vi.mock('../middleware/admin-auth', () => ({
+  adminAuth: async (_c: unknown, next: () => Promise<void>) => {
     await next();
   },
 }));

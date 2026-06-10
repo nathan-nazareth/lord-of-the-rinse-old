@@ -22,7 +22,7 @@ export default defineConfig({
     env: {
       DATABASE_URL: 'postgresql://test:test@localhost:5432/test',
       ADMIN_TOKEN_SECRET: 'test-secret-do-not-use-in-prod-must-be-32-chars',
-      ADMIN_PASSWORD: 'testpassword123',
+      ADMIN_PASSWORD: 'testpassword-not-for-production-16+',
     },
   },
 });

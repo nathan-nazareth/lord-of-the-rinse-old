@@ -61,7 +61,13 @@ app.route('/api/catalog', catalogRoutes);
 app.route('/api/checkout', checkoutRoutes);
 app.route('/api/auth', authRoutes);
 
-// Admin/operator routes — all require an admin token.
+// Login is public — it MUST be mounted BEFORE the global adminAuth middleware
+// or the middleware (which matches `/api/admin/*`) would 401 the login
+// request itself.
+app.route('/api/admin/auth', adminAuthRoutes);
+
+// Admin/operator routes — everything else under /api/admin/* and /api/orders/*
+// requires a valid HMAC admin token.
 app.use('/api/orders/*', adminAuth);
 app.use('/api/admin/*', adminAuth);
 
@@ -70,7 +76,6 @@ app.route('/api/admin/variants', variantsRoutes);
 app.route('/api/admin/stock-movements', stockMovementsRoutes);
 app.route('/api/admin/production-queue', productionQueueRoutes);
 app.route('/api/admin/attributes', attributesRoutes);
-app.route('/api/admin/auth', adminAuthRoutes);
 app.route('/api/admin/products', adminProductsRoutes);
 app.route('/api/admin/options', adminOptionsRoutes);
 app.route('/api/admin/discounts', adminDiscountsRoutes);

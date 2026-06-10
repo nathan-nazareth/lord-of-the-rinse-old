@@ -9,7 +9,7 @@ import {
   IconSparkles,
   IconSquare,
 } from '@tabler/icons-react';
-import React, { useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   LAVENDER_PIECES_PRICE,
   SHAPE_OPTIONS,
@@ -18,10 +18,11 @@ import {
   SoapScent,
   SoapShape,
 } from '../../types';
-import { useSoapPricing } from '../hooks/useSoapPricing';
+import { useSoapPricing, useVariantPrice } from '../hooks/useSoapPricing';
 import { useFormStore } from '../stores/useFormStore';
 import type { FormStep } from '../stores/useFormStore';
 import type { CartItem } from '../types/cart';
+import { useCatalog } from '../hooks/useCatalog';
 import { calculateDiscount } from '../utils/pricing';
 
 type SizeLabel = 'S' | 'M' | 'L';
@@ -157,6 +158,7 @@ interface SoapFormProps {
     quantity: string,
     size: string,
     hasLavenderPieces: boolean,
+    variantId?: string,
   ) => void;
   onGoToCart: () => void;
   onGoToCheckout: () => void;
@@ -184,6 +186,21 @@ export const SoapForm: React.FC<SoapFormProps> = ({
   const clear = useFormStore((s) => s.clear);
 
   const { totalPrice } = useSoapPricing(scent, size ?? 0, hasLavenderPieces);
+  const { data: catalog } = useCatalog();
+
+  // Resolve the real catalog variant UUID for the currently selected
+  // attributes so the server's checkout handler can match it against the DB.
+  const selectedAttributes = useMemo<Record<string, string | null>>(
+    () => ({
+      shape: shape ?? null,
+      scent: scent ?? null,
+      color: color ?? null,
+      size: size != null ? String(size) : null,
+    }),
+    [shape, scent, color, size],
+  );
+  const { matchedVariant } = useVariantPrice(selectedAttributes, catalog?.variants ?? []);
+  const matchedVariantId = matchedVariant?.id ?? null;
 
   const cartSubtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const { total: cartTotal } = calculateDiscount(cartSubtotal, cart.totalQuantity);
@@ -254,7 +271,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({
   const handleAddToCart = () => {
     if (!isFormValid) return;
     setShowAddedToast(true);
-    setTimeout(() => setShowAddedToast(false), 3500);
+    const toastTimeout = window.setTimeout(() => setShowAddedToast(false), 3500);
     // biome-ignore lint/style/noNonNullAssertion: validated by isFormValid before submit
     const shapeVal = shape!;
     // biome-ignore lint/style/noNonNullAssertion: validated by isFormValid before submit
@@ -269,9 +286,13 @@ export const SoapForm: React.FC<SoapFormProps> = ({
       quantity,
       String(size),
       hasLavenderPieces,
+      matchedVariantId ?? undefined,
     );
     clear();
     setCurrentStep('shape');
+    // The toast setTimeout above is short-lived; we don't need to track it for
+    // unmount cleanup. Keep this placeholder comment to document intent.
+    void toastTimeout;
   };
 
   return (

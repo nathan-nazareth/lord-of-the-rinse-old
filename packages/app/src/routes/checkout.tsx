@@ -28,7 +28,10 @@ function CheckoutContent() {
         setErrorMessage(null);
         const reference = await handleCheckout(customer);
         if (reference) {
-          await navigate({ to: '/confirmation', search: { ref: reference } });
+          await navigate({
+            to: '/confirmation',
+            search: { ref: reference, count: cart.totalQuantity },
+          });
         } else {
           setErrorMessage('Failed to place order. Please try again.');
           submittedRef.current = false;

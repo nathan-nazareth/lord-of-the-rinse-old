@@ -77,7 +77,7 @@ describe('index route', () => {
       data: MOCK_CATALOG,
       isLoading: false,
       error: null,
-    } as ReturnType<typeof useCatalog>);
+    } as unknown as ReturnType<typeof useCatalog>);
   });
 
   it('has meta title for the home page', () => {

@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { CartItem } from '../types/cart';
 import { CART_EXPIRY_MS, CART_KEY, MAX_CART_ITEMS } from '../types/cart';
+import { isUuid } from '../hooks/useSoapPricing';
 
 interface CartState {
   items: CartItem[];
@@ -13,6 +14,8 @@ interface CartState {
     color: string,
     quantity: string,
     size: string,
+    hasLavenderPieces: boolean,
+    variantId?: string,
   ) => boolean;
   removeItem: (itemId: string) => void;
   updateQuantity: (itemId: string, quantity: number) => void;
@@ -26,28 +29,51 @@ function computeTotalQuantity(items: CartItem[]): number {
   }, 0);
 }
 
+function safeUuid(): string {
+  try {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+      return crypto.randomUUID();
+    }
+  } catch {
+    // fall through
+  }
+  // Last-resort RFC4122-ish v4 generator. Good enough to satisfy uuid() validators.
+  const bytes = new Uint8Array(16);
+  for (let i = 0; i < 16; i += 1) bytes[i] = Math.floor(Math.random() * 256);
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
+
 export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
       items: [],
       totalQuantity: 0,
 
-      addItem: (shape, scent, price, color, quantity, size) => {
+      addItem: (shape, scent, price, color, quantity, size, hasLavenderPieces, variantId) => {
         if (get().items.length >= MAX_CART_ITEMS) {
           return false;
         }
         const q = parseInt(quantity, 10);
         const cleanPrice = Number.isFinite(price) && price >= 0 ? price : 0;
-        const variantId = `${shape}-${scent}-${color}-${size}`.toLowerCase().replace(/\s+/g, '-');
+        // Prefer the real catalog UUID when one is supplied. The server's checkout
+        // schema validates `variantId` as a UUID, so we MUST not fall back to the
+        // human-readable string. If no UUID is available, mint one client-side so
+        // the request still reaches the server (it'll be rejected with "variant
+        // not found" by the checkout handler, which is the right error to surface).
+        const resolvedVariantId = isUuid(variantId) ? variantId : safeUuid();
         const newItem: CartItem = {
-          id: crypto.randomUUID(),
-          variantId,
+          id: safeUuid(),
+          variantId: resolvedVariantId,
           shape,
           scent,
           price: cleanPrice,
           color,
           quantity: Number.isFinite(q) && q > 0 ? q : 1,
           size: typeof size === 'string' && size.length > 0 ? size : '100',
+          hasLavenderPieces: Boolean(hasLavenderPieces),
           addedAt: new Date().toISOString(),
         };
         const newItems = [...get().items, newItem];
@@ -86,6 +112,7 @@ export const useCartStore = create<CartState>()(
     }),
     {
       name: CART_KEY,
+      version: 2,
       storage: {
         getItem: (name) => {
           try {
@@ -114,16 +141,18 @@ export const useCartStore = create<CartState>()(
               .map((raw) => {
                 const q = parseInt(String(raw.quantity), 10);
                 const p = parseFloat(String(raw.price));
-
+                const rawVariantId = typeof raw.variantId === 'string' ? raw.variantId : 'unknown';
                 return {
-                  id: typeof raw.id === 'string' ? raw.id : crypto.randomUUID(),
-                  variantId: typeof raw.variantId === 'string' ? raw.variantId : 'unknown',
+                  id: typeof raw.id === 'string' ? raw.id : safeUuid(),
+                  variantId: isUuid(rawVariantId) ? rawVariantId : safeUuid(),
                   shape: typeof raw.shape === 'string' ? raw.shape : 'Unknown',
                   scent: typeof raw.scent === 'string' ? raw.scent : 'Unknown',
                   price: Number.isFinite(p) && p >= 0 ? p : 0,
                   color: typeof raw.color === 'string' ? raw.color : 'Unknown',
                   quantity: Number.isFinite(q) && q > 0 ? q : 1,
                   size: typeof raw.size === 'string' && raw.size.length > 0 ? raw.size : '100',
+                  hasLavenderPieces:
+                    typeof raw.hasLavenderPieces === 'boolean' ? raw.hasLavenderPieces : false,
                   addedAt: typeof raw.addedAt === 'string' ? raw.addedAt : new Date().toISOString(),
                 };
               });
@@ -132,7 +161,7 @@ export const useCartStore = create<CartState>()(
 
             return {
               state: { items: cleanItems, totalQuantity },
-              version: 0,
+              version: 2,
             };
           } catch {
             return null;
@@ -157,14 +186,15 @@ export function detectAndClearLegacyCart(): boolean {
     const parsed = JSON.parse(raw);
     const items: unknown[] = parsed?.state?.items ?? parsed?.items ?? [];
 
-    const hasLegacy = items.some(
-      (item) =>
-        typeof item === 'object' &&
-        item !== null &&
-        (!('variantId' in (item as Record<string, unknown>)) ||
-          !('size' in (item as Record<string, unknown>)) ||
-          typeof (item as Record<string, unknown>).size !== 'string'),
-    );
+    const hasLegacy = items.some((item) => {
+      if (typeof item !== 'object' || item === null) return true;
+      const rec = item as Record<string, unknown>;
+      if (typeof rec.variantId !== 'string') return true;
+      if (typeof rec.size !== 'string') return true;
+      if (typeof rec.hasLavenderPieces !== 'boolean') return true;
+      if (!isUuid(rec.variantId)) return true;
+      return false;
+    });
 
     if (hasLegacy) {
       localStorage.removeItem(CART_KEY);

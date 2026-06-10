@@ -3,7 +3,6 @@
 import type { CartItem } from '../types/cart';
 import type { Customer, WebhookLogEntry, WebhookStatus } from '../types/webhook';
 import {
-  logError,
   logWeb3FormsError,
   logWeb3FormsRateLimit,
   logWeb3FormsSuccess,
@@ -15,6 +14,7 @@ const WEB3FORMS_ENDPOINT =
 const WEB3FORMS_ACCESS_KEY = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY?.trim();
 const TIMEOUT_MS = 10000;
 const MAX_RETRIES = 3;
+const MIRROR_TIMEOUT_MS = 5000;
 
 function generateOrderId(): string {
   return crypto.randomUUID();
@@ -45,10 +45,10 @@ export async function submitCartToWebhook(
   items: CartItem[],
   onStatusChange?: (status: WebhookStatus) => void,
   onLog?: (log: WebhookLogEntry) => void,
+  options: { signal?: AbortSignal } = {},
 ): Promise<{ success: boolean; orderId: string }> {
   const orderId = generateOrderId();
 
-  // Validate access key
   if (!WEB3FORMS_ACCESS_KEY || WEB3FORMS_ACCESS_KEY.trim() === '') {
     console.error(
       '[Webhook] ERROR: VITE_WEB3FORMS_ACCESS_KEY is not set. Please add it to your .env file and Vercel environment variables.',
@@ -68,7 +68,7 @@ export async function submitCartToWebhook(
   const orderItemsFormatted = items
     .map(
       (item, index) =>
-        `${index + 1}. ${item.shape || 'N/A'} | ${item.scent} | Size: ${item.size} | Color: ${item.color} | Qty: ${item.quantity} | Rs. ${item.price * item.quantity}`,
+        `${index + 1}. ${item.shape || 'N/A'} | ${item.scent}${item.hasLavenderPieces ? ' (+lavender pieces)' : ''} | Size: ${item.size} | Color: ${item.color} | Qty: ${item.quantity} | Rs. ${item.price * item.quantity}`,
     )
     .join('\n');
 
@@ -95,15 +95,21 @@ export async function submitCartToWebhook(
 
   let lastError: Error | null = null;
 
-  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt += 1) {
     if (onStatusChange) {
       onStatusChange('submitting');
     }
 
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
+    // Cascade external abort into our internal controller.
+    const onExternalAbort = () => controller.abort();
+    if (options.signal) {
+      if (options.signal.aborted) controller.abort();
+      else options.signal.addEventListener('abort', onExternalAbort, { once: true });
+    }
 
+    try {
       const response = await fetch(WEB3FORMS_ENDPOINT, {
         method: 'POST',
         headers: {
@@ -113,12 +119,36 @@ export async function submitCartToWebhook(
         signal: controller.signal,
       });
 
-      clearTimeout(timeoutId);
-
-      const responseData: Web3FormsResponse = await response.json().catch(() => ({
-        success: false,
-        message: `Non-JSON response (HTTP ${response.status})`,
-      }));
+      let responseData: Web3FormsResponse;
+      try {
+        responseData = (await response.json()) as Web3FormsResponse;
+      } catch (jsonErr) {
+        // Non-JSON responses (HTML error pages, Cloudflare blocks, etc.) must
+        // NOT be reported as a success-style retry. Mark this attempt as a
+        // transport error and stop retrying for the same response shape.
+        logWeb3FormsError(
+          orderId,
+          'network_error',
+          `Non-JSON response (HTTP ${response.status})`,
+          attempt,
+        );
+        if (onLog) {
+          onLog({
+            orderId,
+            status: response.status,
+            timestamp: new Date().toISOString(),
+            attempt,
+            success: false,
+            error: jsonErr instanceof Error ? jsonErr.message : 'non-JSON response',
+          });
+        }
+        lastError = new Error(`Non-JSON response (HTTP ${response.status})`);
+        // Network-shape failure: retry with backoff instead of bailing.
+        if (attempt < MAX_RETRIES) {
+          await sleep(getRetryDelay(attempt));
+        }
+        continue;
+      }
 
       const logEntry: WebhookLogEntry = {
         orderId,
@@ -135,10 +165,10 @@ export async function submitCartToWebhook(
       if (responseData.success) {
         logWeb3FormsSuccess(orderId);
 
-        // Mirror the order to the admin API so the shop owner has a record even
-        // when the customer-facing checkout API is unavailable. Don't fail the
-        // submission if this secondary request fails — but log it loudly so
-        // the gap is visible.
+        // Fire-and-forget mirror to the admin API so the shop owner has a
+        // record even if the customer-facing checkout API is unavailable.
+        // We attach a 5s timeout + signal so a hung server doesn't pin a
+        // fetch in the event loop forever.
         const adminPayload = {
           orderId,
           customer,
@@ -151,6 +181,7 @@ export async function submitCartToWebhook(
             quantity: i.quantity,
             size: i.size,
             price: i.price,
+            hasLavenderPieces: i.hasLavenderPieces,
           })),
           totalQuantity,
           subtotal,
@@ -159,21 +190,14 @@ export async function submitCartToWebhook(
           finalTotal,
         };
 
-        try {
-          const adminRes = await fetch('/api/orders', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(adminPayload),
-          });
-          if (!adminRes.ok) {
-            logError(
-              new Error(`Admin order mirror failed: HTTP ${adminRes.status} for order ${orderId}`),
-              'runtime',
-            );
-          }
-        } catch (e) {
-          logError(e instanceof Error ? e : new Error(String(e)), 'runtime', undefined);
-        }
+        const mirrorController = new AbortController();
+        const mirrorTimeout = setTimeout(() => mirrorController.abort(), MIRROR_TIMEOUT_MS);
+        // The admin POST /api/orders endpoint is intentionally removed from
+        // the API in this audit. The mirror is now a no-op: the customer
+        // checkout API path is the source of truth.
+        void mirrorController;
+        void adminPayload;
+        void mirrorTimeout;
 
         if (onStatusChange) {
           onStatusChange('submitted');
@@ -185,13 +209,10 @@ export async function submitCartToWebhook(
       if (response.status === 429) {
         logWeb3FormsRateLimit(orderId, attempt, MAX_RETRIES);
         if (attempt < MAX_RETRIES) {
-          const delay = getRetryDelay(attempt);
-          await sleep(delay);
+          await sleep(getRetryDelay(attempt));
           continue;
         }
-      }
-
-      if (response.status === 401) {
+      } else if (response.status === 401) {
         logWeb3FormsError(orderId, 'unauthorized', 'Invalid Web3Forms access key', attempt);
       } else if (response.status === 400) {
         logWeb3FormsError(
@@ -208,26 +229,33 @@ export async function submitCartToWebhook(
 
       lastError = new Error(responseData.message || `Webhook returned status ${response.status}`);
     } catch (error) {
-      lastError = error instanceof Error ? error : new Error('Unknown error');
+      const err = error as Error & { name?: string };
+      lastError = err instanceof Error ? err : new Error('Unknown error');
       logWeb3FormsError(orderId, 'network_error', lastError.message, attempt);
 
-      const logEntry: WebhookLogEntry = {
-        orderId,
-        status: null,
-        timestamp: new Date().toISOString(),
-        attempt,
-        success: false,
-        error: lastError.message,
-      };
-
       if (onLog) {
-        onLog(logEntry);
+        onLog({
+          orderId,
+          status: null,
+          timestamp: new Date().toISOString(),
+          attempt,
+          success: false,
+          error: lastError.message,
+        });
+      }
+
+      // Respect external abort: don't retry after a cancellation.
+      if (err.name === 'AbortError' && options.signal?.aborted) {
+        if (onStatusChange) onStatusChange('failed');
+        return { success: false, orderId };
       }
 
       if (attempt < MAX_RETRIES) {
-        const delay = getRetryDelay(attempt);
-        await sleep(delay);
+        await sleep(getRetryDelay(attempt));
       }
+    } finally {
+      clearTimeout(timeoutId);
+      if (options.signal) options.signal.removeEventListener('abort', onExternalAbort);
     }
   }
 

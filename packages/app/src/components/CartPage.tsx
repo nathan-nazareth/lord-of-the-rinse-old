@@ -10,6 +10,19 @@ import { useCatalog } from '../hooks/useCatalog';
 import type { CartItem } from '../types/cart';
 import { calculateDiscount } from '../utils/pricing';
 
+const CURRENCY_SYMBOLS: Record<string, string> = {
+  USD: '$',
+  LKR: 'Rs. ',
+  EUR: '€',
+  GBP: '£',
+  INR: '₹',
+};
+
+function resolveCurrencySymbol(isoCode: string | null | undefined): string {
+  if (!isoCode) return 'Rs. ';
+  return CURRENCY_SYMBOLS[isoCode.toUpperCase()] ?? `${isoCode} `;
+}
+
 const CartPage: React.FC<{
   cart: { items: CartItem[]; totalQuantity: number };
   onBackToForm: () => void;
@@ -34,7 +47,7 @@ const CartPage: React.FC<{
   onDismissOrdered,
 }) => {
   const { data: catalog } = useCatalog();
-  const currency = catalog?.settings?.currency ?? 'Rs. ';
+  const currency = resolveCurrencySymbol(catalog?.settings?.currency);
   const subtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const safesubtotal = Number.isFinite(subtotal) ? subtotal : 0;
   const { discountPercentage, discountAmount, total } = calculateDiscount(
@@ -176,6 +189,7 @@ const CartPage: React.FC<{
                       <div className="flex-1 min-w-0">
                         <p className="font-display font-semibold text-lg text-ink-700">
                           {item.shape} · {item.scent}
+                          {item.hasLavenderPieces ? ' · +Lavender' : ''}
                         </p>
                         <p className="text-ink-400 text-sm">
                           {item.color} · {item.size}

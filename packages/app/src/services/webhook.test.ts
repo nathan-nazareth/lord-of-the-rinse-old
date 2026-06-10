@@ -49,13 +49,14 @@ describe('submitCartToWebhook discount logic', () => {
   function makeItem(overrides: Partial<CartItem> = {}): CartItem {
     return {
       id: 'test-id',
-      variantId: 'variant-1',
+      variantId: '550e8400-e29b-41d4-a716-446655440000',
       shape: 'round',
       scent: 'lavender',
       color: 'blue',
       size: '100g',
       quantity: 1,
       price: 200,
+      hasLavenderPieces: false,
       addedAt: new Date().toISOString(),
       ...overrides,
     };

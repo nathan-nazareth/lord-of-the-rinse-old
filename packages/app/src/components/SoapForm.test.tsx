@@ -81,7 +81,7 @@ describe('SoapForm component', () => {
       data: MOCK_CATALOG,
       isLoading: false,
       error: null,
-    } as ReturnType<typeof useCatalog>);
+    } as unknown as ReturnType<typeof useCatalog>);
   });
 
   it('renders initial state correctly', () => {
@@ -165,7 +165,7 @@ describe('SoapForm component', () => {
       data: { ...MOCK_CATALOG, settings: { ...MOCK_CATALOG.settings, shop_open: 'false' } },
       isLoading: false,
       error: null,
-    } as ReturnType<typeof useCatalog>);
+    } as unknown as ReturnType<typeof useCatalog>);
 
     render(
       <SoapForm
@@ -184,7 +184,7 @@ describe('SoapForm component', () => {
       data: undefined,
       isLoading: true,
       error: null,
-    } as ReturnType<typeof useCatalog>);
+    } as unknown as ReturnType<typeof useCatalog>);
 
     render(
       <SoapForm
@@ -234,6 +234,7 @@ describe('SoapForm component', () => {
       '2',
       '50',
       false,
+      undefined, // matchedVariantId — catalog isn't loaded in this test, so it's undefined
     );
   });
 });
