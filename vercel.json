@@ -1,7 +1,7 @@
 {
   "framework": null,
   "version": 2,
-  "installCommand": "APP_DIR=\"$(git rev-parse --show-toplevel 2>/dev/null)/packages/app\"; [ -d \"$APP_DIR\" ] || APP_DIR=\"$PWD\"; cd \"$APP_DIR\" && pwd && npm install --no-workspaces",
-  "buildCommand": "APP_DIR=\"$(git rev-parse --show-toplevel 2>/dev/null)/packages/app\"; [ -d \"$APP_DIR\" ] || APP_DIR=\"$PWD\"; cd \"$APP_DIR\" && pwd && npm run build",
-  "outputDirectory": "dist"
+  "installCommand": "APP_DIR=\"$(git rev-parse --show-toplevel)/packages/app\"; cd \"$APP_DIR\" && npm install --no-workspaces",
+  "buildCommand": "APP_DIR=\"$(git rev-parse --show-toplevel)/packages/app\"; cd \"$APP_DIR\" && npm run build",
+  "outputDirectory": "packages/app/dist"
 }
