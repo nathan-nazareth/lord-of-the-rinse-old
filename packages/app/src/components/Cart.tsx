@@ -11,7 +11,6 @@ import {
 } from '@tabler/icons-react';
 import React, { useState } from 'react';
 import { submitCartToWebhook } from '../services/webhook';
-import { useCatalog } from '../hooks/useCatalog';
 import { useRateLimitStore } from '../stores/useRateLimitStore';
 import type { CartItem as CartItemType } from '../types/cart';
 import type { Customer } from '../types/webhook';
@@ -204,8 +203,7 @@ export const Cart: React.FC<CartProps> = ({
   const [showRateLimitModal, setShowRateLimitModal] = useState(false);
   const closeButtonRef = React.useRef<HTMLButtonElement>(null);
   const rateLimitStore = useRateLimitStore();
-  const { data: catalog } = useCatalog();
-  const currency = catalog?.settings?.currency ?? 'USD';
+  const currency = 'Rs.';
   const maxSubmissions = 10;
   const windowMs = 300000;
   const isAllowed = rateLimitStore.isAllowed(maxSubmissions, windowMs);

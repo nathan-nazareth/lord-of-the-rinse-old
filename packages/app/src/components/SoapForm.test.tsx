@@ -160,7 +160,7 @@ describe('SoapForm component', () => {
     });
   });
 
-  it('shows shop closed message when shop_open is false', () => {
+  it('renders the landing page even when catalog reports shop closed', () => {
     vi.mocked(useCatalog).mockReturnValue({
       data: { ...MOCK_CATALOG, settings: { ...MOCK_CATALOG.settings, shop_open: 'false' } },
       isLoading: false,
@@ -176,10 +176,10 @@ describe('SoapForm component', () => {
       />,
     );
 
-    expect(screen.getByText('Our shop is currently closed')).toBeTruthy();
+    expect(screen.getByText('Begin Creating')).toBeTruthy();
   });
 
-  it('shows loading state while catalog loads', () => {
+  it('renders the landing page while catalog is loading', () => {
     vi.mocked(useCatalog).mockReturnValue({
       data: undefined,
       isLoading: true,
@@ -195,7 +195,7 @@ describe('SoapForm component', () => {
       />,
     );
 
-    expect(screen.getByText('Loading our collection...')).toBeTruthy();
+    expect(screen.getByText('Begin Creating')).toBeTruthy();
   });
 
   it('clears form store after adding to cart', async () => {
