@@ -1,6 +1,7 @@
 import { IconArrowLeft, IconLoader2, IconSparkles } from '@tabler/icons-react';
 import type React from 'react';
 import { useState } from 'react';
+import { useCatalog } from '../hooks/useCatalog';
 import type { CartItem } from '../types/cart';
 import type { Customer } from '../types/webhook';
 import { calculateDiscount } from '../utils/pricing';
@@ -16,7 +17,8 @@ const CheckoutPage: React.FC<{
 }> = ({ cart, onBack, onSubmit, isSubmitting, errorMessage, onClearError }) => {
   const [formData, setFormData] = useState({ name: '', email: '', phone: '' });
   const [errors, setErrors] = useState<{ name?: string; email?: string; phone?: string }>({});
-  const currency = 'Rs.';
+  const { data: catalog } = useCatalog();
+  const currency = catalog?.settings?.currency ?? 'Rs. ';
 
   const subtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const { discountPercentage, discountAmount, total } = calculateDiscount(
