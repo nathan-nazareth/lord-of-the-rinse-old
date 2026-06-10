@@ -1,7 +1,7 @@
 {
   "framework": null,
   "version": 2,
-  "installCommand": "npm install --no-workspaces",
-  "buildCommand": "npm run build",
+  "installCommand": "if [ ! -f package.json ] || ! grep -q '\"@lotr/app\"' package.json; then cd packages/app; fi; npm install --no-workspaces",
+  "buildCommand": "if [ ! -f package.json ] || ! grep -q '\"@lotr/app\"' package.json; then cd packages/app; fi; npm run build",
   "outputDirectory": "dist"
 }
