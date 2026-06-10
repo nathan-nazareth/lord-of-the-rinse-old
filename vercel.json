@@ -1,7 +1,6 @@
 {
   "framework": null,
   "version": 2,
-  "rootDirectory": "packages/app",
   "installCommand": "npm install --no-workspaces",
   "buildCommand": "npm run build",
   "outputDirectory": "dist"
