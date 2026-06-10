@@ -11,7 +11,6 @@ import {
 } from '@tabler/icons-react';
 import React, { useRef, useState } from 'react';
 import {
-  DEFAULT_SIZE,
   LAVENDER_PIECES_PRICE,
   SHAPE_OPTIONS,
   SOAP_OPTIONS,
@@ -29,6 +28,20 @@ const _SIZE_OPTIONS = [
   { label: 'M', weight: 75 },
   { label: 'L', weight: 100 },
 ];
+
+type SizeLabel = 'S' | 'M' | 'L';
+
+const getSizeOptions = (shape: SoapShape): Array<{ label: SizeLabel; grams: number }> => {
+  const limits = SIZE_LIMITS[shape];
+  const min = limits.min;
+  const max = limits.max;
+  const mid = Math.round((min + max) / 2);
+  return [
+    { label: 'S', grams: min },
+    { label: 'M', grams: mid },
+    { label: 'L', grams: max },
+  ];
+};
 
 const SCENT_INFO: Record<string, { description: string; tagline: string }> = {
   Lavender: { description: 'Calming & relaxing', tagline: 'For a restful ritual' },
@@ -177,7 +190,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({
   const setVisited = useFormStore((s) => s.setVisited);
   const clear = useFormStore((s) => s.clear);
 
-  const { totalPrice } = useSoapPricing(scent, size, hasLavenderPieces);
+  const { totalPrice } = useSoapPricing(scent, size ?? 0, hasLavenderPieces);
 
   const cartSubtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const { total: cartTotal } = calculateDiscount(cartSubtotal, cart.totalQuantity);
@@ -194,10 +207,9 @@ export const SoapForm: React.FC<SoapFormProps> = ({
   };
 
   const handleShapeChange = (shape: SoapShape) => {
-    const limits = SIZE_LIMITS[shape];
-    const clampedSize = Math.min(Math.max(DEFAULT_SIZE, limits.min), limits.max);
+    const options = getSizeOptions(shape);
     setField('shape', shape);
-    setField('size', clampedSize);
+    setField('size', options[0].grams);
     setTimeout(() => scrollToSection(flavorSectionRef), 300);
   };
 
@@ -207,8 +219,8 @@ export const SoapForm: React.FC<SoapFormProps> = ({
     setTimeout(() => scrollToSection(sizeSectionRef), 300);
   };
 
-  const handleSizeChange = (size: number) => {
-    setField('size', size);
+  const handleSizeChange = (newSize: number) => {
+    setField('size', newSize);
     setTimeout(() => scrollToSection(lavenderSectionRef), 300);
   };
 
@@ -228,9 +240,14 @@ export const SoapForm: React.FC<SoapFormProps> = ({
     setField('quantity', value);
   };
 
-  const isScentStepValid = scent && size > 0;
+  const isScentStepValid = scent && size !== null;
   const isFormValid =
-    shape && scent && color && size > 0 && quantity.length > 0 && parseInt(quantity, 10) > 0;
+    shape &&
+    scent &&
+    color &&
+    size !== null &&
+    quantity.length > 0 &&
+    parseInt(quantity, 10) > 0;
 
   const handleStepNavigate = (step: FormStep) => {
     const stepIdx = STEPS.indexOf(step);
@@ -256,7 +273,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({
     const scentVal = scent!;
     // biome-ignore lint/style/noNonNullAssertion: validated by isFormValid before submit
     const colorVal = color!;
-    onAddToCart(shapeVal, scentVal, totalPrice, colorVal, quantity, size, hasLavenderPieces);
+    onAddToCart(shapeVal, scentVal, totalPrice, colorVal, quantity, String(size), hasLavenderPieces);
     clear();
     setCurrentStep('shape');
   };
@@ -471,54 +488,36 @@ export const SoapForm: React.FC<SoapFormProps> = ({
                   {shape && (
                     <div>
                       <p className="text-ink-400 text-sm mb-3">
-                        Enter weight in grams ({SIZE_LIMITS[shape].min}–{SIZE_LIMITS[shape].max}g
-                        for {shape})
+                        Choose a size ({SIZE_LIMITS[shape].min}–{SIZE_LIMITS[shape].max}g for{' '}
+                        {shape})
                       </p>
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          inputMode="numeric"
-                          value={size === 0 ? '' : String(size)}
-                          onChange={(e) => {
-                            const raw = e.target.value.replace(/[^0-9]/g, '');
-                            if (raw === '') {
-                              handleSizeChange(0);
-                              return;
-                            }
-                            const num = parseInt(raw, 10);
-                            if (Number.isNaN(num)) {
-                              handleSizeChange(0);
-                              return;
-                            }
-                            // biome-ignore lint/style/noNonNullAssertion: shape is set when on scent step
-                            const limits = SIZE_LIMITS[shape!];
-                            const clamped = Math.min(Math.max(num, limits.min), limits.max);
-                            handleSizeChange(clamped);
-                          }}
-                          onBlur={(e) => {
-                            const raw = e.target.value.replace(/[^0-9]/g, '');
-                            const num = raw === '' ? 0 : parseInt(raw, 10);
-                            // biome-ignore lint/style/noNonNullAssertion: shape is set when on scent step
-                            const limits = SIZE_LIMITS[shape!];
-                            const clamped = Math.min(Math.max(num, limits.min), limits.max);
-                            handleSizeChange(clamped);
-                          }}
-                          placeholder={`${SIZE_LIMITS[shape].min}–${SIZE_LIMITS[shape].max}g`}
-                          className="input-apothecary w-32 text-center text-2xl font-display font-semibold py-3"
-                        />
-                        <span className="flex items-center text-ink-400 font-display text-lg">
-                          g
-                        </span>
+                      <div className="grid grid-cols-3 gap-3">
+                        {getSizeOptions(shape as SoapShape).map((option) => {
+                          const isSelected = size === option.grams;
+                          return (
+                            <button
+                              type="button"
+                              key={option.label}
+                              onClick={() => handleSizeChange(option.grams)}
+                              className={`selection-card flex flex-col items-center justify-center py-5 ${
+                                isSelected ? 'selection-card--selected' : ''
+                              }`}
+                              aria-pressed={isSelected}
+                              aria-label={`Size ${option.label} (${option.grams} grams)`}
+                            >
+                              <span className="font-display text-2xl font-semibold text-ink-700">
+                                {option.label}
+                              </span>
+                              <span className="text-ink-400 text-sm mt-1">{option.grams}g</span>
+                              {isSelected && (
+                                <div className="absolute top-2 right-2 w-5 h-5 bg-terra-400 rounded-full flex items-center justify-center">
+                                  <IconCheck className="w-3 h-3 text-white" />
+                                </div>
+                              )}
+                            </button>
+                          );
+                        })}
                       </div>
-                      <input
-                        type="range"
-                        min={SIZE_LIMITS[shape].min}
-                        max={SIZE_LIMITS[shape].max}
-                        value={size}
-                        onChange={(e) => handleSizeChange(parseInt(e.target.value, 10))}
-                        className="w-full h-2 rounded-lg appearance-none cursor-pointer"
-                        style={{ accentColor: '#C4785A' }}
-                      />
                     </div>
                   )}
                 </div>
@@ -551,7 +550,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({
                   {/* Price summary */}
                   <div className="flex items-center justify-between p-4 bg-parchment-100 rounded-2xl border border-parchment-300">
                     <span className="text-ink-600 font-medium">
-                      {size}g {scent}
+                      {size ?? 0}g {scent}
                       {hasLavenderPieces && ' + Lavender'}
                     </span>
                     <span className="font-display text-xl font-semibold text-terra-500">
@@ -584,7 +583,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({
                     Choose a color
                   </h2>
                   <p className="text-ink-400 text-sm">
-                    {shape} · {scent} · {size}g · Rs. {totalPrice}
+                    {shape} · {scent} · {size ?? 0}g · Rs. {totalPrice}
                   </p>
                 </div>
 
@@ -648,7 +647,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({
                     How many soaps?
                   </h2>
                   <p className="text-ink-400 text-sm">
-                    {shape} · {scent} · {color} · {size}g · Rs. {totalPrice} each
+                    {shape} · {scent} · {color} · {size ?? 0}g · Rs. {totalPrice} each
                   </p>
                 </div>
 

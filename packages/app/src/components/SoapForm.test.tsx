@@ -202,8 +202,9 @@ describe('SoapForm component', () => {
     useFormStore.getState().setField('shape', 'Square');
     useFormStore.getState().setField('scent', 'Lavender');
     useFormStore.getState().setField('color', 'White');
-    useFormStore.getState().setField('size', '50g');
+    useFormStore.getState().setField('size', 50);
     useFormStore.getState().setField('quantity', '2');
+    useFormStore.getState().setField('hasLavenderPieces', false);
     useFormStore.getState().setCurrentStep('quantity');
 
     const mockAddToCart = vi.fn();
@@ -231,7 +232,8 @@ describe('SoapForm component', () => {
       110,
       'White',
       '2',
-      '50g',
+      '50',
+      false,
     );
   });
 });

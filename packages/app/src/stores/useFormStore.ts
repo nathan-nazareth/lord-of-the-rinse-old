@@ -7,7 +7,7 @@ export interface FormState {
   shape: string | null;
   scent: string | null;
   color: string | null;
-  size: string | null;
+  size: number | null;
   quantity: string;
   currentStep: FormStep;
   visited: boolean;

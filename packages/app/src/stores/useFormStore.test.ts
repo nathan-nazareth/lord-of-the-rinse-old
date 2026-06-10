@@ -62,7 +62,7 @@ describe('useFormStore', () => {
     setField('scent', 'Coconut');
     setField('color', 'Pink');
     setField('quantity', '3');
-    setField('size', '100g');
+    setField('size', 100);
     setCurrentStep('quantity');
     setVisited();
 
@@ -84,7 +84,7 @@ describe('useFormStore', () => {
     setField('scent', 'Lemongrass');
     setField('color', 'Blue');
     setField('quantity', '10');
-    setField('size', '75g');
+    setField('size', 75);
     setCurrentStep('quantity');
     setVisited();
 
@@ -102,7 +102,7 @@ describe('useFormStore', () => {
         shape: 'Oval with Dip',
         scent: 'Citronella',
         color: 'Yellow',
-        size: '50g',
+        size: 50,
         quantity: '7',
         currentStep: 'scent',
         visited: true,
