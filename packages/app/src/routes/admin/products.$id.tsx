@@ -1,14 +1,35 @@
-import { createFileRoute, Link, useParams } from '@tanstack/react-router';
+import { createFileRoute, Link, redirect, useParams } from '@tanstack/react-router';
 import { useAdminProducts } from '@/hooks/useAdminCatalog';
+import { useAdminStore } from '@/stores/useAdminStore';
 
 export const Route = createFileRoute('/admin/products/$id')({
+  // Server-side route guard: an unauthenticated visitor never sees the
+  // product detail page, so the route doesn't even render.
+  beforeLoad: () => {
+    if (!useAdminStore.getState().isAuthenticated) {
+      throw redirect({ to: '/admin' });
+    }
+  },
   component: AdminProductDetail,
 });
 
 function AdminProductDetail() {
-  const { id } = useParams({ strict: false }) as { id: string };
+  const { id } = useParams({ strict: false });
+  const isAuthenticated = useAdminStore((s) => s.isAuthenticated);
   const { data: products, isLoading } = useAdminProducts();
-  const product = products?.find((p) => String(p.id) === id);
+  const productId = typeof id === 'string' ? id : '';
+  const product = products?.find((p) => String(p.id) === productId);
+
+  if (!isAuthenticated) {
+    return (
+      <div className="p-8 text-center">
+        <h1 className="text-2xl font-semibold mb-2">Admin sign-in required</h1>
+        <Link to="/admin" className="text-amber-600 hover:underline">
+          Go to login
+        </Link>
+      </div>
+    );
+  }
 
   if (isLoading) return <div className="p-8">Loading…</div>;
   if (!product) {

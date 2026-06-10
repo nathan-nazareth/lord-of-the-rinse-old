@@ -3,13 +3,9 @@ import { auth } from '../lib/auth';
 
 const authRoutes = new Hono();
 
-authRoutes.on(['POST', 'GET'], '/*', async (c) => {
-  try {
-    return await auth.handler(c.req.raw);
-  } catch (err) {
-    console.error('[auth] better-auth handler threw:', err);
-    return c.json({ error: 'Authentication failed' }, 500);
-  }
-});
+// Forward better-auth's responses verbatim so legitimate 401s and
+// validation errors keep their original shape instead of being squashed
+// into a misleading 500.
+authRoutes.on(['POST', 'GET'], '/*', (c) => auth.handler(c.req.raw));
 
 export default authRoutes;

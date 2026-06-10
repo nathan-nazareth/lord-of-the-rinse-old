@@ -35,31 +35,40 @@ async function getStockLevelTx(tx: TxClient, variantId: string): Promise<number>
 
 /**
  * Generate the next order reference for today in format LOR-YYYYMMDD-NNNN.
- * Uses a Postgres advisory lock keyed on the UTC date so concurrent
- * checkouts can't both claim the same sequence number. Must be called
- * inside a transaction so the lock is released atomically.
+ * Uses a Postgres advisory lock keyed on a namespaced hash of the UTC date
+ * so concurrent checkouts can't both claim the same sequence number AND
+ * so the lock can never collide with an advisory lock used elsewhere
+ * (e.g. an unrelated feature holding a lock on the same int).
+ * Must be called inside a transaction so the lock is released atomically.
  */
 async function generateOrderReferenceTx(tx: TxClient): Promise<string> {
-  // Use UTC for the date so the reference matches the DB's now() value.
   const today = new Date();
   const dateStr = today.toISOString().slice(0, 10).replace(/-/g, '');
 
   const prefix = `LOR-${dateStr}-`;
-  // 8-digit YYYYMMDD fits safely in a 32-bit signed integer and a Postgres bigint.
-  const lockKey = Number.parseInt(dateStr, 10);
+  // Namespace constant mixed with the date so this advisory lock is
+  // distinct from any other pg_advisory_xact_lock usage. The bitwise
+  // shift keeps the result inside a 32-bit signed int (Postgres limit).
+  const NAMESPACE = 0x4c4f5231; // "LOR1" as ASCII hex
+  const dateNum = Number.parseInt(dateStr, 10);
+  const lockKey = (NAMESPACE ^ dateNum) | 0;
   await tx.execute(drizzleSql`SELECT pg_advisory_xact_lock(${lockKey})`);
 
+  // Find the highest sequence number for today by parsing the suffix
+  // numerically and ordering by both length and lex order — otherwise
+  // '9999' < '10000' lexically and we'd hand out a duplicate.
   const [result] = await tx
     .select({ reference: orders.reference })
     .from(orders)
     .where(like(orders.reference, `${prefix}%`))
-    .orderBy(desc(orders.reference))
+    .orderBy(sql`length(${orders.reference}) DESC`, desc(orders.reference))
     .limit(1);
 
   let nextNum = 1;
   if (result) {
-    const currentNum = Number.parseInt(result.reference.slice(-4), 10);
-    if (Number.isFinite(currentNum)) {
+    const suffix = result.reference.slice(prefix.length);
+    const currentNum = Number.parseInt(suffix, 10);
+    if (Number.isFinite(currentNum) && currentNum >= 0) {
       nextNum = currentNum + 1;
     }
   }

@@ -4,12 +4,10 @@ import type { Customer } from '../types/webhook';
 
 const mockFetch = vi.fn();
 
-// Set env before any module loads (Vite replaces import.meta.env at build time)
+// The webhook now POSTs to a same-origin /api/webhook-submit proxy so the
+// Web3Forms access key never ships in the client bundle. Mock fetch once.
 beforeAll(() => {
   vi.stubGlobal('fetch', mockFetch);
-  // Vitest merges env with process.env and replaces import.meta.env
-  vi.stubEnv('VITE_WEB3FORMS_ACCESS_KEY', 'test-key-123');
-  vi.stubEnv('VITE_WEB3FORMS_ENDPOINT', 'https://api.test.com/submit');
 });
 
 // Dynamic import after env is stubbed

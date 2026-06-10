@@ -1,7 +1,7 @@
 import { db } from '@lotr/db';
 import { commerceSettings } from '@lotr/db/schema';
 import { settingsUpdateSchema } from '@lotr/shared/schemas';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { adminAuth } from '../middleware/admin-auth';
 
@@ -111,18 +111,20 @@ settings.put('/batch', async (c) => {
     return c.json({ error: 'No valid settings provided', rejected }, 400);
   }
 
-  const results: { key: string; value: string }[] = [];
-  for (const { key, value } of validated) {
-    const [upserted] = await db
+  // Run the whole batch as a single transaction so a mid-batch failure
+  // can't leave a half-applied settings change.
+  const results = await db.transaction(async (tx) => {
+    const now = new Date();
+    const rows = await tx
       .insert(commerceSettings)
-      .values({ key, value })
+      .values(validated.map(({ key, value }) => ({ key, value })))
       .onConflictDoUpdate({
         target: commerceSettings.key,
-        set: { value, updatedAt: new Date() },
+        set: { value: sql`excluded.value`, updatedAt: now },
       })
       .returning();
-    results.push(upserted);
-  }
+    return rows;
+  });
 
   return c.json({ upserted: results, rejected });
 });

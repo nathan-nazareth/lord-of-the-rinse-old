@@ -30,6 +30,9 @@ test-results/
 .env
 .env*.local
 
+# Per-process SQLite test scratch dirs
+**/.tmp/
+
 # Kilo/.opencode tooling
 .opencode/
 

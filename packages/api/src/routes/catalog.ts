@@ -37,18 +37,20 @@ catalog.get('/', async (c) => {
       slug: attr.slug,
       displayOrder: attr.displayOrder ?? 0,
       archived: attr.archived,
+      // Use null (not the current time) when the timestamp is missing so
+      // we never lie about when a row was created.
       createdAt:
         attr.createdAt instanceof Date
           ? attr.createdAt.toISOString()
           : typeof attr.createdAt === 'string'
             ? attr.createdAt
-            : new Date().toISOString(),
+            : null,
       updatedAt:
         attr.updatedAt instanceof Date
           ? attr.updatedAt.toISOString()
           : typeof attr.updatedAt === 'string'
             ? attr.updatedAt
-            : new Date().toISOString(),
+            : null,
     });
     grouped[attr.type] = group;
   }
@@ -91,13 +93,13 @@ catalog.get('/', async (c) => {
         ? v.createdAt.toISOString()
         : typeof v.createdAt === 'string'
           ? v.createdAt
-          : new Date().toISOString(),
+          : null,
     updatedAt:
       v.updatedAt instanceof Date
         ? v.updatedAt.toISOString()
         : typeof v.updatedAt === 'string'
           ? v.updatedAt
-          : new Date().toISOString(),
+          : null,
   }));
 
   // Fetch public settings only

@@ -10,7 +10,10 @@ if (!connectionString) {
 
 const client = postgres(connectionString, { max: 10, idle_timeout: 20 });
 
+let dbClientClosed = false;
 const shutdown = () => {
+  if (dbClientClosed) return;
+  dbClientClosed = true;
   client.end({ timeout: 5 }).catch((err) => {
     console.error('Failed to close postgres client:', err);
   });
@@ -18,6 +21,7 @@ const shutdown = () => {
 
 process.once('SIGINT', shutdown);
 process.once('SIGTERM', shutdown);
+process.once('beforeExit', shutdown);
 
 export const db = drizzle(client, { schema });
 

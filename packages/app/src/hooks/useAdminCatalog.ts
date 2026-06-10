@@ -13,19 +13,24 @@ async function parseApiError(response: Response): Promise<string> {
   // raw HTML / stack traces into Error.message. We also cap the body size
   // so a 50MB error page can't OOM the client.
   try {
-    const text = await response.text();
+    const cloned = response.clone();
+    const text = await cloned.text();
     if (text.length > 0 && text.length < 4096) {
       try {
         const parsed = JSON.parse(text) as ApiErrorBody;
         if (parsed && typeof parsed.error === 'string' && parsed.error.length > 0) {
           return parsed.error;
         }
-      } catch {
-        // Not JSON — fall through to the generic message below.
+      } catch (err) {
+        if (import.meta.env.DEV) {
+          console.debug('[useAdminCatalog] non-JSON error body', err);
+        }
       }
     }
-  } catch {
-    // ignore body read errors
+  } catch (err) {
+    if (import.meta.env.DEV) {
+      console.debug('[useAdminCatalog] error reading error body', err);
+    }
   }
   return `HTTP ${response.status}`;
 }
@@ -35,18 +40,16 @@ async function fetchWithAuth<T>(
   options: RequestInit = {},
   token?: string | null,
 ): Promise<T> {
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
+  const headers = new Headers(options.headers);
+  if (!headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
+  }
   if (token) {
-    headers.Authorization = `Bearer ${token}`;
+    headers.set('Authorization', `Bearer ${token}`);
   }
   let response: Response;
   try {
-    response = await fetch(url, {
-      ...options,
-      headers: { ...headers, ...options.headers },
-    });
+    response = await fetch(url, { ...options, headers });
   } catch (err) {
     // network / DNS / CORS — never let this become an unhandled rejection
     // inside react-query.
@@ -59,35 +62,10 @@ async function fetchWithAuth<T>(
   return (await response.json()) as T;
 }
 
-export interface AdminProduct {
-  id: number;
-  name: string;
-  color: string;
-  scent: string;
-  shape: string;
-  weight: number;
-  price: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface AdminOptions {
-  id: number;
-  minPrice: number;
-  maxPrice: number;
-  minSize: number;
-  maxSize: number;
-  updatedAt: string;
-}
-
-export interface AdminDiscount {
-  id: number;
-  percentage: number;
-  description: string;
-  active: number;
-  createdAt: string;
-  updatedAt: string;
-}
+// Re-export the shared admin types so consumers have a single source of
+// truth for the wire format. Defining them here invited silent drift if
+// either side changed.
+export type { AdminProduct, AdminOptions, AdminDiscount } from '@/types/admin';
 
 export function useAdminProducts() {
   const authToken = useAdminStore((s) => s.authToken);

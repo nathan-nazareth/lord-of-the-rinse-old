@@ -20,8 +20,8 @@ export interface CatalogAttribute {
   slug: string;
   displayOrder: number;
   archived: boolean;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: string | null;
+  updatedAt: string | null;
 }
 
 export interface VariantAttributeRef {
@@ -37,6 +37,6 @@ export interface SoapVariant {
   enabled: boolean;
   archived: boolean;
   attributes: VariantAttributeRef[];
-  createdAt: string;
-  updatedAt: string;
+  createdAt: string | null;
+  updatedAt: string | null;
 }

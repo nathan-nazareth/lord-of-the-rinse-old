@@ -7,6 +7,30 @@ const MAX_DESCRIPTION_LENGTH = 500;
 const MAX_PERCENTAGE = 100;
 const MIN_PERCENTAGE = 0;
 
+function normalizeActive(raw: unknown): number {
+  // Treat 0 / "0" / false / "false" / "no" / "off" as inactive. Anything
+  // else collapses to active. This stops a hand-crafted `{ active: "no" }`
+  // from silently enabling a discount.
+  if (raw === 0 || raw === false) return 0;
+  if (typeof raw === 'string') {
+    const s = raw.trim().toLowerCase();
+    if (s === '0' || s === 'false' || s === 'no' || s === 'off') return 0;
+  }
+  return 1;
+}
+
+interface RawDiscountBody {
+  percentage?: unknown;
+  description?: unknown;
+  active?: unknown;
+}
+
+function parseId(raw: string | undefined): number | null {
+  if (typeof raw !== 'string' || !/^\d+$/.test(raw)) return null;
+  const n = Number(raw);
+  return Number.isInteger(n) && n > 0 ? n : null;
+}
+
 const discountsRoutes = new Hono();
 
 discountsRoutes.use('/*', adminAuth);
@@ -17,9 +41,13 @@ discountsRoutes.get('/', async (c) => {
 });
 
 discountsRoutes.post('/', async (c) => {
-  let body: { percentage?: unknown; description?: unknown; active?: unknown };
+  let body: RawDiscountBody;
   try {
-    body = (await c.req.json()) as typeof body;
+    const raw: unknown = await c.req.json();
+    if (typeof raw !== 'object' || raw === null) {
+      return c.json({ error: 'Invalid JSON body' }, 400);
+    }
+    body = raw as RawDiscountBody;
   } catch {
     return c.json({ error: 'Invalid JSON body' }, 400);
   }
@@ -38,23 +66,21 @@ discountsRoutes.post('/', async (c) => {
   }
 
   if (
+    typeof body.percentage !== 'number' ||
     !Number.isInteger(body.percentage) ||
-    (body.percentage as number) < MIN_PERCENTAGE ||
-    (body.percentage as number) > MAX_PERCENTAGE
+    body.percentage < MIN_PERCENTAGE ||
+    body.percentage > MAX_PERCENTAGE
   ) {
     return c.json({ error: `Percentage must be an integer between 0 and ${MAX_PERCENTAGE}` }, 422);
   }
 
-  // Coerce active to 0/1; anything other than 0 collapses to 1 to keep the
-  // column consistent.
-  let active = 1;
-  if (body.active === 0 || body.active === '0' || body.active === false) active = 0;
+  const active = body.active === undefined ? 1 : normalizeActive(body.active);
 
   const now = new Date().toISOString();
   const result = await adminDb
     .insert(adminDiscounts)
     .values({
-      percentage: body.percentage as number,
+      percentage: body.percentage,
       description: body.description.trim(),
       active,
       createdAt: now,
@@ -66,23 +92,28 @@ discountsRoutes.post('/', async (c) => {
 });
 
 discountsRoutes.put('/:id', async (c) => {
-  const id = Number(c.req.param('id'));
-  if (!Number.isInteger(id) || id <= 0) {
+  const id = parseId(c.req.param('id'));
+  if (id === null) {
     return c.json({ error: 'Invalid id' }, 400);
   }
 
-  let body: { percentage?: unknown; description?: unknown; active?: unknown };
+  let body: RawDiscountBody;
   try {
-    body = (await c.req.json()) as typeof body;
+    const raw: unknown = await c.req.json();
+    if (typeof raw !== 'object' || raw === null) {
+      return c.json({ error: 'Invalid JSON body' }, 400);
+    }
+    body = raw as RawDiscountBody;
   } catch {
     return c.json({ error: 'Invalid JSON body' }, 400);
   }
 
   if (
     body.percentage !== undefined &&
-    (!Number.isInteger(body.percentage) ||
-      (body.percentage as number) < MIN_PERCENTAGE ||
-      (body.percentage as number) > MAX_PERCENTAGE)
+    (typeof body.percentage !== 'number' ||
+      !Number.isInteger(body.percentage) ||
+      body.percentage < MIN_PERCENTAGE ||
+      body.percentage > MAX_PERCENTAGE)
   ) {
     return c.json(
       { error: `Percentage must be an integer between 0 and ${MAX_PERCENTAGE}` },
@@ -107,11 +138,10 @@ discountsRoutes.put('/:id', async (c) => {
   const patch: { percentage?: number; description?: string; active?: number; updatedAt: string } = {
     updatedAt: now,
   };
-  if (body.percentage !== undefined) patch.percentage = body.percentage as number;
+  if (body.percentage !== undefined) patch.percentage = body.percentage;
   if (trimmedDescription !== undefined) patch.description = trimmedDescription;
   if (body.active !== undefined) {
-    patch.active =
-      body.active === 0 || body.active === '0' || body.active === false ? 0 : 1;
+    patch.active = normalizeActive(body.active);
   }
 
   const result = await adminDb
@@ -127,8 +157,8 @@ discountsRoutes.put('/:id', async (c) => {
 });
 
 discountsRoutes.delete('/:id', async (c) => {
-  const id = Number(c.req.param('id'));
-  if (!Number.isInteger(id) || id <= 0) {
+  const id = parseId(c.req.param('id'));
+  if (id === null) {
     return c.json({ error: 'Invalid id' }, 400);
   }
   const discount = await adminDb

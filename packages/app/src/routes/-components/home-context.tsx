@@ -80,6 +80,10 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
   const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
+    // detectAndClearLegacyCart() is itself a no-op when there's nothing
+    // legacy in localStorage, so the localStorage round-trip is cheap
+    // and we don't gate the call on cart contents (which race with
+    // persist rehydration on first mount).
     const cleared = detectAndClearLegacyCart();
     if (cleared) {
       setLegacyCartCleared(true);
@@ -156,6 +160,9 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
       inFlightController.current = controller;
 
       setIsSubmitting(true);
+      // Read the latest cart snapshot inside the callback so this handler
+      // is stable across renders and doesn't re-create downstream handlers.
+      const { items, totalQuantity } = useCartStore.getState();
       const releaseController = () => {
         if (inFlightController.current === controller) {
           inFlightController.current = null;
@@ -163,7 +170,7 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
         setIsSubmitting(false);
       };
       const finalizeSuccess = (ref: string) => {
-        setConfirmationItemCount(cart.totalQuantity);
+        setConfirmationItemCount(totalQuantity);
         setLastOrderReference(ref);
         setJustOrdered(true);
         clearCart();
@@ -179,7 +186,7 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
       };
 
       try {
-        const checkoutItems = cart.items.map((item) => ({
+        const checkoutItems = items.map((item) => ({
           variantId: item.variantId,
           displayName: `${item.scent} (${item.shape}, ${item.color}, ${item.size}g${item.hasLavenderPieces ? ', lavender pieces' : ''})`,
           quantity: item.quantity,
@@ -215,14 +222,14 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
 
         console.warn(`[Checkout] API responded ${response.status}, falling back to Web3Forms`);
       } catch (err) {
-        if ((err as { name?: string })?.name === 'AbortError') {
+        if (err instanceof Error && err.name === 'AbortError') {
           return fail();
         }
         console.warn('[Checkout] API error, falling back to Web3Forms:', err);
       }
 
       try {
-        const result = await submitCartToWebhook(customer, cart.items, undefined, undefined, {
+        const result = await submitCartToWebhook(customer, items, undefined, undefined, {
           signal: controller.signal,
         });
         if (result.success) {
@@ -231,7 +238,7 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
         }
         console.error('[Checkout] Web3Forms submission did not succeed');
       } catch (err) {
-        if ((err as { name?: string })?.name === 'AbortError') return fail();
+        if (err instanceof Error && err.name === 'AbortError') return fail();
         console.error('Order submission error:', err);
       } finally {
         // releaseController() runs inside finalizeSuccess/fail for the success
@@ -244,7 +251,7 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
       }
       return fail();
     },
-    [cart, clearCart, clearFormState],
+    [clearCart, clearFormState],
   );
 
   const handleDismissOrdered = useCallback(() => {

@@ -17,6 +17,7 @@ const { mocks } = vi.hoisted(() => {
     c.values = vi.fn(() => chain());
     c.limit = vi.fn(() => chain());
     c.groupBy = vi.fn(() => chain());
+    c.for = vi.fn(() => chain());
 
     c._resolve = (v: unknown) => _resolve!(v);
     return c;
@@ -27,6 +28,19 @@ const { mocks } = vi.hoisted(() => {
     insert: vi.fn(() => chain()),
     update: vi.fn(() => chain()),
     delete: vi.fn(() => chain()),
+    // POST /api/admin/stock-movements wraps the variant + balance check +
+    // insert in a transaction. The mock forwards select/insert/update to
+    // the same vi.fn()s so test mocks keep working.
+    transaction: vi.fn(async (cb: (tx: typeof db) => Promise<unknown>) => {
+      const tx = {
+        select: db.select,
+        insert: db.insert,
+        update: db.update,
+        delete: db.delete,
+        transaction: vi.fn(),
+      };
+      return cb(tx);
+    }),
   };
 
   return { mocks: { db, chain } };
@@ -117,11 +131,13 @@ function setupSelectChain(result: unknown) {
         const innerChain = {
           orderBy: vi.fn(() => Promise.resolve(result)),
           groupBy: vi.fn(() => Promise.resolve(result)),
+          for: vi.fn(() => Promise.resolve(result)),
           then: (onFulfilled: (v: unknown) => unknown) => Promise.resolve(result).then(onFulfilled),
         };
         return innerChain;
       }),
       orderBy: vi.fn(() => Promise.resolve(result)),
+      for: vi.fn(() => Promise.resolve(result)),
     })),
   });
 }

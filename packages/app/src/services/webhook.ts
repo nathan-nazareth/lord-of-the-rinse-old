@@ -1,5 +1,3 @@
-/// <reference types="vite/client" />
-
 import type { CartItem } from '../types/cart';
 import type { Customer, WebhookLogEntry, WebhookStatus } from '../types/webhook';
 import {
@@ -9,14 +7,15 @@ import {
 } from '../utils/errorLogging';
 import { calculateDiscount } from '../utils/pricing';
 
-const WEB3FORMS_ENDPOINT =
-  import.meta.env.VITE_WEB3FORMS_ENDPOINT || 'https://api.web3forms.com/submit';
-const WEB3FORMS_ACCESS_KEY = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY?.trim();
+const WEBHOOK_PROXY_PATH = '/api/webhook-submit';
 const TIMEOUT_MS = 10000;
 const MAX_RETRIES = 3;
 
 function generateOrderId(): string {
-  return crypto.randomUUID();
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
 async function sleep(ms: number): Promise<void> {
@@ -48,14 +47,6 @@ export async function submitCartToWebhook(
 ): Promise<{ success: boolean; orderId: string }> {
   const orderId = generateOrderId();
 
-  if (!WEB3FORMS_ACCESS_KEY || WEB3FORMS_ACCESS_KEY.trim() === '') {
-    console.error(
-      '[Webhook] ERROR: VITE_WEB3FORMS_ACCESS_KEY is not set. Please add it to your .env file and Vercel environment variables.',
-    );
-    if (onStatusChange) onStatusChange('failed');
-    return { success: false, orderId };
-  }
-
   const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const {
@@ -73,24 +64,34 @@ export async function submitCartToWebhook(
 
   const allShapes = items.map((item) => item.shape || 'N/A').join(', ');
 
+  // Sanitize free-form strings to defang CRLF injection and limit length
+  // before they end up in email headers / body via Web3Forms.
+  const sanitize = (s: string, max = 200): string =>
+    String(s ?? '')
+      .replace(/[\r\n\t\0\v\f]/g, ' ')
+      .slice(0, max);
+
+  const safeName = sanitize(customer.name, 100);
+  const safeEmail = sanitize(customer.email, 200);
+  const safePhone = sanitize(customer.phone ?? '', 50);
+
   const web3FormsPayload: Record<string, string | number | undefined> = {
-    access_key: WEB3FORMS_ACCESS_KEY,
-    Name: customer.name,
-    Email: customer.email,
-    'Phone number': customer.phone || '',
-    'Soap Shape': allShapes,
-    'Order Details': orderItemsFormatted,
+    Name: safeName,
+    Email: safeEmail,
+    'Phone number': safePhone,
+    'Soap Shape': sanitize(allShapes, 500),
+    'Order Details': sanitize(orderItemsFormatted, 4000),
     'Total items': totalQuantity,
     Subtotal: `Rs. ${subtotal}`,
     Discount: `${discountPercentage}% (Rs. ${discountAmount})`,
     'Final Total': `Rs. ${finalTotal}`,
     order_id: orderId,
     submission_timestamp: new Date().toISOString(),
-    from_name: customer.name,
-    subject: `New Soap Order from ${customer.name}`,
+    from_name: safeName,
+    subject: `New Soap Order from ${safeName}`,
   };
 
-  console.log('[Webhook] Submitting order to Web3Forms');
+  console.log('[Webhook] Submitting order via server proxy');
 
   let lastError: Error | null = null;
 
@@ -109,7 +110,7 @@ export async function submitCartToWebhook(
     }
 
     try {
-      const response = await fetch(WEB3FORMS_ENDPOINT, {
+      const response = await fetch(WEBHOOK_PROXY_PATH, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

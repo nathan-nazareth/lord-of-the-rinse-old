@@ -1,17 +1,22 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute, Link, redirect } from '@tanstack/react-router';
 import { useAdminProducts, useDeleteProduct } from '@/hooks/useAdminCatalog';
 import { useAdminStore } from '@/stores/useAdminStore';
 
 export const Route = createFileRoute('/admin/products/')({
+  beforeLoad: () => {
+    if (!useAdminStore.getState().isAuthenticated) {
+      throw redirect({ to: '/admin' });
+    }
+  },
   component: AdminProductsIndex,
 });
 
 function AdminProductsIndex() {
-  const authToken = useAdminStore((s) => s.authToken);
+  const isAuthenticated = useAdminStore((s) => s.isAuthenticated);
   const { data: products, isLoading, error } = useAdminProducts();
   const deleteProduct = useDeleteProduct();
 
-  if (!authToken) return null;
+  if (!isAuthenticated) return null;
   if (isLoading) return <div className="p-8">Loading products…</div>;
   if (error) return <div className="p-8 text-red-600">Failed to load products</div>;
 

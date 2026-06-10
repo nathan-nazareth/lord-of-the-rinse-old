@@ -1,16 +1,21 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute, Link, redirect } from '@tanstack/react-router';
 import { useAdminDiscounts } from '@/hooks/useAdminCatalog';
 import { useAdminStore } from '@/stores/useAdminStore';
 
 export const Route = createFileRoute('/admin/discounts')({
+  beforeLoad: () => {
+    if (!useAdminStore.getState().isAuthenticated) {
+      throw redirect({ to: '/admin' });
+    }
+  },
   component: AdminDiscountsPage,
 });
 
 function AdminDiscountsPage() {
-  const authToken = useAdminStore((s) => s.authToken);
+  const isAuthenticated = useAdminStore((s) => s.isAuthenticated);
   const { data: discounts, isLoading } = useAdminDiscounts();
 
-  if (!authToken) return null;
+  if (!isAuthenticated) return null;
   if (isLoading) return <div className="p-8">Loading…</div>;
 
   return (

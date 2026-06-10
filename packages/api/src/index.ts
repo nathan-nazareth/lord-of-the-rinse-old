@@ -16,6 +16,7 @@ import productionQueueRoutes from './routes/production-queue';
 import settingsRoutes from './routes/settings';
 import stockMovementsRoutes from './routes/stock-movements';
 import variantsRoutes from './routes/variants';
+import webhookSubmitRoutes from './routes/webhook-submit';
 
 export const app = new Hono<{
   Variables: {
@@ -31,10 +32,19 @@ if (isProduction && !corsOrigin) {
   throw new Error('CORS_ORIGIN is required in production');
 }
 
+if (corsOrigin === '*' && process.env.CORS_ALLOW_CREDENTIALS === 'true') {
+  throw new Error('CORS_ORIGIN=* is incompatible with credentials');
+}
+
+const devOrigins = ['http://localhost:3000', 'http://localhost:5173'];
+const originSetting: string | string[] = isProduction
+  ? (corsOrigin as string)
+  : (corsOrigin ? corsOrigin.split(',').map((s) => s.trim()) : devOrigins);
+
 app.use(
   '/api/*',
   cors({
-    origin: corsOrigin || 'http://localhost:3000',
+    origin: originSetting,
     allowHeaders: ['Content-Type', 'Authorization'],
     allowMethods: ['POST', 'GET', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
     exposeHeaders: ['Content-Length', 'Retry-After'],
@@ -46,7 +56,11 @@ app.use(
 app.use('/api/*', rateLimit({ windowMs: 60_000, max: 120 }));
 
 app.onError((err, c) => {
-  console.error('Unhandled error:', err);
+  console.error('Unhandled error:', {
+    method: c.req.method,
+    path: c.req.path,
+    error: err,
+  });
 
   if (err instanceof SyntaxError) {
     return c.json({ error: 'Invalid JSON body' }, 400);
@@ -68,6 +82,7 @@ app.route('/health', health);
 app.route('/api/health', health);
 app.route('/api/catalog', catalogRoutes);
 app.route('/api/checkout', checkoutRoutes);
+app.route('/api/webhook-submit', webhookSubmitRoutes);
 app.route('/api/auth', authRoutes);
 
 // Login is public — it MUST be mounted BEFORE the global adminAuth middleware

@@ -151,13 +151,22 @@ export const useCartStore = create<CartState>()(
             if (!item) return null;
 
             const parsed: unknown = JSON.parse(item);
-            if (typeof parsed !== 'object' || parsed === null) return null;
+            if (typeof parsed !== 'object' || parsed === null) {
+              localStorage.removeItem(name);
+              return null;
+            }
 
             const stateOrItems = (parsed as { state?: unknown }).state ?? parsed;
-            if (typeof stateOrItems !== 'object' || stateOrItems === null) return null;
+            if (typeof stateOrItems !== 'object' || stateOrItems === null) {
+              localStorage.removeItem(name);
+              return null;
+            }
 
             const rawItems: unknown = (stateOrItems as { items?: unknown }).items;
-            if (!Array.isArray(rawItems)) return null;
+            if (!Array.isArray(rawItems)) {
+              localStorage.removeItem(name);
+              return null;
+            }
 
             const updatedAt = (stateOrItems as { updatedAt?: unknown }).updatedAt;
             if (typeof updatedAt === 'number') {
@@ -196,7 +205,15 @@ export const useCartStore = create<CartState>()(
               state: { items: cleanItems, totalQuantity },
               version: 2,
             };
-          } catch {
+          } catch (err) {
+            if (import.meta.env.DEV) {
+              console.warn('[cart] persisted state unreadable, removing key', err);
+            }
+            try {
+              localStorage.removeItem(name);
+            } catch {
+              // Ignore — quota / privacy mode errors don't need to crash.
+            }
             return null;
           }
         },

@@ -115,49 +115,66 @@ stockMovementsRoutes.post('/', async (c) => {
 
   const { variantId, quantity, reason } = parsed.data;
 
-  // Verify variant exists
-  const [variant] = await db
-    .select({ id: soapVariants.id })
-    .from(soapVariants)
-    .where(eq(soapVariants.id, variantId));
+  // Wrap the existence check, balance check, and insert in a single
+  // transaction with a row lock on the variant so two concurrent negative
+  // adjustments can't both observe the same starting balance and over-allocate.
+  try {
+    const result = await db.transaction(async (tx) => {
+      const [variant] = await tx
+        .select({ id: soapVariants.id })
+        .from(soapVariants)
+        .where(eq(soapVariants.id, variantId))
+        .for('update');
 
-  if (!variant) {
-    return c.json({ error: 'Variant not found' }, 404);
-  }
+      if (!variant) {
+        return { notFound: true as const };
+      }
 
-  // If quantity is negative, check that resulting stock won't go below 0
-  if (quantity < 0) {
-    const [current] = await db
-      .select({
-        total: sql<number>`coalesce(sum(${stockMovements.quantity}), 0)`,
-      })
-      .from(stockMovements)
-      .where(eq(stockMovements.variantId, variantId));
+      if (quantity < 0) {
+        const [current] = await tx
+          .select({
+            total: sql<number>`coalesce(sum(${stockMovements.quantity}), 0)`,
+          })
+          .from(stockMovements)
+          .where(eq(stockMovements.variantId, variantId));
 
-    const currentStock = Number(current.total);
-    if (currentStock + quantity < 0) {
+        const currentStock = Number(current.total);
+        if (currentStock + quantity < 0) {
+          return { insufficient: true as const, currentStock, requestedChange: quantity };
+        }
+      }
+
+      const [movement] = await tx
+        .insert(stockMovements)
+        .values({
+          variantId,
+          type: 'adjustment',
+          quantity,
+          reason,
+        })
+        .returning();
+
+      return { movement };
+    });
+
+    if ('notFound' in result) {
+      return c.json({ error: 'Variant not found' }, 404);
+    }
+    if ('insufficient' in result) {
       return c.json(
         {
           error: 'Insufficient stock',
-          currentStock,
-          requestedChange: quantity,
+          currentStock: result.currentStock,
+          requestedChange: result.requestedChange,
         },
         400,
       );
     }
+    return c.json({ movement: result.movement }, 201);
+  } catch (err) {
+    console.error('[stock-movements] adjustment failed:', err);
+    return c.json({ error: 'Failed to record stock movement' }, 500);
   }
-
-  const [movement] = await db
-    .insert(stockMovements)
-    .values({
-      variantId,
-      type: 'adjustment',
-      quantity,
-      reason,
-    })
-    .returning();
-
-  return c.json({ movement }, 201);
 });
 
 export default stockMovementsRoutes;

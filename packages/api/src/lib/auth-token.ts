@@ -51,6 +51,7 @@ export function verifyAdminToken(token: string): AdminTokenPayload | null {
   }
 
   const [header, body, sig] = token.split('.');
+  if (!header || !body || !sig) return null;
   const expected = createHmac('sha256', getSecret()).update(`${header}.${body}`).digest();
 
   let provided: Buffer;
@@ -71,9 +72,30 @@ export function verifyAdminToken(token: string): AdminTokenPayload | null {
     return null;
   }
 
-  if (typeof payload.exp !== 'number' || payload.exp < Date.now()) {
+  // Reject anything that doesn't have the contract fields we expect. Using
+  // a Zod schema would be nicer, but a hand-rolled guard keeps the
+  // dependency footprint small and dodges prototype-pollution risks.
+  if (
+    typeof payload !== 'object' ||
+    payload === null ||
+    typeof payload.sub !== 'string' ||
+    payload.sub.length === 0 ||
+    payload.sub.length > 128
+  ) {
     return null;
   }
+  if (typeof payload.iat !== 'number' || !Number.isFinite(payload.iat)) {
+    return null;
+  }
+  if (typeof payload.exp !== 'number' || !Number.isFinite(payload.exp)) {
+    return null;
+  }
+
+  const now = Date.now();
+  // 30s clock skew tolerance in both directions.
+  const SKEW_MS = 30_000;
+  if (payload.iat - SKEW_MS > now) return null;
+  if (payload.exp < now) return null;
 
   return payload;
 }

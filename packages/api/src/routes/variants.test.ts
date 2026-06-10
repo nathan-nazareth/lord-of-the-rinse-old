@@ -17,6 +17,8 @@ const { mocks } = vi.hoisted(() => {
     c.values = vi.fn(() => chain());
     c.limit = vi.fn(() => chain());
     c.onConflictDoUpdate = vi.fn(() => chain());
+    c.for = vi.fn(() => chain());
+    c.groupBy = vi.fn(() => chain());
 
     c._resolve = (v: unknown) => _resolve!(v);
     return c;
@@ -147,11 +149,13 @@ function setupSelectChain(result: unknown) {
       where: vi.fn(() => {
         const innerChain = {
           orderBy: vi.fn(() => Promise.resolve(result)),
+          for: vi.fn(() => Promise.resolve(result)),
           then: (onFulfilled: (v: unknown) => unknown) => Promise.resolve(result).then(onFulfilled),
         };
         return innerChain;
       }),
       orderBy: vi.fn(() => Promise.resolve(result)),
+      for: vi.fn(() => Promise.resolve(result)),
     })),
   });
 }

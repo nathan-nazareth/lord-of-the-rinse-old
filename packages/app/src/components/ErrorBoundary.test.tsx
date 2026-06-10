@@ -41,11 +41,13 @@ describe('ErrorBoundary', () => {
       </ErrorBoundary>,
     );
     expect(consoleSpy).toHaveBeenCalled();
+    // The ErrorBoundary now forwards render errors through `logError`
+    // (which serialises a StructuredError object as JSON), so the call
+    // we expect is a single JSON-string argument rather than two
+    // separate console args.
     const lastCall = consoleSpy.mock.calls[consoleSpy.mock.calls.length - 1];
-    expect(lastCall[0]).toContain('[ErrorBoundary] Render error:');
-    expect(lastCall[1]).toMatchObject({
-      message: 'Test render error',
-    });
+    const joined = lastCall.map((a) => (typeof a === 'string' ? a : JSON.stringify(a))).join(' ');
+    expect(joined).toContain('Test render error');
   });
 
   it('passes error message to the UI', () => {

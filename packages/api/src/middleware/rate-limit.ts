@@ -104,16 +104,34 @@ function check(
   return { allowed: true, retryAfter: 0 };
 }
 
-const sweepTimer = setInterval(() => {
-  const now = Date.now();
-  for (const [key, bucket] of buckets) {
-    if (bucket.resetAt < now) buckets.delete(key);
-  }
-  evictIfFull();
-}, SWEEP_INTERVAL_MS);
-sweepTimer.unref();
+let sweepTimer: ReturnType<typeof setInterval> | null = null;
+
+function startSweepTimer(): void {
+  if (sweepTimer) return;
+  sweepTimer = setInterval(() => {
+    const now = Date.now();
+    // Collect keys first to avoid mutating the Map while iterating.
+    const expired: string[] = [];
+    for (const [key, bucket] of buckets) {
+      if (bucket.resetAt < now) expired.push(key);
+    }
+    for (const key of expired) buckets.delete(key);
+    evictIfFull();
+  }, SWEEP_INTERVAL_MS);
+  // Don't pin the event loop on a long-running server.
+  sweepTimer.unref();
+}
+
+startSweepTimer();
 
 export function resetRateLimit(): void {
+  buckets.clear();
+}
+
+export function closeRateLimit(): void {
+  if (!sweepTimer) return;
+  clearInterval(sweepTimer);
+  sweepTimer = null;
   buckets.clear();
 }
 

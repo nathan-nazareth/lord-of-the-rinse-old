@@ -109,27 +109,28 @@ variantsRoutes.post('/', async (c) => {
     return c.json({ error: 'One or more attribute IDs are invalid' }, 400);
   }
 
-  // Create variant
-  const [created] = await db.insert(soapVariants).values({ name, slug, unitPrice }).returning();
+  // Wrap the variant + attribute-link inserts in a single transaction so a
+  // failure on the second insert can't leave a half-created variant with
+  // no attributes visible to the storefront.
+  const result = await db.transaction(async (tx) => {
+    const [created] = await tx
+      .insert(soapVariants)
+      .values({ name, slug, unitPrice })
+      .returning();
+    if (!created) {
+      throw new Error('variant_insert_returned_no_row');
+    }
+    await tx.insert(variantAttributes).values(
+      attributes.map((a) => ({
+        variantId: created.id,
+        attributeId: a.attributeId,
+        value: a.value,
+      })),
+    );
+    return { ...created, attributes };
+  });
 
-  // Create variant-attribute links
-  await db.insert(variantAttributes).values(
-    attributes.map((a) => ({
-      variantId: created.id,
-      attributeId: a.attributeId,
-      value: a.value,
-    })),
-  );
-
-  return c.json(
-    {
-      variant: {
-        ...created,
-        attributes,
-      },
-    },
-    201,
-  );
+  return c.json({ variant: result }, 201);
 });
 
 // Update variant (name, slug, price, enabled, archived, attributes)
@@ -142,44 +143,44 @@ variantsRoutes.patch('/:id', async (c) => {
     return c.json({ error: 'Validation failed', details: parsed.error.flatten() }, 400);
   }
 
-  // Check variant exists
-  const [existing] = await db.select().from(soapVariants).where(eq(soapVariants.id, id));
-
-  if (!existing) {
-    return c.json({ error: 'Variant not found' }, 404);
-  }
-
-  // Check for duplicate slug if slug is being changed
-  if (parsed.data.slug && parsed.data.slug !== existing.slug) {
-    const [slugConflict] = await db
-      .select({ id: soapVariants.id })
-      .from(soapVariants)
-      .where(eq(soapVariants.slug, parsed.data.slug));
-
-    if (slugConflict) {
-      return c.json({ error: 'A variant with this slug already exists' }, 409);
-    }
-  }
-
-  // If attributes are provided, validate they exist
-  if (parsed.data.attributes) {
-    const attrIds = parsed.data.attributes.map((a) => a.attributeId);
-    const foundAttrs = await db
-      .select({ id: catalogAttributes.id })
-      .from(catalogAttributes)
-      .where(inArray(catalogAttributes.id, attrIds));
-
-    if (foundAttrs.length !== attrIds.length) {
-      return c.json({ error: 'One or more attribute IDs are invalid' }, 400);
-    }
-  }
-
   const { attributes: newAttrs, ...variantFields } = parsed.data;
 
-  // Wrap the variant update + attribute-link replacement in a single
-  // transaction so a half-applied state (variant updated but no attributes)
-  // can't leak if the insert fails.
+  // Do existence / slug / attribute-id checks and the mutation inside a
+  // single transaction so a concurrent DELETE can't race the read.
   const result = await db.transaction(async (tx) => {
+    const [existing] = await tx
+      .select()
+      .from(soapVariants)
+      .where(eq(soapVariants.id, id))
+      .for('update');
+
+    if (!existing) {
+      return { notFound: true as const };
+    }
+
+    // Check for duplicate slug if slug is being changed
+    if (variantFields.slug && variantFields.slug !== existing.slug) {
+      const [slugConflict] = await tx
+        .select({ id: soapVariants.id })
+        .from(soapVariants)
+        .where(eq(soapVariants.slug, variantFields.slug));
+      if (slugConflict) {
+        return { slugConflict: true as const };
+      }
+    }
+
+    // If attributes are provided, validate they exist
+    if (newAttrs) {
+      const attrIds = newAttrs.map((a) => a.attributeId);
+      const foundAttrs = await tx
+        .select({ id: catalogAttributes.id })
+        .from(catalogAttributes)
+        .where(inArray(catalogAttributes.id, attrIds));
+      if (foundAttrs.length !== attrIds.length) {
+        return { invalidAttributes: true as const };
+      }
+    }
+
     const [updated] = await tx
       .update(soapVariants)
       .set({
@@ -216,6 +217,11 @@ variantsRoutes.patch('/:id', async (c) => {
     return { variant: { ...updated, attributes: finalAttrs } };
   });
 
+  if ('notFound' in result) return c.json({ error: 'Variant not found' }, 404);
+  if ('slugConflict' in result)
+    return c.json({ error: 'A variant with this slug already exists' }, 409);
+  if ('invalidAttributes' in result)
+    return c.json({ error: 'One or more attribute IDs are invalid' }, 400);
   return c.json(result);
 });
 

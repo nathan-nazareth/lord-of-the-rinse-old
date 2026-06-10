@@ -1,4 +1,5 @@
 import { Component } from 'react';
+import { logError } from '../utils/errorLogging';
 import { FallbackUI } from './FallbackUI';
 
 type EBProps = { children: import('react').ReactNode };
@@ -12,16 +13,12 @@ export class ErrorBoundary extends Component<EBProps, EBState> {
   }
 
   componentDidCatch(error: Error, errorInfo: import('react').ErrorInfo) {
-    console.error('[ErrorBoundary] Render error:', {
-      message: error.message,
-      stack: error.stack,
-      componentStack: errorInfo.componentStack,
-      timestamp: new Date().toISOString(),
-    });
+    logError(error, 'render', { componentStack: errorInfo.componentStack });
   }
 
   handleRetry = () => {
-    this.setState({ hasError: false, error: null });
+    // window.location.reload() re-mounts the entire tree, so the local
+    // setState is redundant — drop it to avoid confusing readers.
     window.location.reload();
   };
 

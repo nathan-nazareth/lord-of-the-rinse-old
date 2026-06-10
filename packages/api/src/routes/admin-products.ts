@@ -47,8 +47,24 @@ productsRoutes.post('/', async (c) => {
     return c.json({ error: 'Invalid product fields' }, 422);
   }
 
+  // weight + price must be non-negative integers. Also reject NaN explicitly
+  // so a hand-crafted `{ "weight": "abc" }` body can't slip through.
+  if (typeof body.weight === 'string' || typeof body.weight === 'boolean') {
+    return c.json({ error: 'weight must be a number' }, 422);
+  }
+  if (typeof body.price === 'string' || typeof body.price === 'boolean') {
+    return c.json({ error: 'price must be a number' }, 422);
+  }
+
   // weight + price must be non-negative integers (SQLite integer columns).
-  // Reject floats at the API boundary so the contract is honest.
+  // Reject floats AND null/undefined so the contract is honest. A null
+  // value would otherwise silently coerce to 0 and pass validation.
+  if (body.weight === null || body.weight === undefined) {
+    return c.json({ error: 'weight is required' }, 422);
+  }
+  if (body.price === null || body.price === undefined) {
+    return c.json({ error: 'price is required' }, 422);
+  }
   const weight = Number(body.weight);
   const price = Number(body.price);
   if (!Number.isInteger(weight) || weight < 0 || !Number.isInteger(price) || price < 0) {

@@ -1,4 +1,4 @@
-import { adminDb, adminOptions } from './admin';
+import { adminDb, adminOptions, adminClient } from './admin';
 
 async function seed() {
   const existing = await adminDb.select().from(adminOptions).limit(1);
@@ -21,4 +21,22 @@ async function seed() {
   console.log('Admin options seeded: minPrice=500, maxPrice=5000, minSize=50, maxSize=500');
 }
 
-seed().catch(console.error);
+const isMainModule =
+  typeof import.meta !== 'undefined' &&
+  typeof process !== 'undefined' &&
+  import.meta.url === `file://${process.argv[1]}`;
+
+if (isMainModule) {
+  seed()
+    .catch((err) => {
+      console.error('[admin-seed] failed:', err);
+      process.exitCode = 1;
+    })
+    .finally(() => {
+      try {
+        adminClient.close();
+      } catch {
+        // ignore
+      }
+    });
+}

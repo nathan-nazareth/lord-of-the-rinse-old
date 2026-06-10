@@ -1,7 +1,8 @@
 import { adminDb, adminOptions } from '@lotr/db/admin';
-import { eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { adminAuth } from '../middleware/admin-auth';
+
+const MAX_BOUND = 1_000_000;
 
 const optionsRoutes = new Hono();
 
@@ -16,64 +17,64 @@ optionsRoutes.get('/', async (c) => {
 });
 
 optionsRoutes.put('/', async (c) => {
-  let body: {
-    minPrice: number;
-    maxPrice: number;
-    minSize: number;
-    maxSize: number;
-  };
+  let raw: unknown;
   try {
-    body = await c.req.json();
+    raw = await c.req.json();
   } catch {
     return c.json({ error: 'Invalid JSON body' }, 400);
   }
 
-  if (
-    !Number.isInteger(body.minPrice) ||
-    !Number.isInteger(body.maxPrice) ||
-    !Number.isInteger(body.minSize) ||
-    !Number.isInteger(body.maxSize)
-  ) {
-    return c.json({ error: 'Numeric fields must be integers' }, 422);
+  if (typeof raw !== 'object' || raw === null) {
+    return c.json({ error: 'Invalid JSON body' }, 400);
+  }
+  const body = raw as Record<string, unknown>;
+  const fields = ['minPrice', 'maxPrice', 'minSize', 'maxSize'] as const;
+
+  const values: Record<string, number> = {};
+  for (const field of fields) {
+    const v = body[field];
+    if (typeof v !== 'number' || !Number.isInteger(v) || v < 0 || v > MAX_BOUND) {
+      return c.json(
+        { error: `${field} must be a non-negative integer ≤ ${MAX_BOUND}` },
+        422,
+      );
+    }
+    values[field] = v;
   }
 
-  if (body.maxPrice < body.minPrice) {
+  if (values.maxPrice < values.minPrice) {
     return c.json({ error: 'maxPrice must be >= minPrice' }, 422);
   }
-  if (body.maxSize < body.minSize) {
+  if (values.maxSize < values.minSize) {
     return c.json({ error: 'maxSize must be >= minSize' }, 422);
   }
 
   const now = new Date().toISOString();
-  const existing = await adminDb.select().from(adminOptions).limit(1);
+  // Atomic upsert: avoids the SELECT-then-INSERT/UPDATE race that
+  // produced SQLITE_CONSTRAINT_PRIMARYKEY 500s on cold starts.
+  const result = await adminDb
+    .insert(adminOptions)
+    .values({
+      id: 1,
+      minPrice: values.minPrice,
+      maxPrice: values.maxPrice,
+      minSize: values.minSize,
+      maxSize: values.maxSize,
+      updatedAt: now,
+    })
+    .onConflictDoUpdate({
+      target: adminOptions.id,
+      set: {
+        minPrice: values.minPrice,
+        maxPrice: values.maxPrice,
+        minSize: values.minSize,
+        maxSize: values.maxSize,
+        updatedAt: now,
+      },
+    })
+    .returning();
 
-  if (existing[0]) {
-    const result = await adminDb
-      .update(adminOptions)
-      .set({
-        minPrice: body.minPrice,
-        maxPrice: body.maxPrice,
-        minSize: body.minSize,
-        maxSize: body.maxSize,
-        updatedAt: now,
-      })
-      .where(eq(adminOptions.id, existing[0].id))
-      .returning();
-    return c.json(result[0]);
-  } else {
-    const result = await adminDb
-      .insert(adminOptions)
-      .values({
-        id: 1,
-        minPrice: body.minPrice,
-        maxPrice: body.maxPrice,
-        minSize: body.minSize,
-        maxSize: body.maxSize,
-        updatedAt: now,
-      })
-      .returning();
-    return c.json(result[0]);
-  }
+  return c.json(result[0]);
 });
 
 export default optionsRoutes;

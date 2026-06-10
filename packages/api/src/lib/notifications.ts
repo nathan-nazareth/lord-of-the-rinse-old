@@ -90,10 +90,26 @@ async function buildWeb3FormsPayload(
  *
  * Designed to be called fire-and-forget after checkout.
  */
+async function recordSkipped(orderId: string, lastError: string): Promise<void> {
+  try {
+    await db
+      .update(notificationAttempts)
+      .set({
+        status: 'skipped',
+        lastError,
+        updatedAt: new Date(),
+      })
+      .where(eq(notificationAttempts.orderId, orderId));
+  } catch (err) {
+    console.error('[dispatchNotification] could not record skipped status:', err);
+  }
+}
+
 export async function dispatchNotification(orderId: string): Promise<void> {
   // Check enabled setting
   const enabled = await isWeb3FormsEnabled();
   if (!enabled) {
+    await recordSkipped(orderId, 'web3forms_disabled');
     return;
   }
 
@@ -103,6 +119,7 @@ export async function dispatchNotification(orderId: string): Promise<void> {
       '[dispatchNotification] WEB3FORMS_ACCESS_KEY is not set; skipping notification for order',
       orderId,
     );
+    await recordSkipped(orderId, 'missing_WEB3FORMS_ACCESS_KEY');
     return;
   }
 
@@ -135,8 +152,16 @@ export async function dispatchNotification(orderId: string): Promise<void> {
     });
 
     if (!response.ok) {
-      const text = await response.text().catch(() => 'Unknown error');
-      throw new Error(`Web3Forms ${response.status}: ${text}`);
+      const rawText = await response.text().catch(() => 'Unknown error');
+      // Sanitize Web3Forms' response body before persisting it as
+      // `lastError`. The downstream email provider has been known to
+      // echo back the submitted access_key / replyto in 4xx responses,
+      // which would otherwise leak into the admin UI and logs.
+      const sanitized = rawText
+        .replace(/access_key=[^&\s"]+/gi, 'access_key=[redacted]')
+        .replace(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g, '[email]')
+        .slice(0, 200);
+      throw new Error(`Web3Forms ${response.status}: ${sanitized}`);
     }
 
     // Success

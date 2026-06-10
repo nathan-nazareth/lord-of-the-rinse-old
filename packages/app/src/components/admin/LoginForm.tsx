@@ -28,18 +28,35 @@ export function LoginForm() {
         setError('Too many attempts. Please wait a minute and try again.');
         return;
       }
-      if (!res.ok) {
+      if (res.status === 401) {
         setError('Invalid password');
         return;
       }
+      if (!res.ok) {
+        setError('Login failed. Please try again.');
+        return;
+      }
 
-      const data = (await res.json()) as { token?: string };
-      if (!data.token) {
+      let data: unknown;
+      try {
+        data = await res.json();
+      } catch {
         setError('Server returned an invalid response');
         return;
       }
 
-      setAuth(data.token);
+      const token =
+        typeof data === 'object' &&
+        data !== null &&
+        typeof (data as { token?: unknown }).token === 'string'
+          ? (data as { token: string }).token
+          : '';
+      if (token.length === 0) {
+        setError('Server returned an invalid response');
+        return;
+      }
+
+      setAuth(token);
       navigate({ to: '/admin/products' });
     } catch {
       setError('Network error. Please try again.');

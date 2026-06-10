@@ -85,8 +85,9 @@ ordersRoutes.patch('/:id/status', async (c) => {
         return { notFound: true as const };
       }
 
-      const allowed = validTransitions[order.status as keyof typeof validTransitions];
-      if (!allowed?.includes(newStatus)) {
+      const fromStatus = order.status as keyof typeof validTransitions;
+      const transitions = validTransitions[fromStatus];
+      if (!transitions?.includes(newStatus)) {
         return {
           invalidTransition: true as const,
           from: order.status,
@@ -147,7 +148,9 @@ ordersRoutes.patch('/:id/status', async (c) => {
     return c.json({ order: result.order });
   } catch (err) {
     console.error('[orders] status update failed:', err);
-    return c.json({ error: 'Failed to update order status' }, 500);
+    // Defer the global error handler so unique-violation / 23505 becomes
+    // a 409 instead of a misleading 500.
+    throw err;
   }
 });
 
@@ -155,50 +158,63 @@ ordersRoutes.patch('/:id/status', async (c) => {
 ordersRoutes.post('/:id/retry-notification', async (c) => {
   const id = c.req.param('id');
 
-  // Verify order exists
-  const [order] = await db.select().from(orders).where(eq(orders.id, id));
+  try {
+    // Validate the attempt inside the same transaction we use to flip its
+    // status, so a process kill between the update and the dispatch can't
+    // leave the row stuck in 'pending' with an inflated attempts count.
+    const result = await db.transaction(async (tx) => {
+      const [order] = await tx.select().from(orders).where(eq(orders.id, id));
+      if (!order) return { notFound: 'order' as const };
 
-  if (!order) {
-    return c.json({ error: 'Order not found' }, 404);
+      const [attempt] = await tx
+        .select()
+        .from(notificationAttempts)
+        .where(eq(notificationAttempts.orderId, id))
+        .limit(1);
+      if (!attempt) return { notFound: 'attempt' as const };
+
+      if (attempt.status !== 'pending' && attempt.status !== 'failed' && attempt.status !== 'skipped') {
+        return { invalidStatus: attempt.status as string };
+      }
+
+      await tx
+        .update(notificationAttempts)
+        .set({ status: 'pending', updatedAt: new Date() })
+        .where(eq(notificationAttempts.id, attempt.id));
+
+      return { attemptId: attempt.id };
+    });
+
+    if ('notFound' in result) {
+      const message =
+        result.notFound === 'order' ? 'Order not found' : 'No notification attempt found for this order';
+      const status = result.notFound === 'order' ? 404 : 404;
+      return c.json({ error: message }, status);
+    }
+    if ('invalidStatus' in result) {
+      return c.json(
+        { error: `Cannot retry notification with status '${result.invalidStatus}'` },
+        400,
+      );
+    }
+
+    await dispatchNotification(id);
+
+    const [updated] = await db
+      .select()
+      .from(notificationAttempts)
+      .where(eq(notificationAttempts.id, result.attemptId));
+
+    if (!updated) {
+      console.error('[orders] notification attempt vanished for id', result.attemptId);
+      return c.json({ error: 'Notification attempt not found after retry' }, 500);
+    }
+
+    return c.json({ notification: updated });
+  } catch (err) {
+    console.error('[orders] retry-notification failed:', err);
+    return c.json({ error: 'Failed to retry notification' }, 500);
   }
-
-  // Find the notification attempt
-  const [attempt] = await db
-    .select()
-    .from(notificationAttempts)
-    .where(eq(notificationAttempts.orderId, id))
-    .limit(1);
-
-  if (!attempt) {
-    return c.json({ error: 'No notification attempt found for this order' }, 404);
-  }
-
-  // Only allow retry for pending or failed
-  if (attempt.status !== 'pending' && attempt.status !== 'failed') {
-    return c.json({ error: `Cannot retry notification with status '${attempt.status}'` }, 400);
-  }
-
-  // Reset status to pending before dispatch
-  await db
-    .update(notificationAttempts)
-    .set({ status: 'pending', updatedAt: new Date() })
-    .where(eq(notificationAttempts.id, attempt.id));
-
-  // Await the dispatch so we can return the result
-  await dispatchNotification(id);
-
-  // Fetch updated attempt
-  const [updated] = await db
-    .select()
-    .from(notificationAttempts)
-    .where(eq(notificationAttempts.id, attempt.id));
-
-  if (!updated) {
-    console.error('[orders] notification attempt vanished for id', attempt.id);
-    return c.json({ error: 'Notification attempt not found after retry' }, 500);
-  }
-
-  return c.json({ notification: updated });
 });
 
 export default ordersRoutes;

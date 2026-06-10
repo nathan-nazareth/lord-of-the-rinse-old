@@ -202,20 +202,19 @@ export const Cart: React.FC<CartProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showRateLimitModal, setShowRateLimitModal] = useState(false);
   const closeButtonRef = React.useRef<HTMLButtonElement>(null);
-  const rateLimitStore = useRateLimitStore();
+  // Subscribe to the smallest possible slice of the store so we don't
+  // re-render the entire cart on every mutation of unrelated fields.
+  const isAllowed = useRateLimitStore((s) => s.isAllowed(10, 300_000));
+  const lastSubmission = useRateLimitStore((s) => s.lastSubmission);
+  const recordSubmission = useRateLimitStore((s) => s.recordSubmission);
   const currency = 'Rs.';
-  const maxSubmissions = 10;
-  const windowMs = 300000;
-  const isAllowed = rateLimitStore.isAllowed(maxSubmissions, windowMs);
-  const cooldownRemaining = (() => {
-    const now = Date.now();
-    const windowExpired =
-      rateLimitStore.windowStart < 0 || now - rateLimitStore.windowStart >= windowMs;
-    if (rateLimitStore.count >= maxSubmissions && !windowExpired) {
-      return Math.ceil((windowMs - (now - rateLimitStore.windowStart)) / 1000);
-    }
-    return null;
-  })();
+  const WINDOW_MS = 300_000;
+  const cooldownRemaining = React.useMemo(() => {
+    if (lastSubmission <= 0) return null;
+    const elapsed = Date.now() - lastSubmission;
+    if (elapsed >= WINDOW_MS) return null;
+    return Math.ceil((WINDOW_MS - elapsed) / 1000);
+  }, [lastSubmission]);
 
   // Auto-open the rate limit modal when the user gets blocked.
   React.useEffect(() => {
@@ -296,7 +295,7 @@ export const Cart: React.FC<CartProps> = ({
         // Only record the rate-limit hit on a confirmed success. Failed
         // attempts must NOT consume the budget, otherwise a flapping
         // network would lock the user out.
-        rateLimitStore.recordSubmission(windowMs);
+        recordSubmission(WINDOW_MS);
         const itemsOrdered = cart.totalQuantity;
         setOrderItemCount(itemsOrdered);
         setShowConfirmation(true);
