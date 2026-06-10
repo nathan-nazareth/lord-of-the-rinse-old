@@ -2,5 +2,5 @@
   "framework": null,
   "version": 2,
   "buildCommand": "npm run build",
-  "outputDirectory": "packages/app/dist"
+  "outputDirectory": "dist"
 }
