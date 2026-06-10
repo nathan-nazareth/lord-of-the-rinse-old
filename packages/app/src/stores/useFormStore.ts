@@ -53,7 +53,8 @@ export const useFormStore = create<FormState & FormActions>()(
             if (
               typeof parsed !== 'object' ||
               parsed === null ||
-              (parsed as { state?: unknown }).state === undefined
+              typeof (parsed as { state?: unknown }).state !== 'object' ||
+              (parsed as { state?: unknown }).state === null
             ) {
               return null;
             }

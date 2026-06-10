@@ -119,16 +119,18 @@ export const useCartStore = create<CartState>()(
             const item = localStorage.getItem(name);
             if (!item) return null;
 
-            const parsed = JSON.parse(item);
-            const stateOrItems = parsed?.state ?? parsed;
+            const parsed: unknown = JSON.parse(item);
+            if (typeof parsed !== 'object' || parsed === null) return null;
 
-            if (!stateOrItems) return null;
+            const stateOrItems = (parsed as { state?: unknown }).state ?? parsed;
+            if (typeof stateOrItems !== 'object' || stateOrItems === null) return null;
 
-            const rawItems: unknown = stateOrItems.items;
+            const rawItems: unknown = (stateOrItems as { items?: unknown }).items;
             if (!Array.isArray(rawItems)) return null;
 
-            if (stateOrItems.updatedAt) {
-              if (Date.now() - stateOrItems.updatedAt > CART_EXPIRY_MS) {
+            const updatedAt = (stateOrItems as { updatedAt?: unknown }).updatedAt;
+            if (typeof updatedAt === 'number') {
+              if (Date.now() - updatedAt > CART_EXPIRY_MS) {
                 localStorage.removeItem(name);
                 return null;
               }
@@ -183,8 +185,13 @@ export function detectAndClearLegacyCart(): boolean {
     const raw = localStorage.getItem(CART_KEY);
     if (!raw) return false;
 
-    const parsed = JSON.parse(raw);
-    const items: unknown[] = parsed?.state?.items ?? parsed?.items ?? [];
+    const parsed: unknown = JSON.parse(raw);
+    if (typeof parsed !== 'object' || parsed === null) return false;
+
+    const items: unknown[] =
+      (parsed as { state?: { items?: unknown[] } }).state?.items ??
+      (parsed as { items?: unknown[] }).items ??
+      [];
 
     const hasLegacy = items.some((item) => {
       if (typeof item !== 'object' || item === null) return true;

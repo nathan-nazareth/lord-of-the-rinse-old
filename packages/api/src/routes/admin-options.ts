@@ -29,12 +29,12 @@ optionsRoutes.put('/', async (c) => {
   }
 
   if (
-    !Number.isFinite(body.minPrice) ||
-    !Number.isFinite(body.maxPrice) ||
-    !Number.isFinite(body.minSize) ||
-    !Number.isFinite(body.maxSize)
+    !Number.isInteger(body.minPrice) ||
+    !Number.isInteger(body.maxPrice) ||
+    !Number.isInteger(body.minSize) ||
+    !Number.isInteger(body.maxSize)
   ) {
-    return c.json({ error: 'Numeric fields must be finite' }, 422);
+    return c.json({ error: 'Numeric fields must be integers' }, 422);
   }
 
   if (body.maxPrice < body.minPrice) {
@@ -50,14 +50,27 @@ optionsRoutes.put('/', async (c) => {
   if (existing[0]) {
     const result = await adminDb
       .update(adminOptions)
-      .set({ ...body, updatedAt: now })
+      .set({
+        minPrice: body.minPrice,
+        maxPrice: body.maxPrice,
+        minSize: body.minSize,
+        maxSize: body.maxSize,
+        updatedAt: now,
+      })
       .where(eq(adminOptions.id, existing[0].id))
       .returning();
     return c.json(result[0]);
   } else {
     const result = await adminDb
       .insert(adminOptions)
-      .values({ id: 1, ...body, updatedAt: now })
+      .values({
+        id: 1,
+        minPrice: body.minPrice,
+        maxPrice: body.maxPrice,
+        minSize: body.minSize,
+        maxSize: body.maxSize,
+        updatedAt: now,
+      })
       .returning();
     return c.json(result[0]);
   }

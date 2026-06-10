@@ -9,7 +9,7 @@ import {
   IconSparkles,
   IconSquare,
 } from '@tabler/icons-react';
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   LAVENDER_PIECES_PRICE,
   SHAPE_OPTIONS,
@@ -212,6 +212,28 @@ export const SoapForm: React.FC<SoapFormProps> = ({
   const colorSectionRef = useRef<HTMLDivElement>(null);
   const quantitySectionRef = useRef<HTMLDivElement>(null);
 
+  // Track every pending scroll setTimeout so we can clear them on unmount
+  // and reset the queue when the user navigates rapidly between steps.
+  const timeoutsRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
+  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const pending = timeoutsRef.current;
+    return () => {
+      for (const id of pending) clearTimeout(id);
+      pending.clear();
+      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    };
+  }, []);
+
+  const scheduleScroll = (ref: React.RefObject<HTMLDivElement | null>, delay: number) => {
+    const id = setTimeout(() => {
+      timeoutsRef.current.delete(id);
+      ref.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, delay);
+    timeoutsRef.current.add(id);
+  };
+
   const scrollToSection = (ref: React.RefObject<HTMLDivElement | null>) => {
     ref.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
@@ -220,29 +242,29 @@ export const SoapForm: React.FC<SoapFormProps> = ({
     const options = getSizeOptions(shape);
     setField('shape', shape);
     setField('size', options[0].grams);
-    setTimeout(() => scrollToSection(flavorSectionRef), 300);
+    scheduleScroll(flavorSectionRef, 300);
   };
 
   const handleScentChange = (scent: SoapScent) => {
     setField('scent', scent);
     setField('hasLavenderPieces', false);
-    setTimeout(() => scrollToSection(sizeSectionRef), 300);
+    scheduleScroll(sizeSectionRef, 300);
   };
 
   const handleSizeChange = (newSize: number) => {
     setField('size', newSize);
-    setTimeout(() => scrollToSection(lavenderSectionRef), 300);
+    scheduleScroll(lavenderSectionRef, 300);
   };
 
   const handleContinueFromLanding = () => {
     setVisited();
     setCurrentStep('shape');
-    setTimeout(() => scrollToSection(shapeSectionRef), 100);
+    scheduleScroll(shapeSectionRef, 100);
   };
 
   const handleColorChange = (color: SoapColor) => {
     setField('color', color);
-    setTimeout(() => scrollToSection(quantitySectionRef), 100);
+    scheduleScroll(quantitySectionRef, 100);
   };
 
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -259,19 +281,25 @@ export const SoapForm: React.FC<SoapFormProps> = ({
     const currentIdx = STEPS.indexOf(currentStep);
     if (stepIdx <= currentIdx) {
       setCurrentStep(step);
-      setTimeout(() => {
+      const id = setTimeout(() => {
+        timeoutsRef.current.delete(id);
         if (step === 'shape') scrollToSection(shapeSectionRef);
         if (step === 'scent') scrollToSection(flavorSectionRef);
         if (step === 'color') scrollToSection(colorSectionRef);
         if (step === 'quantity') scrollToSection(quantitySectionRef);
       }, 100);
+      timeoutsRef.current.add(id);
     }
   };
 
   const handleAddToCart = () => {
     if (!isFormValid) return;
     setShowAddedToast(true);
-    const toastTimeout = window.setTimeout(() => setShowAddedToast(false), 3500);
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    toastTimeoutRef.current = setTimeout(() => {
+      toastTimeoutRef.current = null;
+      setShowAddedToast(false);
+    }, 3500);
     // biome-ignore lint/style/noNonNullAssertion: validated by isFormValid before submit
     const shapeVal = shape!;
     // biome-ignore lint/style/noNonNullAssertion: validated by isFormValid before submit
@@ -290,9 +318,6 @@ export const SoapForm: React.FC<SoapFormProps> = ({
     );
     clear();
     setCurrentStep('shape');
-    // The toast setTimeout above is short-lived; we don't need to track it for
-    // unmount cleanup. Keep this placeholder comment to document intent.
-    void toastTimeout;
   };
 
   return (
@@ -433,7 +458,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({
                   type="button"
                   onClick={() => {
                     setCurrentStep('scent');
-                    setTimeout(() => scrollToSection(flavorSectionRef), 100);
+                    scheduleScroll(flavorSectionRef, 100);
                   }}
                   className="btn-apothecary btn-primary btn-full mt-2"
                 >
@@ -579,7 +604,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({
                     type="button"
                     onClick={() => {
                       setCurrentStep('color');
-                      setTimeout(() => scrollToSection(colorSectionRef), 100);
+                      scheduleScroll(colorSectionRef, 100);
                     }}
                     disabled={!isScentStepValid}
                     className="btn-apothecary btn-primary btn-full mt-2"
@@ -643,7 +668,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({
                     type="button"
                     onClick={() => {
                       setCurrentStep('quantity');
-                      setTimeout(() => scrollToSection(quantitySectionRef), 100);
+                      scheduleScroll(quantitySectionRef, 100);
                     }}
                     disabled={!color}
                     className="btn-apothecary btn-primary flex-1"

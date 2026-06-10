@@ -72,6 +72,9 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
   // AbortController for in-flight checkout so the request is cancelled on
   // unmount or when the user navigates away mid-submission.
   const inFlightController = useRef<AbortController | null>(null);
+  // Track deferred-scroll timers so they can be cleared on unmount instead
+  // of running against a detached ref.
+  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const cleared = detectAndClearLegacyCart();
@@ -80,11 +83,15 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Cancel any pending checkout on unmount.
+  // Cancel any pending checkout on unmount and clear any pending scroll timer.
   useEffect(() => {
     return () => {
       inFlightController.current?.abort();
       inFlightController.current = null;
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+        scrollTimeoutRef.current = null;
+      }
     };
   }, []);
 
@@ -95,7 +102,9 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
   const handleShopClick = useCallback(() => {
     setShowLanding(false);
     setVisited();
-    setTimeout(() => {
+    if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    scrollTimeoutRef.current = setTimeout(() => {
+      scrollTimeoutRef.current = null;
       formSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 50);
   }, [setVisited]);

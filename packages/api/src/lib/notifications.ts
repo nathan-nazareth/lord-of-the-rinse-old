@@ -24,15 +24,19 @@ function buildWeb3FormsPayload(
   order: { reference: string; customerName: string; customerEmail: string; total: string },
   lines: { displayName: string; quantity: number; unitPrice: string }[],
 ): Record<string, string> {
+  const fmtPrice = (raw: string): string => {
+    const n = Number.parseFloat(raw);
+    return Number.isFinite(n) ? n.toFixed(2) : '0.00';
+  };
   const itemsList = lines
-    .map((l) => `- ${l.displayName} x${l.quantity} @ $${Number.parseFloat(l.unitPrice).toFixed(2)}`)
+    .map((l) => `- ${l.displayName} x${l.quantity} @ $${fmtPrice(l.unitPrice)}`)
     .join('\n');
 
   const message = [
     `New order: ${order.reference}`,
     '',
     `Customer: ${order.customerName} (${order.customerEmail})`,
-    `Total: $${Number.parseFloat(order.total).toFixed(2)}`,
+    `Total: $${fmtPrice(order.total)}`,
     '',
     'Items:',
     itemsList,

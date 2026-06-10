@@ -26,9 +26,9 @@ export interface DiscountTier {
 }
 
 export interface CatalogSettings {
-  shop_open: string;
+  shop_open: boolean;
   currency: string;
-  discount_tiers: string;
+  discount_tiers: DiscountTier[];
 }
 
 export interface CatalogResponse {

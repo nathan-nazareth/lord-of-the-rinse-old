@@ -14,7 +14,6 @@ const WEB3FORMS_ENDPOINT =
 const WEB3FORMS_ACCESS_KEY = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY?.trim();
 const TIMEOUT_MS = 10000;
 const MAX_RETRIES = 3;
-const MIRROR_TIMEOUT_MS = 5000;
 
 function generateOrderId(): string {
   return crypto.randomUUID();
@@ -164,40 +163,6 @@ export async function submitCartToWebhook(
 
       if (responseData.success) {
         logWeb3FormsSuccess(orderId);
-
-        // Fire-and-forget mirror to the admin API so the shop owner has a
-        // record even if the customer-facing checkout API is unavailable.
-        // We attach a 5s timeout + signal so a hung server doesn't pin a
-        // fetch in the event loop forever.
-        const adminPayload = {
-          orderId,
-          customer,
-          items: items.map((i) => ({
-            id: i.id,
-            variantId: i.variantId,
-            shape: i.shape,
-            scent: i.scent,
-            color: i.color,
-            quantity: i.quantity,
-            size: i.size,
-            price: i.price,
-            hasLavenderPieces: i.hasLavenderPieces,
-          })),
-          totalQuantity,
-          subtotal,
-          discountPercentage,
-          discountAmount,
-          finalTotal,
-        };
-
-        const mirrorController = new AbortController();
-        const mirrorTimeout = setTimeout(() => mirrorController.abort(), MIRROR_TIMEOUT_MS);
-        // The admin POST /api/orders endpoint is intentionally removed from
-        // the API in this audit. The mirror is now a no-op: the customer
-        // checkout API path is the source of truth.
-        void mirrorController;
-        void adminPayload;
-        void mirrorTimeout;
 
         if (onStatusChange) {
           onStatusChange('submitted');

@@ -21,7 +21,7 @@ discountsRoutes.post('/', async (c) => {
   }
 
   if (
-    !Number.isFinite(body.percentage) ||
+    !Number.isInteger(body.percentage) ||
     typeof body.description !== 'string' ||
     body.description.trim().length === 0
   ) {
@@ -35,7 +35,7 @@ discountsRoutes.post('/', async (c) => {
   const now = new Date().toISOString();
   const result = await adminDb
     .insert(adminDiscounts)
-    .values({ ...body, active: 1, createdAt: now, updatedAt: now })
+    .values({ percentage: body.percentage, description: body.description.trim(), active: 1, createdAt: now, updatedAt: now })
     .returning();
 
   return c.json(result[0], 201);
@@ -56,15 +56,25 @@ discountsRoutes.put('/:id', async (c) => {
 
   if (
     body.percentage !== undefined &&
-    (!Number.isFinite(body.percentage) || body.percentage < 0 || body.percentage > 100)
+    (!Number.isInteger(body.percentage) || body.percentage < 0 || body.percentage > 100)
   ) {
-    return c.json({ error: 'Percentage must be a finite number between 0 and 100' }, 422);
+    return c.json({ error: 'Percentage must be an integer between 0 and 100' }, 422);
   }
 
+  const trimmedDescription =
+    typeof body.description === 'string' ? body.description.trim() : undefined;
+
   const now = new Date().toISOString();
+  const patch: { percentage?: number; description?: string; active?: number; updatedAt: string } = {
+    updatedAt: now,
+  };
+  if (body.percentage !== undefined) patch.percentage = body.percentage;
+  if (trimmedDescription !== undefined) patch.description = trimmedDescription;
+  if (body.active !== undefined) patch.active = body.active;
+
   const result = await adminDb
     .update(adminDiscounts)
-    .set({ ...body, updatedAt: now })
+    .set(patch)
     .where(eq(adminDiscounts.id, id))
     .returning();
 

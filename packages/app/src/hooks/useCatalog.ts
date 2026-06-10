@@ -8,7 +8,12 @@ async function fetchCatalog(): Promise<CatalogResponse> {
   if (!res.ok) {
     throw new Error(`Failed to fetch catalog: ${res.status}`);
   }
-  return res.json();
+  try {
+    return (await res.json()) as CatalogResponse;
+  } catch (err) {
+    console.error('[useCatalog] Invalid JSON in catalog response', err);
+    throw new Error('Catalog response was not valid JSON');
+  }
 }
 
 export function useCatalog() {

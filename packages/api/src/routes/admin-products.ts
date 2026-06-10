@@ -40,12 +40,12 @@ productsRoutes.post('/', async (c) => {
     return c.json({ error: 'Invalid product fields' }, 422);
   }
 
-  // weight + price must be non-negative finite numbers. The schema column is
-  // an integer; we coerce so floats don't blow up the SQLite insert.
+  // weight + price must be non-negative integers (SQLite integer columns).
+  // Reject floats at the API boundary so the contract is honest.
   const weight = Number(body.weight);
   const price = Number(body.price);
-  if (!Number.isFinite(weight) || weight < 0 || !Number.isFinite(price) || price < 0) {
-    return c.json({ error: 'Invalid product fields' }, 422);
+  if (!Number.isInteger(weight) || weight < 0 || !Number.isInteger(price) || price < 0) {
+    return c.json({ error: 'Weight and price must be non-negative integers' }, 422);
   }
 
   const opts = await adminDb.select().from(adminOptions).limit(1);
@@ -74,8 +74,8 @@ productsRoutes.post('/', async (c) => {
       color: body.color.trim(),
       scent: body.scent.trim(),
       shape: body.shape.trim(),
-      weight: Math.trunc(weight),
-      price: Math.trunc(price),
+      weight,
+      price,
       createdAt: now,
       updatedAt: now,
     })
