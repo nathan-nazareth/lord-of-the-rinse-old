@@ -68,7 +68,10 @@ export const updateVariantSchema = z.object({
 });
 
 export const catalogResponseSchema = z.object({
-  attributes: z.array(attributeSchema),
+  // The API groups attributes by `type` (shape/scent/color/size/addon) into a
+  // map, not a flat array. Keep the schema in lockstep with
+  // packages/api/src/routes/catalog.ts:119-123.
+  attributes: z.record(attributeTypeSchema, z.array(attributeSchema)),
   variants: z.array(variantSchema),
   settings: z.record(z.string(), z.unknown()),
 });

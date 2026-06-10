@@ -176,37 +176,47 @@ variantsRoutes.patch('/:id', async (c) => {
 
   const { attributes: newAttrs, ...variantFields } = parsed.data;
 
-  const [updated] = await db
-    .update(soapVariants)
-    .set({
-      ...variantFields,
-      updatedAt: sql`now()`,
-    })
-    .where(eq(soapVariants.id, id))
-    .returning();
+  // Wrap the variant update + attribute-link replacement in a single
+  // transaction so a half-applied state (variant updated but no attributes)
+  // can't leak if the insert fails.
+  const result = await db.transaction(async (tx) => {
+    const [updated] = await tx
+      .update(soapVariants)
+      .set({
+        ...variantFields,
+        updatedAt: sql`now()`,
+      })
+      .where(eq(soapVariants.id, id))
+      .returning();
 
-  // Replace attribute references if provided
-  let finalAttrs = await db
-    .select({
-      attributeId: variantAttributes.attributeId,
-      value: variantAttributes.value,
-    })
-    .from(variantAttributes)
-    .where(eq(variantAttributes.variantId, id));
+    if (!updated) {
+      throw new Error('variant_update_returned_no_row');
+    }
 
-  if (newAttrs) {
-    await db.delete(variantAttributes).where(eq(variantAttributes.variantId, id));
-    await db.insert(variantAttributes).values(
-      newAttrs.map((a) => ({
-        variantId: id,
-        attributeId: a.attributeId,
-        value: a.value,
-      })),
-    );
-    finalAttrs = newAttrs;
-  }
+    let finalAttrs: { attributeId: string; value: string }[] = await tx
+      .select({
+        attributeId: variantAttributes.attributeId,
+        value: variantAttributes.value,
+      })
+      .from(variantAttributes)
+      .where(eq(variantAttributes.variantId, id));
 
-  return c.json({ variant: { ...updated, attributes: finalAttrs } });
+    if (newAttrs) {
+      await tx.delete(variantAttributes).where(eq(variantAttributes.variantId, id));
+      await tx.insert(variantAttributes).values(
+        newAttrs.map((a) => ({
+          variantId: id,
+          attributeId: a.attributeId,
+          value: a.value,
+        })),
+      );
+      finalAttrs = newAttrs;
+    }
+
+    return { variant: { ...updated, attributes: finalAttrs } };
+  });
+
+  return c.json(result);
 });
 
 // Archive variant (soft delete)

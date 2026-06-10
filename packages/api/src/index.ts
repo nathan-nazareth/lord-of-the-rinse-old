@@ -52,6 +52,15 @@ app.onError((err, c) => {
     return c.json({ error: 'Invalid JSON body' }, 400);
   }
 
+  // Postgres / SQLite unique-violation: a sibling route probably should have
+  // returned 409, but if it slipped through here, surface a sane status
+  // instead of a confusing 500. Drizzle's PostgresError / SqliteError both
+  // expose `code`; the libsql client wraps with `code: 'SQLITE_CONSTRAINT_UNIQUE'`.
+  const errCode = (err as { code?: unknown })?.code;
+  if (errCode === '23505' || errCode === 'SQLITE_CONSTRAINT_UNIQUE') {
+    return c.json({ error: 'Resource already exists' }, 409);
+  }
+
   return c.json({ error: 'Internal server error' }, 500);
 });
 

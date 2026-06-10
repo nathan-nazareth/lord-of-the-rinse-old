@@ -3,6 +3,7 @@ import { catalogAttributes } from '@lotr/db/schema';
 import { attributeTypeSchema, createAttributeSchema, updateAttributeSchema } from '@lotr/shared';
 import { and, asc, eq, type SQL } from 'drizzle-orm';
 import { Hono } from 'hono';
+import { adminAuth } from '../middleware/admin-auth';
 
 const attributesRoutes = new Hono<{
   Variables: {
@@ -10,6 +11,11 @@ const attributesRoutes = new Hono<{
     session: unknown;
   };
 }>();
+
+// Defense in depth: also enforce admin auth at the router level so a future
+// refactor that moves this mount out from under the global `/api/admin/*`
+// guard doesn't accidentally expose catalog mutations to the public.
+attributesRoutes.use('/*', adminAuth);
 
 // List attributes (with optional type filter and archived filter)
 attributesRoutes.get('/', async (c) => {
@@ -76,6 +82,11 @@ attributesRoutes.post('/', async (c) => {
     .values({ type, name, slug, displayOrder })
     .returning();
 
+  if (!created) {
+    console.error('[attributes] insert returned no row');
+    return c.json({ error: 'Failed to create attribute' }, 500);
+  }
+
   return c.json({ attribute: created }, 201);
 });
 
@@ -117,6 +128,11 @@ attributesRoutes.patch('/:id', async (c) => {
     .where(eq(catalogAttributes.id, id))
     .returning();
 
+  if (!updated) {
+    console.error('[attributes] update returned no row for id', id);
+    return c.json({ error: 'Failed to update attribute' }, 500);
+  }
+
   return c.json({ attribute: updated });
 });
 
@@ -135,6 +151,11 @@ attributesRoutes.delete('/:id', async (c) => {
     .set({ archived: true, updatedAt: sql`now()`, displayOrder: existing.displayOrder })
     .where(eq(catalogAttributes.id, id))
     .returning();
+
+  if (!archived) {
+    console.error('[attributes] archive returned no row for id', id);
+    return c.json({ error: 'Failed to archive attribute' }, 500);
+  }
 
   return c.json({ attribute: archived });
 });

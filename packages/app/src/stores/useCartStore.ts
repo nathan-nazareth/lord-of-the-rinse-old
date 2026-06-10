@@ -53,17 +53,48 @@ export const useCartStore = create<CartState>()(
       totalQuantity: 0,
 
       addItem: (shape, scent, price, color, quantity, size, hasLavenderPieces, variantId) => {
-        if (get().items.length >= MAX_CART_ITEMS) {
-          return false;
-        }
         const q = parseInt(quantity, 10);
         const cleanPrice = Number.isFinite(price) && price >= 0 ? price : 0;
+        const cleanSize = typeof size === 'string' && size.length > 0 ? size : '100';
+        const cleanQty = Number.isFinite(q) && q > 0 ? q : 1;
         // Prefer the real catalog UUID when one is supplied. The server's checkout
         // schema validates `variantId` as a UUID, so we MUST not fall back to the
         // human-readable string. If no UUID is available, mint one client-side so
         // the request still reaches the server (it'll be rejected with "variant
         // not found" by the checkout handler, which is the right error to surface).
         const resolvedVariantId = isUuid(variantId) ? variantId : safeUuid();
+        const cleanLavender = Boolean(hasLavenderPieces);
+
+        // Merge with an existing matching line so the cart doesn't sprout
+        // duplicates for the same shape/scent/color/size/addon combo. The
+        // variantId is the primary identity for catalog matching; if both items
+        // share a UUID, they're the same SKU.
+        const currentItems = get().items;
+        const existingIdx = currentItems.findIndex(
+          (item) =>
+            item.variantId === resolvedVariantId &&
+            item.shape === shape &&
+            item.scent === scent &&
+            item.color === color &&
+            item.size === cleanSize &&
+            item.hasLavenderPieces === cleanLavender &&
+            item.price === cleanPrice,
+        );
+
+        if (existingIdx >= 0) {
+          const merged = currentItems.map((item, i) =>
+            i === existingIdx ? { ...item, quantity: item.quantity + cleanQty } : item,
+          );
+          set({
+            items: merged,
+            totalQuantity: computeTotalQuantity(merged),
+          });
+          return true;
+        }
+
+        if (currentItems.length >= MAX_CART_ITEMS) {
+          return false;
+        }
         const newItem: CartItem = {
           id: safeUuid(),
           variantId: resolvedVariantId,
@@ -71,12 +102,12 @@ export const useCartStore = create<CartState>()(
           scent,
           price: cleanPrice,
           color,
-          quantity: Number.isFinite(q) && q > 0 ? q : 1,
-          size: typeof size === 'string' && size.length > 0 ? size : '100',
-          hasLavenderPieces: Boolean(hasLavenderPieces),
+          quantity: cleanQty,
+          size: cleanSize,
+          hasLavenderPieces: cleanLavender,
           addedAt: new Date().toISOString(),
         };
-        const newItems = [...get().items, newItem];
+        const newItems = [...currentItems, newItem];
         set({
           items: newItems,
           totalQuantity: computeTotalQuantity(newItems),
@@ -170,7 +201,10 @@ export const useCartStore = create<CartState>()(
           }
         },
         setItem: (name, value) => {
-          localStorage.setItem(name, JSON.stringify(value));
+          // Stamp the wall-clock so getItem() can enforce CART_EXPIRY_MS.
+          // Without this, NaN > ms is always false and the cart never expires.
+          const payload = { ...value, updatedAt: Date.now() };
+          localStorage.setItem(name, JSON.stringify(payload));
         },
         removeItem: (name) => {
           localStorage.removeItem(name);

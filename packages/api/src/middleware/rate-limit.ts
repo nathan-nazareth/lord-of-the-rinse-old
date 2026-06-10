@@ -16,7 +16,43 @@ interface RateLimitOptions {
 const MAX_BUCKETS = 50_000;
 const SWEEP_INTERVAL_MS = 30_000;
 
+// Comma-separated list of upstream proxies that are allowed to set
+// X-Forwarded-For. When unset, we fall back to a single-hop heuristic that
+// only honors the right-most entry, which prevents the trivial spoof where a
+// client prepends "1.1.1.1" to bypass the limiter.
+const TRUSTED_PROXIES = (process.env.TRUSTED_PROXIES ?? '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
+
 const buckets = new Map<string, Bucket>();
+
+function resolveClientIp(
+  remoteAddr: string | undefined,
+  forwardedFor: string | undefined,
+  realIp: string | undefined,
+): string {
+  const trusted = (entry: string) => TRUSTED_PROXIES.includes(entry.trim());
+  if (forwardedFor) {
+    const parts = forwardedFor.split(',').map((p) => p.trim()).filter(Boolean);
+    // Walk the list right-to-left and use the first IP NOT in the trusted
+    // proxy set. This is the originating client even when there's an
+    // intermediate hop. If the chain is fully trusted (e.g. CDN), use the
+    // left-most address.
+    if (TRUSTED_PROXIES.length > 0) {
+      for (let i = parts.length - 1; i >= 0; i -= 1) {
+        if (!trusted(parts[i] ?? '')) return parts[i] ?? 'unknown';
+      }
+      return parts[0] ?? 'unknown';
+    }
+    // No trusted-proxy config: use the *right-most* hop, which is the one
+    // appended by the closest reverse proxy. The left-most is attacker-
+    // controlled.
+    return parts[parts.length - 1] ?? 'unknown';
+  }
+  if (realIp) return realIp;
+  return remoteAddr ?? 'unknown';
+}
 
 function getKey(
   c: Parameters<MiddlewareHandler>[0],
@@ -24,7 +60,11 @@ function getKey(
   keyBy?: RateLimitOptions['keyBy'],
 ): string {
   if (keyBy) return `${prefix}:${keyBy(c)}`;
-  const ip = c.req.header('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+  const ip = resolveClientIp(
+    c.env?.remoteAddr,
+    c.req.header('x-forwarded-for'),
+    c.req.header('x-real-ip'),
+  );
   return `${prefix}:${ip}`;
 }
 

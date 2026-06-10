@@ -27,6 +27,21 @@ const { mocks } = vi.hoisted(() => {
     insert: vi.fn(() => chain()),
     update: vi.fn(() => chain()),
     delete: vi.fn(() => chain()),
+    // PATCH /api/admin/variants/:id wraps the update + attribute replacement
+    // in a transaction for atomicity. The mock transaction simply forwards
+    // `select`/`update`/`insert`/`delete` to the same vi.fn()s that the test
+    // pre-arms with mockReturnValueOnce — that way `setupUpdateChain` keeps
+    // working as-is.
+    transaction: vi.fn(async (cb: (tx: typeof db) => Promise<unknown>) => {
+      const tx = {
+        select: db.select,
+        insert: db.insert,
+        update: db.update,
+        delete: db.delete,
+        transaction: vi.fn(),
+      };
+      return cb(tx);
+    }),
   };
 
   return { mocks: { db, chain } };

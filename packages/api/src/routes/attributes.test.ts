@@ -148,12 +148,6 @@ vi.mock('../middleware/admin-auth', () => ({
   },
 }));
 
-vi.mock('../middleware/admin-auth', () => ({
-  adminAuth: async (_c: unknown, next: () => Promise<void>) => {
-    await next();
-  },
-}));
-
 // Must import app AFTER mocks are set up
 import { app } from '../index';
 

@@ -27,6 +27,14 @@ import { calculateDiscount } from '../utils/pricing';
 
 type SizeLabel = 'S' | 'M' | 'L';
 
+const SIZE_LIMITS: Record<string, { min: number; max: number }> = {
+  [SoapShape.SQUARE]: { min: 50, max: 100 },
+  [SoapShape.OVAL_DIP]: { min: 35, max: 50 },
+  [SoapShape.HEART]: { min: 50, max: 75 },
+  [SoapShape.OVAL_FLAT]: { min: 50, max: 85 },
+  [SoapShape.CIRCLE]: { min: 50, max: 100 },
+};
+
 const getSizeOptions = (shape: SoapShape): Array<{ label: SizeLabel; grams: number }> => {
   const limits = SIZE_LIMITS[shape];
   const min = limits.min;
@@ -94,14 +102,6 @@ const StepIndicator: React.FC<{ current: FormStep; onNavigate: (s: FormStep) => 
       })}
     </div>
   );
-};
-
-const SIZE_LIMITS: Record<string, { min: number; max: number }> = {
-  [SoapShape.SQUARE]: { min: 50, max: 100 },
-  [SoapShape.OVAL_DIP]: { min: 35, max: 50 },
-  [SoapShape.HEART]: { min: 50, max: 75 },
-  [SoapShape.OVAL_FLAT]: { min: 50, max: 85 },
-  [SoapShape.CIRCLE]: { min: 50, max: 100 },
 };
 
 const ShapeIcon: React.FC<{ shape: SoapShape; className?: string }> = ({ shape, className }) => {

@@ -296,7 +296,9 @@ describe('updateVariantSchema', () => {
 describe('catalogResponseSchema', () => {
   it('accepts valid response', () => {
     const result = catalogResponseSchema.safeParse({
-      attributes: [],
+      // attributes is a Record<AttributeType, Attribute[]> in the real wire
+      // format — keep the schema test in lockstep with the route.
+      attributes: {},
       variants: [],
       settings: { shopOpen: true },
     });
@@ -305,22 +307,37 @@ describe('catalogResponseSchema', () => {
 
   it('accepts populated response', () => {
     const result = catalogResponseSchema.safeParse({
-      attributes: [{
-        id: '550e8400-e29b-41d4-a716-446655440000',
-        type: 'scent',
-        name: 'Lavender',
-        slug: 'lavender',
-        displayOrder: 1,
-      }],
-      variants: [{
-        id: '660e8400-e29b-41d4-a716-446655440000',
-        name: 'Lavender Dreams',
-        slug: 'lavender-dreams',
-        unitPrice: '12.99',
-        attributes: [],
-      }],
+      attributes: {
+        scent: [
+          {
+            id: '550e8400-e29b-41d4-a716-446655440000',
+            type: 'scent',
+            name: 'Lavender',
+            slug: 'lavender',
+            displayOrder: 1,
+          },
+        ],
+      },
+      variants: [
+        {
+          id: '660e8400-e29b-41d4-a716-446655440000',
+          name: 'Lavender Dreams',
+          slug: 'lavender-dreams',
+          unitPrice: '12.99',
+          attributes: [],
+        },
+      ],
       settings: {},
     });
     expect(result.success).toBe(true);
+  });
+
+  it('rejects an invalid attribute type key', () => {
+    const result = catalogResponseSchema.safeParse({
+      attributes: { fragrance: [] }, // not in the enum
+      variants: [],
+      settings: {},
+    });
+    expect(result.success).toBe(false);
   });
 });

@@ -12,17 +12,22 @@ const LoadingSpinner: React.FC<{ message?: string }> = ({ message = 'Loading...'
 
 export const LoadingState: React.FC<{ children: React.ReactNode; timeout?: number }> = ({
   children,
-  timeout = 3000,
+  timeout = 8000,
 }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // If the page is already fully loaded (cached reloads, route changes after
+    // initial mount), skip the spinner entirely.
     if (document.readyState === 'complete') {
       setIsLoading(false);
       return;
     }
     const onLoad = () => setIsLoading(false);
     window.addEventListener('load', onLoad, { once: true });
+    // Cap the spinner at `timeout` so a hung network can't trap the user on
+    // the loading screen forever, but make the default large enough that
+    // slow first-paint doesn't cause a flash of empty content.
     const timeoutId = setTimeout(() => setIsLoading(false), timeout);
     return () => {
       window.removeEventListener('load', onLoad);

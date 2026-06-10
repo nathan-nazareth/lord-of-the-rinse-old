@@ -53,6 +53,64 @@ describe('useCartStore', () => {
     expect(isUuid(state.items[0].variantId)).toBe(true);
   });
 
+  it('merges into an existing matching line instead of duplicating it', () => {
+    const { addItem } = useCartStore.getState();
+    addItem(
+      'square',
+      'lavender',
+      12.99,
+      'blue',
+      '2',
+      '75g',
+      false,
+      '550e8400-e29b-41d4-a716-446655440000',
+    );
+    addItem(
+      'square',
+      'lavender',
+      12.99,
+      'blue',
+      '3',
+      '75g',
+      false,
+      '550e8400-e29b-41d4-a716-446655440000',
+    );
+
+    const state = useCartStore.getState();
+    expect(state.items).toHaveLength(1);
+    expect(state.items[0].quantity).toBe(5);
+    expect(state.totalQuantity).toBe(5);
+  });
+
+  it('creates a new line when attributes differ', () => {
+    const { addItem } = useCartStore.getState();
+    addItem(
+      'square',
+      'lavender',
+      12.99,
+      'blue',
+      '2',
+      '75g',
+      false,
+      '550e8400-e29b-41d4-a716-446655440000',
+    );
+    // Different size — should NOT merge
+    addItem(
+      'square',
+      'lavender',
+      12.99,
+      'blue',
+      '2',
+      '100g',
+      false,
+      '660e8400-e29b-41d4-a716-446655440000',
+    );
+
+    const state = useCartStore.getState();
+    expect(state.items).toHaveLength(2);
+    expect(state.totalQuantity).toBe(4);
+  });
+
   it('rejects adding when cart has 20 items', () => {
     const store = useCartStore.getState();
     for (let i = 0; i < 20; i += 1) {
@@ -122,6 +180,21 @@ describe('useCartStore', () => {
     expect(parsed.state.items).toHaveLength(1);
     expect(parsed.state.items[0].shape).toBe('square');
     expect(isUuid(parsed.state.items[0].variantId)).toBe(true);
+  });
+
+  it('stamps an updatedAt timestamp on every persist write', () => {
+    useCartStore.getState().addItem('square', 'lavender', 12.99, 'blue', '1', '75g', false);
+    const stored = mockStorage.getItem('organic-soap-cart');
+    const parsed = JSON.parse(stored as string);
+    // The expiry check in getItem() relies on this stamp; without it the
+    // 30-day cart retention is dead code.
+    expect(typeof parsed.updatedAt).toBe('number');
+    expect(parsed.updatedAt).toBeGreaterThan(0);
+  });
+
+  it('exposes a detectAndClearLegacyCart() helper that returns false for fresh carts', () => {
+    useCartStore.getState().addItem('square', 'lavender', 12.99, 'blue', '1', '75g', false);
+    expect(detectAndClearLegacyCart()).toBe(false);
   });
 
   it('restores state from localStorage on re-hydrate', async () => {

@@ -4,7 +4,15 @@ import type { CatalogResponse } from '../types/catalog';
 const API_BASE = (import.meta.env.VITE_API_URL ?? '').replace(/\/+$/, '');
 
 async function fetchCatalog(): Promise<CatalogResponse> {
-  const res = await fetch(`${API_BASE}/api/catalog`);
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}/api/catalog`);
+  } catch (err) {
+    // network failure, DNS, CORS, etc. — never let this become an unhandled
+    // promise rejection inside react-query.
+    console.error('[useCatalog] catalog request failed', err);
+    throw new Error('Unable to reach the catalog service');
+  }
   if (!res.ok) {
     throw new Error(`Failed to fetch catalog: ${res.status}`);
   }

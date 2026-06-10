@@ -12,6 +12,8 @@ function IndexContent() {
     handleAddToCart,
     legacyCartCleared,
     dismissLegacyToast,
+    cartFullNotice,
+    dismissCartFullNotice,
   } = useHomeContext();
   const navigate = useNavigate();
 
@@ -29,6 +31,21 @@ function IndexContent() {
             <IconAlertCircle className="w-4 h-4" />
           </div>
           <span>Your cart was cleared due to a format update. Please add items again.</span>
+        </button>
+      )}
+      {/* Cart full toast — surfaced when addItem rejects the click because
+          MAX_CART_ITEMS was hit. Without this, the click silently no-ops. */}
+      {cartFullNotice && (
+        <button
+          type="button"
+          className="toast-apothecary"
+          aria-label="Dismiss notification: Your cart is full"
+          onClick={dismissCartFullNotice}
+        >
+          <div className="w-7 h-7 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
+            <IconAlertCircle className="w-4 h-4" />
+          </div>
+          <span>Your cart is full (max 20 items). Remove an item or proceed to checkout.</span>
         </button>
       )}
       {showLanding ? (

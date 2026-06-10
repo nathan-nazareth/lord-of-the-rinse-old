@@ -3,6 +3,9 @@ import { eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { adminAuth } from '../middleware/admin-auth';
 
+const MAX_NAME_LENGTH = 200;
+const MAX_FIELD_LENGTH = 100;
+
 const productsRoutes = new Hono();
 
 productsRoutes.use('/*', adminAuth);
@@ -14,15 +17,15 @@ productsRoutes.get('/', async (c) => {
 
 productsRoutes.post('/', async (c) => {
   let body: {
-    name: string;
-    color: string;
-    scent: string;
-    shape: string;
-    weight: number;
-    price: number;
+    name?: unknown;
+    color?: unknown;
+    scent?: unknown;
+    shape?: unknown;
+    weight?: unknown;
+    price?: unknown;
   };
   try {
-    body = await c.req.json();
+    body = (await c.req.json()) as typeof body;
   } catch {
     return c.json({ error: 'Invalid JSON body' }, 400);
   }
@@ -30,12 +33,16 @@ productsRoutes.post('/', async (c) => {
   if (
     typeof body.name !== 'string' ||
     body.name.trim().length === 0 ||
+    body.name.length > MAX_NAME_LENGTH ||
     typeof body.color !== 'string' ||
     body.color.trim().length === 0 ||
+    body.color.length > MAX_FIELD_LENGTH ||
     typeof body.scent !== 'string' ||
     body.scent.trim().length === 0 ||
+    body.scent.length > MAX_FIELD_LENGTH ||
     typeof body.shape !== 'string' ||
-    body.shape.trim().length === 0
+    body.shape.trim().length === 0 ||
+    body.shape.length > MAX_FIELD_LENGTH
   ) {
     return c.json({ error: 'Invalid product fields' }, 422);
   }
@@ -70,10 +77,10 @@ productsRoutes.post('/', async (c) => {
   const result = await adminDb
     .insert(adminProducts)
     .values({
-      name: body.name.trim(),
-      color: body.color.trim(),
-      scent: body.scent.trim(),
-      shape: body.shape.trim(),
+      name: (body.name as string).trim(),
+      color: (body.color as string).trim(),
+      scent: (body.scent as string).trim(),
+      shape: (body.shape as string).trim(),
       weight,
       price,
       createdAt: now,

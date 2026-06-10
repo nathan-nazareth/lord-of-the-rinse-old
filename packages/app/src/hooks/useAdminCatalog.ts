@@ -3,6 +3,33 @@ import { useAdminStore } from '@/stores/useAdminStore';
 
 const API_BASE = '/api/admin';
 
+interface ApiErrorBody {
+  error?: string;
+  details?: unknown;
+}
+
+async function parseApiError(response: Response): Promise<string> {
+  // Try to surface the server's structured error message but DO NOT throw
+  // raw HTML / stack traces into Error.message. We also cap the body size
+  // so a 50MB error page can't OOM the client.
+  try {
+    const text = await response.text();
+    if (text.length > 0 && text.length < 4096) {
+      try {
+        const parsed = JSON.parse(text) as ApiErrorBody;
+        if (parsed && typeof parsed.error === 'string' && parsed.error.length > 0) {
+          return parsed.error;
+        }
+      } catch {
+        // Not JSON — fall through to the generic message below.
+      }
+    }
+  } catch {
+    // ignore body read errors
+  }
+  return `HTTP ${response.status}`;
+}
+
 async function fetchWithAuth<T>(
   url: string,
   options: RequestInit = {},
@@ -14,13 +41,19 @@ async function fetchWithAuth<T>(
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }
-  const response = await fetch(url, {
-    ...options,
-    headers: { ...headers, ...options.headers },
-  });
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      ...options,
+      headers: { ...headers, ...options.headers },
+    });
+  } catch (err) {
+    // network / DNS / CORS — never let this become an unhandled rejection
+    // inside react-query.
+    throw new Error(err instanceof Error ? `Network error: ${err.message}` : 'Network error');
+  }
   if (!response.ok) {
-    const error = await response.text();
-    throw new Error(error || `HTTP ${response.status}`);
+    throw new Error(await parseApiError(response));
   }
   if (response.status === 204) return undefined as T;
   return (await response.json()) as T;

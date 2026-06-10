@@ -71,7 +71,15 @@ ordersRoutes.patch('/:id/status', async (c) => {
   // cancel an order without restoring stock (or vice versa).
   try {
     const result = await db.transaction(async (tx) => {
-      const [order] = await tx.select().from(orders).where(eq(orders.id, id));
+      // Row-lock the order so two concurrent admin clicks can't both
+      // observe status='new' and both decide new→processing (or worse,
+      // race new→processing vs new→cancelled). The lock is released
+      // when the transaction commits/rolls back.
+      const [order] = await tx
+        .select()
+        .from(orders)
+        .where(eq(orders.id, id))
+        .for('update');
 
       if (!order) {
         return { notFound: true as const };
@@ -86,11 +94,23 @@ ordersRoutes.patch('/:id/status', async (c) => {
         };
       }
 
+      // Re-validate by appending the new status to the WHERE clause. If a
+      // competing transaction already moved the row out of `order.status`
+      // between our SELECT FOR UPDATE and UPDATE, the row count will be
+      // zero and we surface 409 instead of silently overwriting.
       const [updated] = await tx
         .update(orders)
         .set({ status: newStatus, updatedAt: sql`now()` })
-        .where(eq(orders.id, id))
+        .where(and(eq(orders.id, id), eq(orders.status, order.status)))
         .returning();
+
+      if (!updated) {
+        return {
+          concurrentUpdate: true as const,
+          expected: order.status,
+          to: newStatus,
+        };
+      }
 
       if (newStatus === 'cancelled') {
         const lines = await tx.select().from(orderLines).where(eq(orderLines.orderId, id));
@@ -116,6 +136,12 @@ ordersRoutes.patch('/:id/status', async (c) => {
     }
     if ('invalidTransition' in result) {
       return c.json({ error: `Cannot transition from '${result.from}' to '${result.to}'` }, 400);
+    }
+    if ('concurrentUpdate' in result) {
+      return c.json(
+        { error: 'Order was modified by another request; please retry' },
+        409,
+      );
     }
 
     return c.json({ order: result.order });
@@ -166,6 +192,11 @@ ordersRoutes.post('/:id/retry-notification', async (c) => {
     .select()
     .from(notificationAttempts)
     .where(eq(notificationAttempts.id, attempt.id));
+
+  if (!updated) {
+    console.error('[orders] notification attempt vanished for id', attempt.id);
+    return c.json({ error: 'Notification attempt not found after retry' }, 500);
+  }
 
   return c.json({ notification: updated });
 });

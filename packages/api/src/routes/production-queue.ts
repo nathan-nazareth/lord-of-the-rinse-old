@@ -1,5 +1,6 @@
 import { db, sql } from '@lotr/db';
 import { orderLines, orders } from '@lotr/db/schema';
+import { and, eq, gt, inArray } from 'drizzle-orm';
 import { Hono } from 'hono';
 
 const productionQueueRoutes = new Hono<{
@@ -9,9 +10,14 @@ const productionQueueRoutes = new Hono<{
   };
 }>();
 
+// Statuses that should appear in the production queue. Typed as a const
+// tuple so `inArray` is statically checked against the column type.
+const ACTIVE_STATUSES = ['new', 'processing'] as const;
+
 // Get production queue grouped by variant
 productionQueueRoutes.get('/', async (c) => {
-  // Query order lines with quantityToProduce > 0 joined with orders in new/processing status
+  // Typed where clause: Drizzle generates parameterized SQL, so column
+  // renames break the build instead of producing a silent runtime miscount.
   const rows = await db
     .select({
       variantId: orderLines.variantId,
@@ -20,8 +26,10 @@ productionQueueRoutes.get('/', async (c) => {
       reference: orders.reference,
     })
     .from(orderLines)
-    .innerJoin(orders, sql`${orderLines.orderId} = ${orders.id}`)
-    .where(sql`${orderLines.quantityToProduce} > 0 AND ${orders.status} IN ('new', 'processing')`)
+    .innerJoin(orders, eq(orderLines.orderId, orders.id))
+    .where(
+      and(gt(orderLines.quantityToProduce, 0), inArray(orders.status, [...ACTIVE_STATUSES])),
+    )
     .orderBy(orders.reference);
 
   // Group by variant

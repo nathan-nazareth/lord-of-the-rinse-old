@@ -128,7 +128,9 @@ describe('useRateLimitStore', () => {
 
       const store = useRateLimitStore.getState();
       expect(store.count).toBe(0);
-      expect(store.windowStart).toBe(0);
+      // -1 is the "no submissions yet" sentinel — Date.now() may legitimately
+      // be 0 on broken system clocks, so we can't reuse 0 as a sentinel.
+      expect(store.windowStart).toBe(-1);
       expect(store.lastSubmission).toBe(0);
 
       vi.useRealTimers();

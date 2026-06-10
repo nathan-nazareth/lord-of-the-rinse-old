@@ -210,7 +210,7 @@ export const Cart: React.FC<CartProps> = ({
   const cooldownRemaining = (() => {
     const now = Date.now();
     const windowExpired =
-      rateLimitStore.windowStart === 0 || now - rateLimitStore.windowStart >= windowMs;
+      rateLimitStore.windowStart < 0 || now - rateLimitStore.windowStart >= windowMs;
     if (rateLimitStore.count >= maxSubmissions && !windowExpired) {
       return Math.ceil((windowMs - (now - rateLimitStore.windowStart)) / 1000);
     }
@@ -222,17 +222,32 @@ export const Cart: React.FC<CartProps> = ({
     if (cooldownRemaining !== null) setShowRateLimitModal(true);
   }, [cooldownRemaining]);
 
-  // Auto-close the modal once the cooldown has fully expired.
+  // Auto-close the modal once the cooldown has fully expired. We anchor the
+  // timeout to the store's `lastSubmission` timestamp instead of the
+  // recomputed `cooldownRemaining` so the timer is stable across re-renders
+  // (otherwise every render with a slightly different `cooldownRemaining`
+  // reschedules the timer and we can stack dozens in the queue on slow
+  // devices or hot HMR sessions).
+  const autoCloseTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   React.useEffect(() => {
+    if (autoCloseTimerRef.current) {
+      clearTimeout(autoCloseTimerRef.current);
+      autoCloseTimerRef.current = null;
+    }
     if (cooldownRemaining === null) {
       setShowRateLimitModal(false);
       return;
     }
-    const timeoutId = window.setTimeout(
-      () => setShowRateLimitModal(false),
-      cooldownRemaining * 1000,
-    );
-    return () => window.clearTimeout(timeoutId);
+    autoCloseTimerRef.current = setTimeout(() => {
+      autoCloseTimerRef.current = null;
+      setShowRateLimitModal(false);
+    }, cooldownRemaining * 1000);
+    return () => {
+      if (autoCloseTimerRef.current) {
+        clearTimeout(autoCloseTimerRef.current);
+        autoCloseTimerRef.current = null;
+      }
+    };
   }, [cooldownRemaining]);
 
   React.useEffect(() => {

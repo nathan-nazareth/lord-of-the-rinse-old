@@ -163,9 +163,16 @@ export async function dispatchNotification(orderId: string): Promise<void> {
         })
         .where(eq(notificationAttempts.id, attempt.id));
     } catch (updateErr) {
+      const updateMessage = updateErr instanceof Error ? updateErr.message : String(updateErr);
+      // Both the API and the recovery write failed. Re-throw so callers
+      // (e.g. the orders retry endpoint) can surface a real 5xx instead of
+      // silently leaving the notification stuck in 'pending' forever.
       console.error(
         '[dispatchNotification] could not record failure status:',
-        updateErr instanceof Error ? updateErr.message : String(updateErr),
+        updateMessage,
+      );
+      throw new Error(
+        `Notification dispatch failed (${errorMessage}) and status update failed (${updateMessage})`,
       );
     }
   }

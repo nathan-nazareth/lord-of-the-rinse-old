@@ -3,6 +3,9 @@ import { persist } from 'zustand/middleware';
 
 interface RateLimitState {
   count: number;
+  // -1 means "no submissions yet"; Date.now() is a positive wall-clock value
+  // (zero is theoretically possible on broken system clocks, so the previous
+  // `windowStart === 0` sentinel was ambiguous).
   windowStart: number;
   lastSubmission: number;
   isAllowed: (maxSubmissions: number, windowMs: number) => boolean;
@@ -18,26 +21,26 @@ export const useRateLimitStore = create<RateLimitState & RateLimitActions>()(
   persist(
     (set, get) => ({
       count: 0,
-      windowStart: 0,
+      windowStart: -1,
       lastSubmission: 0,
       isAllowed: (maxSubmissions, windowMs) => {
         const state = get();
         const now = Date.now();
-        const windowExpired = state.windowStart === 0 || now - state.windowStart >= windowMs;
+        const windowExpired = state.windowStart < 0 || now - state.windowStart >= windowMs;
         if (windowExpired) return true;
         return state.count < maxSubmissions;
       },
       remainingSubmissions: (maxSubmissions, windowMs) => {
         const state = get();
         const now = Date.now();
-        const windowExpired = state.windowStart === 0 || now - state.windowStart >= windowMs;
+        const windowExpired = state.windowStart < 0 || now - state.windowStart >= windowMs;
         if (windowExpired) return maxSubmissions;
         return Math.max(0, maxSubmissions - state.count);
       },
       recordSubmission: (windowMs) => {
         const now = Date.now();
         set((state) => {
-          const windowExpired = state.windowStart === 0 || now - state.windowStart >= windowMs;
+          const windowExpired = state.windowStart < 0 || now - state.windowStart >= windowMs;
           if (windowExpired) {
             return { count: 1, windowStart: now, lastSubmission: now };
           }
@@ -45,7 +48,7 @@ export const useRateLimitStore = create<RateLimitState & RateLimitActions>()(
         });
       },
       reset: () => {
-        set({ count: 0, windowStart: 0, lastSubmission: 0 });
+        set({ count: 0, windowStart: -1, lastSubmission: 0 });
       },
     }),
     { name: 'soap:v1:formRateLimit' },

@@ -41,6 +41,8 @@ interface HomeContextValue {
   clearCart: () => void;
   legacyCartCleared: boolean;
   dismissLegacyToast: () => void;
+  cartFullNotice: boolean;
+  dismissCartFullNotice: () => void;
 }
 
 const HomeContext = createContext<HomeContextValue | null>(null);
@@ -68,6 +70,7 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
   const [justOrdered, setJustOrdered] = useState(false);
   const [showLanding, setShowLanding] = useState(true);
   const [legacyCartCleared, setLegacyCartCleared] = useState(false);
+  const [cartFullNotice, setCartFullNotice] = useState(false);
 
   // AbortController for in-flight checkout so the request is cancelled on
   // unmount or when the user navigates away mid-submission.
@@ -97,6 +100,10 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
 
   const dismissLegacyToast = useCallback(() => {
     setLegacyCartCleared(false);
+  }, []);
+
+  const dismissCartFullNotice = useCallback(() => {
+    setCartFullNotice(false);
   }, []);
 
   const handleShopClick = useCallback(() => {
@@ -131,7 +138,11 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
         variantId,
       );
       if (success) {
+        setCartFullNotice(false);
         window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        // Tell the form why the click did nothing.
+        setCartFullNotice(true);
       }
     },
     [addItem],
@@ -145,23 +156,25 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
       inFlightController.current = controller;
 
       setIsSubmitting(true);
-      const finalizeSuccess = (ref: string) => {
+      const releaseController = () => {
         if (inFlightController.current === controller) {
           inFlightController.current = null;
         }
+        setIsSubmitting(false);
+      };
+      const finalizeSuccess = (ref: string) => {
         setConfirmationItemCount(cart.totalQuantity);
         setLastOrderReference(ref);
         setJustOrdered(true);
         clearCart();
         clearFormState();
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        releaseController();
         return ref;
       };
 
       const fail = () => {
-        if (inFlightController.current === controller) {
-          inFlightController.current = null;
-        }
+        releaseController();
         return undefined;
       };
 
@@ -221,8 +234,9 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
         if ((err as { name?: string })?.name === 'AbortError') return fail();
         console.error('Order submission error:', err);
       } finally {
-        // CRITICAL: clear submitting in BOTH success and failure paths so the
-        // loading spinner doesn't get stuck forever after a successful order.
+        // releaseController() runs inside finalizeSuccess/fail for the success
+        // path. For the Web3Forms-failure path, release here so the spinner
+        // never gets stuck.
         if (inFlightController.current === controller) {
           inFlightController.current = null;
           setIsSubmitting(false);
@@ -257,6 +271,8 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
         clearCart,
         legacyCartCleared,
         dismissLegacyToast,
+        cartFullNotice,
+        dismissCartFullNotice,
       }}
     >
       {children}

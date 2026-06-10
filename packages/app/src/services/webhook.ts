@@ -209,8 +209,11 @@ export async function submitCartToWebhook(
         });
       }
 
-      // Respect external abort: don't retry after a cancellation.
-      if (err.name === 'AbortError' && options.signal?.aborted) {
+      // Distinguish: an EXTERNAL abort (the caller cancelled the checkout)
+      // must short-circuit. An INTERNAL abort (our 10s timeout) is a transient
+      // failure and should be retried.
+      const externalAbort = err.name === 'AbortError' && options.signal?.aborted;
+      if (externalAbort) {
         if (onStatusChange) onStatusChange('failed');
         return { success: false, orderId };
       }
