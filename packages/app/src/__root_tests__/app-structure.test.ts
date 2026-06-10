@@ -3,7 +3,7 @@ import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 describe('packages/app structure', () => {
-  const base = resolve(__dirname);
+  const base = resolve(__dirname, '..', '..');
 
   it('vite.config.ts exists', () => {
     expect(existsSync(resolve(base, 'vite.config.ts'))).toBe(true);

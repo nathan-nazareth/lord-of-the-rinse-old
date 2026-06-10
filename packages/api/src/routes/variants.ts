@@ -1,8 +1,8 @@
-import { Hono } from 'hono';
 import { db, sql } from '@lotr/db';
-import { soapVariants, variantAttributes, catalogAttributes } from '@lotr/db/schema';
-import { eq, and, desc, asc, inArray } from 'drizzle-orm';
+import { catalogAttributes, soapVariants, variantAttributes } from '@lotr/db/schema';
 import { createVariantSchema, updateVariantSchema } from '@lotr/shared';
+import { and, desc, eq, inArray } from 'drizzle-orm';
+import { Hono } from 'hono';
 
 const variantsRoutes = new Hono<{
   Variables: {
@@ -60,10 +60,7 @@ variantsRoutes.get('/', async (c) => {
 variantsRoutes.get('/:id', async (c) => {
   const id = c.req.param('id');
 
-  const [variant] = await db
-    .select()
-    .from(soapVariants)
-    .where(eq(soapVariants.id, id));
+  const [variant] = await db.select().from(soapVariants).where(eq(soapVariants.id, id));
 
   if (!variant) {
     return c.json({ error: 'Variant not found' }, 404);
@@ -113,10 +110,7 @@ variantsRoutes.post('/', async (c) => {
   }
 
   // Create variant
-  const [created] = await db
-    .insert(soapVariants)
-    .values({ name, slug, unitPrice })
-    .returning();
+  const [created] = await db.insert(soapVariants).values({ name, slug, unitPrice }).returning();
 
   // Create variant-attribute links
   await db.insert(variantAttributes).values(
@@ -149,10 +143,7 @@ variantsRoutes.patch('/:id', async (c) => {
   }
 
   // Check variant exists
-  const [existing] = await db
-    .select()
-    .from(soapVariants)
-    .where(eq(soapVariants.id, id));
+  const [existing] = await db.select().from(soapVariants).where(eq(soapVariants.id, id));
 
   if (!existing) {
     return c.json({ error: 'Variant not found' }, 404);
@@ -195,15 +186,13 @@ variantsRoutes.patch('/:id', async (c) => {
     .returning();
 
   // Replace attribute references if provided
-  let finalAttrs = (
-    await db
-      .select({
-        attributeId: variantAttributes.attributeId,
-        value: variantAttributes.value,
-      })
-      .from(variantAttributes)
-      .where(eq(variantAttributes.variantId, id))
-  );
+  let finalAttrs = await db
+    .select({
+      attributeId: variantAttributes.attributeId,
+      value: variantAttributes.value,
+    })
+    .from(variantAttributes)
+    .where(eq(variantAttributes.variantId, id));
 
   if (newAttrs) {
     await db.delete(variantAttributes).where(eq(variantAttributes.variantId, id));
@@ -224,10 +213,7 @@ variantsRoutes.patch('/:id', async (c) => {
 variantsRoutes.delete('/:id', async (c) => {
   const id = c.req.param('id');
 
-  const [existing] = await db
-    .select()
-    .from(soapVariants)
-    .where(eq(soapVariants.id, id));
+  const [existing] = await db.select().from(soapVariants).where(eq(soapVariants.id, id));
 
   if (!existing) {
     return c.json({ error: 'Variant not found' }, 404);

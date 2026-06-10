@@ -3,7 +3,11 @@ import { useAdminStore } from '@/stores/useAdminStore';
 
 const API_BASE = '/api/admin';
 
-async function fetchWithAuth<T>(url: string, options: RequestInit = {}, token?: string | null): Promise<T> {
+async function fetchWithAuth<T>(
+  url: string,
+  options: RequestInit = {},
+  token?: string | null,
+): Promise<T> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };
@@ -18,7 +22,8 @@ async function fetchWithAuth<T>(url: string, options: RequestInit = {}, token?: 
     const error = await response.text();
     throw new Error(error || `HTTP ${response.status}`);
   }
-  return response.json();
+  if (response.status === 204) return undefined as T;
+  return (await response.json()) as T;
 }
 
 export interface AdminProduct {
@@ -54,8 +59,9 @@ export interface AdminDiscount {
 export function useAdminProducts() {
   const authToken = useAdminStore((s) => s.authToken);
   return useQuery({
-    queryKey: ['admin', 'products'],
+    queryKey: ['admin', 'products', authToken],
     queryFn: () => fetchWithAuth<AdminProduct[]>(`${API_BASE}/products`, {}, authToken),
+    enabled: Boolean(authToken),
   });
 }
 
@@ -64,10 +70,11 @@ export function useCreateProduct() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: Omit<AdminProduct, 'id' | 'createdAt' | 'updatedAt'>) =>
-      fetchWithAuth<AdminProduct>(`${API_BASE}/products`, {
-        method: 'POST',
-        body: JSON.stringify(data),
-      }, authToken),
+      fetchWithAuth<AdminProduct>(
+        `${API_BASE}/products`,
+        { method: 'POST', body: JSON.stringify(data) },
+        authToken,
+      ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'products'] });
     },
@@ -79,9 +86,11 @@ export function useDeleteProduct() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: number) =>
-      fetchWithAuth<{ success: boolean }>(`${API_BASE}/products/${id}`, {
-        method: 'DELETE',
-      }, authToken),
+      fetchWithAuth<{ success: boolean }>(
+        `${API_BASE}/products/${id}`,
+        { method: 'DELETE' },
+        authToken,
+      ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'products'] });
     },
@@ -91,8 +100,9 @@ export function useDeleteProduct() {
 export function useAdminOptions() {
   const authToken = useAdminStore((s) => s.authToken);
   return useQuery({
-    queryKey: ['admin', 'options'],
+    queryKey: ['admin', 'options', authToken],
     queryFn: () => fetchWithAuth<AdminOptions>(`${API_BASE}/options`, {}, authToken),
+    enabled: Boolean(authToken),
   });
 }
 
@@ -101,10 +111,11 @@ export function useUpdateAdminOptions() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: Omit<AdminOptions, 'id' | 'updatedAt'>) =>
-      fetchWithAuth<AdminOptions>(`${API_BASE}/options`, {
-        method: 'PUT',
-        body: JSON.stringify(data),
-      }, authToken),
+      fetchWithAuth<AdminOptions>(
+        `${API_BASE}/options`,
+        { method: 'PUT', body: JSON.stringify(data) },
+        authToken,
+      ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'options'] });
     },
@@ -114,8 +125,9 @@ export function useUpdateAdminOptions() {
 export function useAdminDiscounts() {
   const authToken = useAdminStore((s) => s.authToken);
   return useQuery({
-    queryKey: ['admin', 'discounts'],
+    queryKey: ['admin', 'discounts', authToken],
     queryFn: () => fetchWithAuth<AdminDiscount[]>(`${API_BASE}/discounts`, {}, authToken),
+    enabled: Boolean(authToken),
   });
 }
 
@@ -124,10 +136,11 @@ export function useCreateDiscount() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: { percentage: number; description: string }) =>
-      fetchWithAuth<AdminDiscount>(`${API_BASE}/discounts`, {
-        method: 'POST',
-        body: JSON.stringify(data),
-      }, authToken),
+      fetchWithAuth<AdminDiscount>(
+        `${API_BASE}/discounts`,
+        { method: 'POST', body: JSON.stringify(data) },
+        authToken,
+      ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'discounts'] });
     },
@@ -139,10 +152,11 @@ export function useUpdateDiscount() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: Partial<AdminDiscount> }) =>
-      fetchWithAuth<AdminDiscount>(`${API_BASE}/discounts/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify(data),
-      }, authToken),
+      fetchWithAuth<AdminDiscount>(
+        `${API_BASE}/discounts/${id}`,
+        { method: 'PUT', body: JSON.stringify(data) },
+        authToken,
+      ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'discounts'] });
     },
@@ -154,9 +168,11 @@ export function useDeleteDiscount() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: number) =>
-      fetchWithAuth<{ success: boolean }>(`${API_BASE}/discounts/${id}`, {
-        method: 'DELETE',
-      }, authToken),
+      fetchWithAuth<{ success: boolean }>(
+        `${API_BASE}/discounts/${id}`,
+        { method: 'DELETE' },
+        authToken,
+      ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'discounts'] });
     },

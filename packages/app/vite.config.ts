@@ -1,11 +1,13 @@
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { TanStackRouterVite } from '@tanstack/router-vite-plugin';
 import react from '@vitejs/plugin-react';
-import { defineConfig, loadEnv } from 'vite';
+import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
-export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, '.', '');
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+export default defineConfig(() => {
   return {
     server: {
       port: 3000,
@@ -53,13 +55,9 @@ export default defineConfig(({ mode }) => {
         },
       }),
     ],
-    define: {
-      'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-    },
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, './src'),
+        '@': path.resolve(__dirname, 'src'),
       },
     },
   };

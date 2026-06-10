@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { countAdminUsers } from './user-repository';
 
 // Mock the db module so we don't need a real Postgres connection

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // We use vi.hoisted() to create mocks that can be used in both vi.mock and tests
 const { mocks } = vi.hoisted(() => {
@@ -11,7 +11,9 @@ const { mocks } = vi.hoisted(() => {
     const c = {} as Record<string, ReturnType<typeof vi.fn>>;
     // Make it thenable so `await chain()` resolves
     let _resolve: (v: unknown) => void;
-    const _promise = new Promise((r) => { _resolve = r; });
+    const _promise = new Promise((r) => {
+      _resolve = r;
+    });
     c.then = (onFulfilled: (v: unknown) => unknown) => _promise.then(onFulfilled);
 
     // Common chainable methods that return the chain itself
@@ -45,12 +47,19 @@ vi.mock('@lotr/db', () => ({
 vi.mock('@lotr/db/schema', () => {
   const col = (name: string) => name;
   const tableMock = Object.fromEntries(
-    ['id', 'type', 'name', 'slug', 'displayOrder', 'archived', 'createdAt', 'updatedAt'].map(k => [k, col(k)])
+    ['id', 'type', 'name', 'slug', 'displayOrder', 'archived', 'createdAt', 'updatedAt'].map(
+      (k) => [k, col(k)],
+    ),
   );
   return {
     catalogAttributes: tableMock,
     soapVariants: tableMock,
-    variantAttributes: { id: col('id'), variantId: col('variantId'), attributeId: col('attributeId'), value: col('value') },
+    variantAttributes: {
+      id: col('id'),
+      variantId: col('variantId'),
+      attributeId: col('attributeId'),
+      value: col('value'),
+    },
     users: { id: col('id'), email: col('email'), name: col('name'), role: col('role') },
     sessions: { id: col('id'), userId: col('userId'), token: col('token') },
     accounts: { id: col('id'), userId: col('userId') },
@@ -65,14 +74,31 @@ vi.mock('@lotr/shared', () => {
   function createAttributeSchema() {
     return {
       safeParse(data: unknown) {
-        if (typeof data !== 'object' || data === null) return { success: false, error: { flatten: () => ({ fieldErrors: {}, formErrors: ['Invalid input'] }) } };
+        if (typeof data !== 'object' || data === null)
+          return {
+            success: false,
+            error: { flatten: () => ({ fieldErrors: {}, formErrors: ['Invalid input'] }) },
+          };
         const d = data as Record<string, unknown>;
         const errors: Record<string, string[]> = {};
         if (!VALID_TYPES.includes(d.type as string)) errors.type = ['Invalid type'];
         if (typeof d.name !== 'string' || d.name.length === 0) errors.name = ['Name is required'];
-        if (typeof d.slug !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(d.slug)) errors.slug = ['Invalid slug'];
-        if (Object.keys(errors).length > 0) return { success: false as const, error: { flatten: () => ({ fieldErrors: errors, formErrors: [] }) } };
-        return { success: true as const, data: { type: d.type, name: d.name, slug: d.slug, displayOrder: typeof d.displayOrder === 'number' ? d.displayOrder : 0 } };
+        if (typeof d.slug !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(d.slug))
+          errors.slug = ['Invalid slug'];
+        if (Object.keys(errors).length > 0)
+          return {
+            success: false as const,
+            error: { flatten: () => ({ fieldErrors: errors, formErrors: [] }) },
+          };
+        return {
+          success: true as const,
+          data: {
+            type: d.type,
+            name: d.name,
+            slug: d.slug,
+            displayOrder: typeof d.displayOrder === 'number' ? d.displayOrder : 0,
+          },
+        };
       },
     };
   }
@@ -80,12 +106,25 @@ vi.mock('@lotr/shared', () => {
   function updateAttributeSchema() {
     return {
       safeParse(data: unknown) {
-        if (typeof data !== 'object' || data === null) return { success: false, error: { flatten: () => ({ fieldErrors: {}, formErrors: ['Invalid input'] }) } };
+        if (typeof data !== 'object' || data === null)
+          return {
+            success: false,
+            error: { flatten: () => ({ fieldErrors: {}, formErrors: ['Invalid input'] }) },
+          };
         const d = data as Record<string, unknown>;
         const errors: Record<string, string[]> = {};
-        if ('name' in d && (typeof d.name !== 'string' || d.name.length === 0)) errors.name = ['Name is required'];
-        if ('slug' in d && (typeof d.slug !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(d.slug))) errors.slug = ['Invalid slug'];
-        if (Object.keys(errors).length > 0) return { success: false as const, error: { flatten: () => ({ fieldErrors: errors, formErrors: [] }) } };
+        if ('name' in d && (typeof d.name !== 'string' || d.name.length === 0))
+          errors.name = ['Name is required'];
+        if (
+          'slug' in d &&
+          (typeof d.slug !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(d.slug))
+        )
+          errors.slug = ['Invalid slug'];
+        if (Object.keys(errors).length > 0)
+          return {
+            success: false as const,
+            error: { flatten: () => ({ fieldErrors: errors, formErrors: [] }) },
+          };
         return { success: true as const, data: d };
       },
     };
@@ -105,6 +144,12 @@ vi.mock('@lotr/shared', () => {
 // Mock auth middleware to bypass auth checks
 vi.mock('../middleware/require-auth', () => ({
   requireAuth: async (_c: unknown, next: () => Promise<void>) => {
+    await next();
+  },
+}));
+
+vi.mock('../middleware/admin-auth', () => ({
+  adminAuth: async (_c: unknown, next: () => Promise<void>) => {
     await next();
   },
 }));
@@ -165,7 +210,14 @@ describe('GET /api/admin/attributes', () => {
 
   it('returns list of attributes', async () => {
     setupSelectChain([
-      { id: '1', type: 'scent', name: 'Lavender', slug: 'lavender', displayOrder: 0, archived: false },
+      {
+        id: '1',
+        type: 'scent',
+        name: 'Lavender',
+        slug: 'lavender',
+        displayOrder: 0,
+        archived: false,
+      },
     ]);
 
     const res = await app.request('/api/admin/attributes');
@@ -206,7 +258,14 @@ describe('GET /api/admin/attributes/:id', () => {
 
   it('returns a single attribute', async () => {
     setupSelectChain([
-      { id: 'abc-123', type: 'scent', name: 'Lavender', slug: 'lavender', displayOrder: 0, archived: false },
+      {
+        id: 'abc-123',
+        type: 'scent',
+        name: 'Lavender',
+        slug: 'lavender',
+        displayOrder: 0,
+        archived: false,
+      },
     ]);
 
     const res = await app.request('/api/admin/attributes/abc-123');
@@ -330,7 +389,16 @@ describe('PATCH /api/admin/attributes/:id', () => {
   it('archives an attribute', async () => {
     setupUpdateChain(
       { id: 'abc', type: 'scent', name: 'Lavender', slug: 'lavender', displayOrder: 0 },
-      [{ id: 'abc', type: 'scent', name: 'Lavender', slug: 'lavender', displayOrder: 0, archived: true }],
+      [
+        {
+          id: 'abc',
+          type: 'scent',
+          name: 'Lavender',
+          slug: 'lavender',
+          displayOrder: 0,
+          archived: true,
+        },
+      ],
     );
 
     const res = await app.request('/api/admin/attributes/abc', {
@@ -354,7 +422,16 @@ describe('DELETE /api/admin/attributes/:id', () => {
   it('archives an attribute via DELETE', async () => {
     setupUpdateChain(
       { id: 'abc', type: 'scent', name: 'Lavender', slug: 'lavender', displayOrder: 0 },
-      [{ id: 'abc', type: 'scent', name: 'Lavender', slug: 'lavender', displayOrder: 0, archived: true }],
+      [
+        {
+          id: 'abc',
+          type: 'scent',
+          name: 'Lavender',
+          slug: 'lavender',
+          displayOrder: 0,
+          archived: true,
+        },
+      ],
     );
 
     const res = await app.request('/api/admin/attributes/abc', {

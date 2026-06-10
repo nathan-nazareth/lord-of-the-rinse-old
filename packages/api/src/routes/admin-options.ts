@@ -1,6 +1,6 @@
-import { Hono } from 'hono';
 import { adminDb, adminOptions } from '@lotr/db/admin';
 import { eq } from 'drizzle-orm';
+import { Hono } from 'hono';
 import { adminAuth } from '../middleware/admin-auth';
 
 const optionsRoutes = new Hono();
@@ -16,12 +16,26 @@ optionsRoutes.get('/', async (c) => {
 });
 
 optionsRoutes.put('/', async (c) => {
-  const body = await c.req.json<{
+  let body: {
     minPrice: number;
     maxPrice: number;
     minSize: number;
     maxSize: number;
-  }>();
+  };
+  try {
+    body = await c.req.json();
+  } catch {
+    return c.json({ error: 'Invalid JSON body' }, 400);
+  }
+
+  if (
+    !Number.isFinite(body.minPrice) ||
+    !Number.isFinite(body.maxPrice) ||
+    !Number.isFinite(body.minSize) ||
+    !Number.isFinite(body.maxSize)
+  ) {
+    return c.json({ error: 'Numeric fields must be finite' }, 422);
+  }
 
   if (body.maxPrice < body.minPrice) {
     return c.json({ error: 'maxPrice must be >= minPrice' }, 422);

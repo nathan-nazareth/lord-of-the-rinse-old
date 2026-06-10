@@ -1,8 +1,8 @@
-import { Hono } from 'hono';
 import { db, sql } from '@lotr/db';
 import { catalogAttributes } from '@lotr/db/schema';
-import { eq, and, desc, asc } from 'drizzle-orm';
-import { createAttributeSchema, updateAttributeSchema, attributeTypeSchema } from '@lotr/shared';
+import { attributeTypeSchema, createAttributeSchema, updateAttributeSchema } from '@lotr/shared';
+import { and, asc, eq } from 'drizzle-orm';
+import { Hono } from 'hono';
 
 const attributesRoutes = new Hono<{
   Variables: {
@@ -41,10 +41,7 @@ attributesRoutes.get('/', async (c) => {
 attributesRoutes.get('/:id', async (c) => {
   const id = c.req.param('id');
 
-  const [result] = await db
-    .select()
-    .from(catalogAttributes)
-    .where(eq(catalogAttributes.id, id));
+  const [result] = await db.select().from(catalogAttributes).where(eq(catalogAttributes.id, id));
 
   if (!result) {
     return c.json({ error: 'Attribute not found' }, 404);
@@ -93,10 +90,7 @@ attributesRoutes.patch('/:id', async (c) => {
   }
 
   // Check attribute exists
-  const [existing] = await db
-    .select()
-    .from(catalogAttributes)
-    .where(eq(catalogAttributes.id, id));
+  const [existing] = await db.select().from(catalogAttributes).where(eq(catalogAttributes.id, id));
 
   if (!existing) {
     return c.json({ error: 'Attribute not found' }, 404);
@@ -130,10 +124,7 @@ attributesRoutes.patch('/:id', async (c) => {
 attributesRoutes.delete('/:id', async (c) => {
   const id = c.req.param('id');
 
-  const [existing] = await db
-    .select()
-    .from(catalogAttributes)
-    .where(eq(catalogAttributes.id, id));
+  const [existing] = await db.select().from(catalogAttributes).where(eq(catalogAttributes.id, id));
 
   if (!existing) {
     return c.json({ error: 'Attribute not found' }, 404);

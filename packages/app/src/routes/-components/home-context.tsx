@@ -106,6 +106,16 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
   const handleCheckout = useCallback(
     async (customer: Customer): Promise<string | undefined> => {
       setIsSubmitting(true);
+      const finalizeSuccess = (ref: string) => {
+        setConfirmationItemCount(cart.totalQuantity);
+        setLastOrderReference(ref);
+        setJustOrdered(true);
+        clearCart();
+        clearFormState();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return ref;
+      };
+
       try {
         const checkoutItems = cart.items.map((item) => ({
           variantId: item.variantId,
@@ -126,17 +136,21 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
         });
 
         if (response.ok) {
-          const data = await response.json();
-          setConfirmationItemCount(cart.totalQuantity);
-          setLastOrderReference(data.reference);
-          setJustOrdered(true);
-          clearCart();
-          clearFormState();
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-          return data.reference;
+          let data: { reference?: string } = {};
+          try {
+            data = (await response.json()) as { reference?: string };
+          } catch {
+            console.error('[Checkout] Server returned a non-JSON success response');
+            return undefined;
+          }
+          if (!data.reference) {
+            console.error('[Checkout] Server response missing reference');
+            return undefined;
+          }
+          return finalizeSuccess(data.reference);
         }
 
-        console.warn('[Checkout] API unavailable, falling back to Web3Forms');
+        console.warn(`[Checkout] API responded ${response.status}, falling back to Web3Forms`);
       } catch (err) {
         console.warn('[Checkout] API error, falling back to Web3Forms:', err);
       }
@@ -145,13 +159,7 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
         const result = await submitCartToWebhook(customer, cart.items);
         if (result.success) {
           const ref = `LTR-${result.orderId.slice(0, 8).toUpperCase()}`;
-          setConfirmationItemCount(cart.totalQuantity);
-          setLastOrderReference(ref);
-          setJustOrdered(true);
-          clearCart();
-          clearFormState();
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-          return ref;
+          return finalizeSuccess(ref);
         }
       } catch (err) {
         console.error('Order submission error:', err);

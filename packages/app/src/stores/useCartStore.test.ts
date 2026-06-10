@@ -40,9 +40,7 @@ describe('useCartStore', () => {
     }
     expect(useCartStore.getState().items).toHaveLength(20);
 
-    const result = useCartStore
-      .getState()
-      .addItem('square', 'lavender', 12.99, 'blue', '1', '75g');
+    const result = useCartStore.getState().addItem('square', 'lavender', 12.99, 'blue', '1', '75g');
     expect(result).toBe(false);
     expect(useCartStore.getState().items).toHaveLength(20);
   });

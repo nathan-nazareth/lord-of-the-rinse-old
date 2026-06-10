@@ -107,7 +107,7 @@ describe('useFormStore', () => {
         currentStep: 'scent',
         visited: true,
       },
-      version: 0,
+      version: 1,
     };
     mockStorage.setItem('soap_form_state', JSON.stringify(persistedData));
 

@@ -1,7 +1,6 @@
-import { Hono } from 'hono';
 import { db, sql } from '@lotr/db';
 import { orderLines, orders } from '@lotr/db/schema';
-import { gt, inArray } from 'drizzle-orm';
+import { Hono } from 'hono';
 
 const productionQueueRoutes = new Hono<{
   Variables: {
@@ -22,9 +21,7 @@ productionQueueRoutes.get('/', async (c) => {
     })
     .from(orderLines)
     .innerJoin(orders, sql`${orderLines.orderId} = ${orders.id}`)
-    .where(
-      sql`${orderLines.quantityToProduce} > 0 AND ${orders.status} IN ('new', 'processing')`,
-    )
+    .where(sql`${orderLines.quantityToProduce} > 0 AND ${orders.status} IN ('new', 'processing')`)
     .orderBy(orders.reference);
 
   // Group by variant
@@ -39,8 +36,7 @@ productionQueueRoutes.get('/', async (c) => {
   >();
 
   for (const row of rows) {
-    // Use variantId if available, otherwise fall back to displayName as key
-    const key = row.variantId || row.displayName;
+    const key = row.variantId ?? `name:${row.displayName}`;
     const existing = variantMap.get(key);
     if (existing) {
       existing.totalToProduce += row.quantityToProduce;

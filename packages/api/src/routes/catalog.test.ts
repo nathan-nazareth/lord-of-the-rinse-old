@@ -1,10 +1,12 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { mocks } = vi.hoisted(() => {
   const chain = () => {
     const c = {} as Record<string, ReturnType<typeof vi.fn>>;
     let _resolve: (v: unknown) => void;
-    const _promise = new Promise((r) => { _resolve = r; });
+    const _promise = new Promise((r) => {
+      _resolve = r;
+    });
     c.then = (onFulfilled: (v: unknown) => unknown) => _promise.then(onFulfilled);
 
     c.orderBy = vi.fn(() => chain());
@@ -38,15 +40,24 @@ vi.mock('@lotr/db', () => ({
 vi.mock('@lotr/db/schema', () => {
   const col = (name: string) => name;
   const attrCols = Object.fromEntries(
-    ['id', 'type', 'name', 'slug', 'displayOrder', 'archived', 'createdAt', 'updatedAt'].map(k => [k, col(k)])
+    ['id', 'type', 'name', 'slug', 'displayOrder', 'archived', 'createdAt', 'updatedAt'].map(
+      (k) => [k, col(k)],
+    ),
   );
   const variantCols = Object.fromEntries(
-    ['id', 'name', 'slug', 'unitPrice', 'enabled', 'archived', 'createdAt', 'updatedAt'].map(k => [k, col(k)])
+    ['id', 'name', 'slug', 'unitPrice', 'enabled', 'archived', 'createdAt', 'updatedAt'].map(
+      (k) => [k, col(k)],
+    ),
   );
   return {
     catalogAttributes: attrCols,
     soapVariants: variantCols,
-    variantAttributes: { id: col('id'), variantId: col('variantId'), attributeId: col('attributeId'), value: col('value') },
+    variantAttributes: {
+      id: col('id'),
+      variantId: col('variantId'),
+      attributeId: col('attributeId'),
+      value: col('value'),
+    },
     commerceSettings: { key: col('key'), value: col('value') },
     users: { id: col('id'), email: col('email'), name: col('name'), role: col('role') },
     sessions: { id: col('id'), userId: col('userId'), token: col('token') },
@@ -57,6 +68,12 @@ vi.mock('@lotr/db/schema', () => {
 
 vi.mock('../middleware/require-auth', () => ({
   requireAuth: async (_c: unknown, next: () => Promise<void>) => {
+    await next();
+  },
+}));
+
+vi.mock('../middleware/admin-auth', () => ({
+  adminAuth: async (_c: unknown, next: () => Promise<void>) => {
     await next();
   },
 }));
@@ -95,13 +112,27 @@ describe('GET /api/catalog', () => {
     // First select: attributes
     setupSelectChain([
       { id: 'a1', type: 'shape', name: 'Round', slug: 'round', displayOrder: 0, archived: false },
-      { id: 'a2', type: 'scent', name: 'Lavender', slug: 'lavender', displayOrder: 0, archived: false },
+      {
+        id: 'a2',
+        type: 'scent',
+        name: 'Lavender',
+        slug: 'lavender',
+        displayOrder: 0,
+        archived: false,
+      },
       { id: 'a3', type: 'color', name: 'Blue', slug: 'blue', displayOrder: 0, archived: false },
     ]);
 
     // Second select: variants
     setupSelectChain([
-      { id: 'v1', name: 'Lavender Soap', slug: 'lavender-soap', unitPrice: '9.99', enabled: true, archived: false },
+      {
+        id: 'v1',
+        name: 'Lavender Soap',
+        slug: 'lavender-soap',
+        unitPrice: '9.99',
+        enabled: true,
+        archived: false,
+      },
     ]);
 
     // Third select: variant attributes
@@ -195,7 +226,14 @@ describe('GET /api/catalog', () => {
       { id: 'a1', type: 'shape', name: 'Round', slug: 'round', displayOrder: 1, archived: false },
       { id: 'a2', type: 'shape', name: 'Square', slug: 'square', displayOrder: 2, archived: false },
       { id: 'a3', type: 'scent', name: 'Rose', slug: 'rose', displayOrder: 0, archived: false },
-      { id: 'a4', type: 'addon', name: 'Gold Flake', slug: 'gold-flake', displayOrder: 0, archived: false },
+      {
+        id: 'a4',
+        type: 'addon',
+        name: 'Gold Flake',
+        slug: 'gold-flake',
+        displayOrder: 0,
+        archived: false,
+      },
     ]);
     setupSelectChain([]);
     setupSelectWithFieldsChain([]);

@@ -27,6 +27,7 @@ nul
 # Playwright
 test-results/
 .vercel
+.env
 .env*.local
 
 # Kilo/.opencode tooling
@@ -36,3 +37,8 @@ test-results/
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
+
+# Local .env files MUST NOT be committed
+**/.env
+**/.env.*
+!.env.example

@@ -1,12 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { mocks } = vi.hoisted(() => {
   const chain = () => {
-    const c = {} as Record<string, ReturnType<typeof vi.fn>>;
-    let _resolve: (v: unknown) => void;
-    const _promise = new Promise((r) => { _resolve = r; });
-    c.then = (onFulfilled: (v: unknown) => unknown) => _promise.then(onFulfilled);
-
+    const c = {} as Record<string, unknown>;
     c.orderBy = vi.fn(() => chain());
     c.returning = vi.fn(() => chain());
     c.where = vi.fn(() => chain());
@@ -16,9 +12,18 @@ const { mocks } = vi.hoisted(() => {
     c.limit = vi.fn(() => chain());
     c.onConflictDoUpdate = vi.fn(() => chain());
     c.groupBy = vi.fn(() => chain());
-
-    c._resolve = (v: unknown) => _resolve!(v);
+    c.for = vi.fn(() => chain());
+    c.execute = vi.fn(() => Promise.resolve());
+    c.then = (onFulfilled: (v: unknown) => unknown) => Promise.resolve([]).then(onFulfilled);
     return c;
+  };
+
+  const txStub = {
+    select: vi.fn(() => chain()),
+    insert: vi.fn(() => chain()),
+    update: vi.fn(() => chain()),
+    delete: vi.fn(() => chain()),
+    execute: vi.fn(() => Promise.resolve()),
   };
 
   const db = {
@@ -26,9 +31,10 @@ const { mocks } = vi.hoisted(() => {
     insert: vi.fn(() => chain()),
     update: vi.fn(() => chain()),
     delete: vi.fn(() => chain()),
+    transaction: vi.fn(async (cb: (tx: typeof txStub) => Promise<unknown>) => cb(txStub)),
   };
 
-  return { mocks: { db, chain } };
+  return { mocks: { db, chain, txStub } };
 });
 
 vi.mock('@lotr/db', () => ({
@@ -39,14 +45,73 @@ vi.mock('@lotr/db', () => ({
 vi.mock('@lotr/db/schema', () => {
   const col = (name: string) => name;
   return {
-    catalogAttributes: { id: col('id'), type: col('type'), name: col('name'), slug: col('slug'), displayOrder: col('displayOrder'), archived: col('archived'), createdAt: col('createdAt'), updatedAt: col('updatedAt') },
-    soapVariants: { id: col('id'), name: col('name'), slug: col('slug'), unitPrice: col('unitPrice'), enabled: col('enabled'), archived: col('archived'), createdAt: col('createdAt'), updatedAt: col('updatedAt') },
-    variantAttributes: { id: col('id'), variantId: col('variantId'), attributeId: col('attributeId'), value: col('value') },
+    catalogAttributes: {
+      id: col('id'),
+      type: col('type'),
+      name: col('name'),
+      slug: col('slug'),
+      displayOrder: col('displayOrder'),
+      archived: col('archived'),
+      createdAt: col('createdAt'),
+      updatedAt: col('updatedAt'),
+    },
+    soapVariants: {
+      id: col('id'),
+      name: col('name'),
+      slug: col('slug'),
+      unitPrice: col('unitPrice'),
+      enabled: col('enabled'),
+      archived: col('archived'),
+      createdAt: col('createdAt'),
+      updatedAt: col('updatedAt'),
+    },
+    variantAttributes: {
+      id: col('id'),
+      variantId: col('variantId'),
+      attributeId: col('attributeId'),
+      value: col('value'),
+    },
     commerceSettings: { key: col('key'), value: col('value') },
-    orders: { id: col('id'), reference: col('reference'), status: col('status'), customerName: col('customerName'), customerEmail: col('customerEmail'), total: col('total'), createdAt: col('createdAt'), updatedAt: col('updatedAt') },
-    orderLines: { id: col('id'), orderId: col('orderId'), variantId: col('variantId'), displayName: col('displayName'), quantity: col('quantity'), unitPrice: col('unitPrice'), allocatedFromStock: col('allocatedFromStock'), quantityToProduce: col('quantityToProduce'), createdAt: col('createdAt') },
-    stockMovements: { id: col('id'), variantId: col('variantId'), type: col('type'), quantity: col('quantity'), reason: col('reason'), referenceId: col('referenceId'), createdAt: col('createdAt') },
-    notificationAttempts: { id: col('id'), orderId: col('orderId'), provider: col('provider'), status: col('status'), attempts: col('attempts'), lastError: col('lastError'), createdAt: col('createdAt'), updatedAt: col('updatedAt') },
+    orders: {
+      id: col('id'),
+      reference: col('reference'),
+      status: col('status'),
+      customerName: col('customerName'),
+      customerEmail: col('customerEmail'),
+      total: col('total'),
+      createdAt: col('createdAt'),
+      updatedAt: col('updatedAt'),
+    },
+    orderLines: {
+      id: col('id'),
+      orderId: col('orderId'),
+      variantId: col('variantId'),
+      displayName: col('displayName'),
+      quantity: col('quantity'),
+      unitPrice: col('unitPrice'),
+      allocatedFromStock: col('allocatedFromStock'),
+      quantityToProduce: col('quantityToProduce'),
+      createdAt: col('createdAt'),
+    },
+    stockMovements: {
+      id: col('id'),
+      variantId: col('variantId'),
+      type: col('type'),
+      quantity: col('quantity'),
+      reason: col('reason'),
+      referenceId: col('referenceId'),
+      createdAt: col('createdAt'),
+    },
+    notificationAttempts: {
+      id: col('id'),
+      orderId: col('orderId'),
+      provider: col('provider'),
+      status: col('status'),
+      attempts: col('attempts'),
+      lastError: col('lastError'),
+      createdAt: col('createdAt'),
+      updatedAt: col('updatedAt'),
+    },
     users: { id: col('id'), email: col('email'), name: col('name'), role: col('role') },
     sessions: { id: col('id'), userId: col('userId'), token: col('token') },
     accounts: { id: col('id'), userId: col('userId') },
@@ -60,32 +125,33 @@ vi.mock('../middleware/require-auth', () => ({
   },
 }));
 
+vi.mock('../middleware/admin-auth', () => ({
+  adminAuth: async (_c: unknown, next: () => Promise<void>) => {
+    await next();
+  },
+}));
+
 import { app } from '../index';
 
 function setupSelectChain(result: unknown) {
-  mocks.db.select.mockReturnValueOnce({
-    from: vi.fn(() => ({
-      where: vi.fn(() => {
-        const innerChain = {
-          orderBy: vi.fn(() => ({
-            limit: vi.fn(() => Promise.resolve(result)),
-            then: (onFulfilled: (v: unknown) => unknown) => Promise.resolve(result).then(onFulfilled),
-          })),
-          then: (onFulfilled: (v: unknown) => unknown) => Promise.resolve(result).then(onFulfilled),
-          groupBy: vi.fn(() => Promise.resolve(result)),
-        };
-        return innerChain;
-      }),
-      orderBy: vi.fn(() => ({
-        limit: vi.fn(() => Promise.resolve(result)),
-        then: (onFulfilled: (v: unknown) => unknown) => Promise.resolve(result).then(onFulfilled),
-      })),
-    })),
+  // select().from().where().orderBy().limit(1) — the .where() call returns
+  // a fresh chain via the chain factory, so we have to override orderBy on it.
+  const whereResult = mocks.chain();
+  whereResult.orderBy.mockReturnValueOnce({
+    limit: vi.fn(() => Promise.resolve(result)),
+    then: (onFulfilled: (v: unknown) => unknown) => Promise.resolve(result).then(onFulfilled),
+  });
+  const c = mocks.chain();
+  c.where.mockReturnValueOnce(whereResult);
+  c.then = (onFulfilled: (v: unknown) => unknown) => Promise.resolve([]).then(onFulfilled);
+  c.groupBy.mockReturnValueOnce(Promise.resolve(result));
+  mocks.txStub.select.mockReturnValueOnce({
+    from: vi.fn(() => c),
   });
 }
 
 function setupInsertChain(result: unknown) {
-  mocks.db.insert.mockReturnValueOnce({
+  mocks.txStub.insert.mockReturnValueOnce({
     values: vi.fn(() => ({
       returning: vi.fn(() => Promise.resolve(result)),
     })),
@@ -94,24 +160,63 @@ function setupInsertChain(result: unknown) {
 
 function setupStockLevelChain(stockLevel: number) {
   // For the stock level query: select({ total: ... }).from(stockMovements).where(...)
-  mocks.db.select.mockReturnValueOnce({
+  mocks.txStub.select.mockReturnValueOnce({
     from: vi.fn(() => ({
       where: vi.fn(() => Promise.resolve([{ total: stockLevel }])),
     })),
   });
 }
 
-function setupVariantLookup(variants: Array<{ id: string; name: string; unitPrice: string; enabled: boolean; archived: boolean }>) {
-  mocks.db.select.mockReturnValueOnce({
-    from: vi.fn(() => ({
-      where: vi.fn(() => Promise.resolve(variants)),
-    })),
+function setupVariantLookup(
+  variants: Array<{
+    id: string;
+    name: string;
+    unitPrice: string;
+    enabled: boolean;
+    archived: boolean;
+  }>,
+) {
+  // Variant lookup is select().from().where().for('update') — we need
+  // .for() to return a thenable resolving to the variant rows.
+  const whereResult = mocks.chain();
+  whereResult.for.mockReturnValueOnce({
+    then: (onFulfilled: (v: unknown) => unknown) => Promise.resolve(variants).then(onFulfilled),
+  });
+  const c = mocks.chain();
+  c.where.mockReturnValueOnce(whereResult);
+  mocks.txStub.select.mockReturnValueOnce({
+    from: vi.fn(() => c),
   });
 }
 
 describe('POST /api/checkout', () => {
   beforeEach(() => {
-    vi.resetAllMocks();
+    // Clear the once-queue without wiping vi.fn implementations.
+    for (const fn of [
+      mocks.db.select,
+      mocks.db.insert,
+      mocks.db.update,
+      mocks.db.delete,
+      mocks.db.transaction,
+      mocks.txStub.select,
+      mocks.txStub.insert,
+      mocks.txStub.update,
+      mocks.txStub.delete,
+      mocks.txStub.execute,
+    ]) {
+      fn.mockReset();
+    }
+    // Re-seed default behaviors after reset.
+    mocks.db.transaction.mockImplementation(async (cb) => cb(mocks.txStub));
+    mocks.txStub.execute.mockImplementation(() => Promise.resolve());
+    mocks.txStub.select.mockImplementation(() => mocks.chain());
+    mocks.txStub.insert.mockImplementation(() => mocks.chain());
+    mocks.txStub.update.mockImplementation(() => mocks.chain());
+    mocks.txStub.delete.mockImplementation(() => mocks.chain());
+    mocks.db.select.mockImplementation(() => mocks.chain());
+    mocks.db.insert.mockImplementation(() => mocks.chain());
+    mocks.db.update.mockImplementation(() => mocks.chain());
+    mocks.db.delete.mockImplementation(() => mocks.chain());
   });
 
   it('returns 400 for invalid request body', async () => {
@@ -130,7 +235,14 @@ describe('POST /api/checkout', () => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        items: [{ variantId: '550e8400-e29b-41d4-a716-446655440000', quantity: 1, displayName: 'Test', unitPrice: '12.99' }],
+        items: [
+          {
+            variantId: '550e8400-e29b-41d4-a716-446655440000',
+            quantity: 1,
+            displayName: 'Test',
+            unitPrice: '12.99',
+          },
+        ],
         customerName: 'John',
         customerEmail: 'not-email',
       }),
@@ -143,13 +255,23 @@ describe('POST /api/checkout', () => {
     const variantId = '550e8400-e29b-41d4-a716-446655440000';
 
     // 0. Variant lookup
-    setupVariantLookup([{ id: variantId, name: 'Lavender Dreams', unitPrice: '12.99', enabled: true, archived: false }]);
+    setupVariantLookup([
+      {
+        id: variantId,
+        name: 'Lavender Dreams',
+        unitPrice: '12.99',
+        enabled: true,
+        archived: false,
+      },
+    ]);
 
     // 1. Select for reference generation (no existing orders today)
     setupSelectChain([]);
 
     // 2. Insert order (returning)
-    setupInsertChain([{ id: orderId, reference: 'LOR-20260523-0001', status: 'new', total: '12.99' }]);
+    setupInsertChain([
+      { id: orderId, reference: 'LOR-20260523-0001', status: 'new', total: '12.99' },
+    ]);
 
     // 3. Stock level for variant: 5 in stock
     setupStockLevelChain(5);
@@ -184,13 +306,17 @@ describe('POST /api/checkout', () => {
     const variantId = '550e8400-e29b-41d4-a716-446655440000';
 
     // Variant lookup
-    setupVariantLookup([{ id: variantId, name: 'Lavender Dreams', unitPrice: '8.66', enabled: true, archived: false }]);
+    setupVariantLookup([
+      { id: variantId, name: 'Lavender Dreams', unitPrice: '8.66', enabled: true, archived: false },
+    ]);
 
     // Reference generation: one existing order
     setupSelectChain([{ reference: 'LOR-20260523-0001' }]);
 
     // Insert order
-    setupInsertChain([{ id: orderId, reference: 'LOR-20260523-0002', status: 'new', total: '25.98' }]);
+    setupInsertChain([
+      { id: orderId, reference: 'LOR-20260523-0002', status: 'new', total: '25.98' },
+    ]);
 
     // Stock level: 0
     setupStockLevelChain(0);
@@ -215,7 +341,9 @@ describe('POST /api/checkout', () => {
 
     expect(res.status).toBe(201);
     const body = await res.json();
-    expect(body.reference).toBe(`LOR-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-0002`);
+    expect(body.reference).toBe(
+      `LOR-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-0002`,
+    );
   });
 
   it('is accessible without authentication', async () => {
@@ -233,14 +361,18 @@ describe('POST /api/checkout', () => {
     const variantId = '550e8400-e29b-41d4-a716-446655440000';
 
     // Variant lookup
-    setupVariantLookup([{ id: variantId, name: 'Test Soap', unitPrice: '10.00', enabled: true, archived: false }]);
+    setupVariantLookup([
+      { id: variantId, name: 'Test Soap', unitPrice: '10.00', enabled: true, archived: false },
+    ]);
 
     const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     // Max reference today is LOR-<today>-0005
     setupSelectChain([{ reference: `LOR-${today}-0005` }]);
 
     // Insert order
-    setupInsertChain([{ id: 'order-3', reference: `LOR-${today}-0006`, status: 'new', total: '10.00' }]);
+    setupInsertChain([
+      { id: 'order-3', reference: `LOR-${today}-0006`, status: 'new', total: '10.00' },
+    ]);
 
     // Stock level
     setupStockLevelChain(10);
@@ -295,7 +427,9 @@ describe('POST /api/checkout', () => {
   it('rejects checkout with disabled variant', async () => {
     const variantId = '550e8400-e29b-41d4-a716-446655440000';
 
-    setupVariantLookup([{ id: variantId, name: 'Disabled Soap', unitPrice: '10.00', enabled: false, archived: false }]);
+    setupVariantLookup([
+      { id: variantId, name: 'Disabled Soap', unitPrice: '10.00', enabled: false, archived: false },
+    ]);
 
     const res = await app.request('/api/checkout', {
       method: 'POST',
@@ -316,7 +450,9 @@ describe('POST /api/checkout', () => {
   it('rejects checkout with archived variant', async () => {
     const variantId = '550e8400-e29b-41d4-a716-446655440000';
 
-    setupVariantLookup([{ id: variantId, name: 'Old Soap', unitPrice: '10.00', enabled: true, archived: true }]);
+    setupVariantLookup([
+      { id: variantId, name: 'Old Soap', unitPrice: '10.00', enabled: true, archived: true },
+    ]);
 
     const res = await app.request('/api/checkout', {
       method: 'POST',
@@ -338,12 +474,22 @@ describe('POST /api/checkout', () => {
     const variantId = '550e8400-e29b-41d4-a716-446655440000';
 
     // Variant has price 12.99 but client sends 0.01
-    setupVariantLookup([{ id: variantId, name: 'Lavender Dreams', unitPrice: '12.99', enabled: true, archived: false }]);
+    setupVariantLookup([
+      {
+        id: variantId,
+        name: 'Lavender Dreams',
+        unitPrice: '12.99',
+        enabled: true,
+        archived: false,
+      },
+    ]);
 
     // Reference generation
     setupSelectChain([]);
     // Order insert — server computes total from variant price (12.99 * 1)
-    setupInsertChain([{ id: 'order-1', reference: 'LOR-20260524-0001', status: 'new', total: '12.99' }]);
+    setupInsertChain([
+      { id: 'order-1', reference: 'LOR-20260524-0001', status: 'new', total: '12.99' },
+    ]);
     // Stock level
     setupStockLevelChain(0);
     // Order line insert (uses server-side variant name and price)

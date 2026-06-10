@@ -229,7 +229,7 @@ describe('SoapForm component', () => {
     expect(mockAddToCart).toHaveBeenCalledWith(
       'Square',
       'Lavender',
-      110,
+      140,
       'White',
       '2',
       '50',

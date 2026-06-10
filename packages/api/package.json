@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@better-auth/drizzle-adapter": "^1.6.11",
+    "@hono/node-server": "^1.13.7",
     "@libsql/client": "^0.17.3",
     "@lotr/db": "workspace:*",
     "@lotr/shared": "workspace:*",

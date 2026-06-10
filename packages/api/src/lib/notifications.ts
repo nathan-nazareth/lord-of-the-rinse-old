@@ -1,5 +1,5 @@
 import { db, sql } from '@lotr/db';
-import { orders, orderLines, notificationAttempts, commerceSettings } from '@lotr/db/schema';
+import { commerceSettings, notificationAttempts, orderLines, orders } from '@lotr/db/schema';
 import { eq } from 'drizzle-orm';
 
 /**
@@ -25,10 +25,7 @@ function buildWeb3FormsPayload(
   lines: { displayName: string; quantity: number; unitPrice: string }[],
 ): Record<string, string> {
   const itemsList = lines
-    .map(
-      (l) =>
-        `- ${l.displayName} x${l.quantity} @ $${Number.parseFloat(l.unitPrice).toFixed(2)}`,
-    )
+    .map((l) => `- ${l.displayName} x${l.quantity} @ $${Number.parseFloat(l.unitPrice).toFixed(2)}`)
     .join('\n');
 
   const message = [
@@ -42,7 +39,6 @@ function buildWeb3FormsPayload(
   ].join('\n');
 
   return {
-    access_key: process.env.WEB3FORMS_ACCESS_KEY || '',
     subject: `New Order: ${order.reference}`,
     from_name: order.customerName,
     replyto: order.customerEmail,
@@ -67,20 +63,22 @@ export async function dispatchNotification(orderId: string): Promise<void> {
     return;
   }
 
+  const accessKey = process.env.WEB3FORMS_ACCESS_KEY;
+  if (!accessKey) {
+    console.error(
+      '[dispatchNotification] WEB3FORMS_ACCESS_KEY is not set; skipping notification for order',
+      orderId,
+    );
+    return;
+  }
+
   // Fetch order
-  const [order] = await db
-    .select()
-    .from(orders)
-    .where(eq(orders.id, orderId))
-    .limit(1);
+  const [order] = await db.select().from(orders).where(eq(orders.id, orderId)).limit(1);
 
   if (!order) return;
 
   // Fetch lines
-  const lines = await db
-    .select()
-    .from(orderLines)
-    .where(eq(orderLines.orderId, orderId));
+  const lines = await db.select().from(orderLines).where(eq(orderLines.orderId, orderId));
 
   // Fetch pending notification attempt for this order
   const [attempt] = await db
@@ -92,7 +90,7 @@ export async function dispatchNotification(orderId: string): Promise<void> {
   if (!attempt) return;
 
   // Build and send
-  const payload = buildWeb3FormsPayload(order, lines);
+  const payload = { ...buildWeb3FormsPayload(order, lines), access_key: accessKey };
 
   try {
     const response = await fetch('https://api.web3forms.com/submit', {
@@ -118,16 +116,23 @@ export async function dispatchNotification(orderId: string): Promise<void> {
       })
       .where(eq(notificationAttempts.id, attempt.id));
   } catch (err) {
-    // Failure
     const errorMessage = err instanceof Error ? err.message : String(err);
-    await db
-      .update(notificationAttempts)
-      .set({
-        status: 'failed',
-        attempts: sql`${notificationAttempts.attempts} + 1`,
-        lastError: errorMessage,
-        updatedAt: new Date(),
-      })
-      .where(eq(notificationAttempts.id, attempt.id));
+    console.error('[dispatchNotification] failed:', errorMessage);
+    try {
+      await db
+        .update(notificationAttempts)
+        .set({
+          status: 'failed',
+          attempts: sql`${notificationAttempts.attempts} + 1`,
+          lastError: errorMessage,
+          updatedAt: new Date(),
+        })
+        .where(eq(notificationAttempts.id, attempt.id));
+    } catch (updateErr) {
+      console.error(
+        '[dispatchNotification] could not record failure status:',
+        updateErr instanceof Error ? updateErr.message : String(updateErr),
+      );
+    }
   }
 }

@@ -68,7 +68,12 @@ export const logUnhandledRejection = (event: PromiseRejectionEvent): void => {
   console.error('[Unhandled Promise]', JSON.stringify(error, null, 2));
 };
 
+let errorHandlersInstalled = false;
+
 export const setupGlobalErrorHandlers = (): void => {
+  if (errorHandlersInstalled) return;
+  errorHandlersInstalled = true;
+
   window.addEventListener('error', (event) => {
     if (event.message) {
       const error: StructuredError = {
@@ -83,7 +88,10 @@ export const setupGlobalErrorHandlers = (): void => {
     }
   });
 
-  window.addEventListener('unhandledrejection', logUnhandledRejection);
+  window.addEventListener('unhandledrejection', (event) => {
+    logUnhandledRejection(event);
+    event.preventDefault();
+  });
 };
 
 export interface Web3FormsErrorLog {

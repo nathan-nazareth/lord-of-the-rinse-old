@@ -7,5 +7,14 @@ const adminDbUrl = process.env.ADMIN_SQLITE_URL || 'file:admin.db';
 const adminClient = createClient({ url: adminDbUrl });
 export const adminDb = drizzle(adminClient, { schema: adminSchema });
 
-export { adminSchema };
+const shutdown = () => {
+  adminClient.close().catch((err) => {
+    console.error('Failed to close libsql client:', err);
+  });
+};
+
+process.once('SIGINT', shutdown);
+process.once('SIGTERM', shutdown);
+
+export { adminSchema, adminClient };
 export const { adminProducts, adminOptions, adminDiscounts } = adminSchema;

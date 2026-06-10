@@ -1,8 +1,8 @@
-import { betterAuth } from 'better-auth';
-import { createAuthMiddleware, APIError } from 'better-auth/api';
 import { drizzleAdapter } from '@better-auth/drizzle-adapter';
 import { db } from '@lotr/db';
 import * as schema from '@lotr/db/schema';
+import { betterAuth } from 'better-auth';
+import { APIError, createAuthMiddleware } from 'better-auth/api';
 import { countAdminUsers } from './user-repository';
 
 export const auth = betterAuth({
@@ -15,7 +15,6 @@ export const auth = betterAuth({
       account: schema.accounts,
       verification: schema.verifications,
     },
-    usePlural: true,
   }),
   emailAndPassword: {
     enabled: true,

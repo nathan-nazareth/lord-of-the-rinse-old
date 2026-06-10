@@ -1,6 +1,6 @@
-import { Hono } from 'hono';
 import { adminDb, adminDiscounts } from '@lotr/db/admin';
 import { eq } from 'drizzle-orm';
+import { Hono } from 'hono';
 import { adminAuth } from '../middleware/admin-auth';
 
 const discountsRoutes = new Hono();
@@ -13,10 +13,20 @@ discountsRoutes.get('/', async (c) => {
 });
 
 discountsRoutes.post('/', async (c) => {
-  const body = await c.req.json<{
-    percentage: number;
-    description: string;
-  }>();
+  let body: { percentage: number; description: string };
+  try {
+    body = await c.req.json();
+  } catch {
+    return c.json({ error: 'Invalid JSON body' }, 400);
+  }
+
+  if (
+    !Number.isFinite(body.percentage) ||
+    typeof body.description !== 'string' ||
+    body.description.trim().length === 0
+  ) {
+    return c.json({ error: 'Invalid discount fields' }, 422);
+  }
 
   if (body.percentage < 0 || body.percentage > 100) {
     return c.json({ error: 'Percentage must be between 0 and 100' }, 422);
@@ -33,14 +43,22 @@ discountsRoutes.post('/', async (c) => {
 
 discountsRoutes.put('/:id', async (c) => {
   const id = Number(c.req.param('id'));
-  const body = await c.req.json<{
-    percentage?: number;
-    description?: string;
-    active?: number;
-  }>();
+  if (!Number.isInteger(id) || id <= 0) {
+    return c.json({ error: 'Invalid id' }, 400);
+  }
 
-  if (body.percentage !== undefined && (body.percentage < 0 || body.percentage > 100)) {
-    return c.json({ error: 'Percentage must be between 0 and 100' }, 422);
+  let body: { percentage?: number; description?: string; active?: number };
+  try {
+    body = await c.req.json();
+  } catch {
+    return c.json({ error: 'Invalid JSON body' }, 400);
+  }
+
+  if (
+    body.percentage !== undefined &&
+    (!Number.isFinite(body.percentage) || body.percentage < 0 || body.percentage > 100)
+  ) {
+    return c.json({ error: 'Percentage must be a finite number between 0 and 100' }, 422);
   }
 
   const now = new Date().toISOString();
@@ -58,6 +76,9 @@ discountsRoutes.put('/:id', async (c) => {
 
 discountsRoutes.delete('/:id', async (c) => {
   const id = Number(c.req.param('id'));
+  if (!Number.isInteger(id) || id <= 0) {
+    return c.json({ error: 'Invalid id' }, 400);
+  }
   const discount = await adminDb
     .select()
     .from(adminDiscounts)

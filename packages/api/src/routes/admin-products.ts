@@ -1,6 +1,6 @@
-import { Hono } from 'hono';
-import { adminDb, adminProducts, adminOptions } from '@lotr/db/admin';
+import { adminDb, adminOptions, adminProducts } from '@lotr/db/admin';
 import { eq } from 'drizzle-orm';
+import { Hono } from 'hono';
 import { adminAuth } from '../middleware/admin-auth';
 
 const productsRoutes = new Hono();
@@ -13,26 +13,52 @@ productsRoutes.get('/', async (c) => {
 });
 
 productsRoutes.post('/', async (c) => {
-  const body = await c.req.json<{
+  let body: {
     name: string;
     color: string;
     scent: string;
     shape: string;
     weight: number;
     price: number;
-  }>();
+  };
+  try {
+    body = await c.req.json();
+  } catch {
+    return c.json({ error: 'Invalid JSON body' }, 400);
+  }
+
+  if (
+    typeof body.name !== 'string' ||
+    body.name.trim().length === 0 ||
+    typeof body.color !== 'string' ||
+    body.color.trim().length === 0 ||
+    typeof body.scent !== 'string' ||
+    body.scent.trim().length === 0 ||
+    typeof body.shape !== 'string' ||
+    body.shape.trim().length === 0
+  ) {
+    return c.json({ error: 'Invalid product fields' }, 422);
+  }
+
+  // weight + price must be non-negative finite numbers. The schema column is
+  // an integer; we coerce so floats don't blow up the SQLite insert.
+  const weight = Number(body.weight);
+  const price = Number(body.price);
+  if (!Number.isFinite(weight) || weight < 0 || !Number.isFinite(price) || price < 0) {
+    return c.json({ error: 'Invalid product fields' }, 422);
+  }
 
   const opts = await adminDb.select().from(adminOptions).limit(1);
   const bounds = opts[0];
 
   if (bounds) {
-    if (body.price < bounds.minPrice || body.price > bounds.maxPrice) {
+    if (price < bounds.minPrice || price > bounds.maxPrice) {
       return c.json(
         { error: `Price must be between ${bounds.minPrice} and ${bounds.maxPrice}` },
         422,
       );
     }
-    if (body.weight < bounds.minSize || body.weight > bounds.maxSize) {
+    if (weight < bounds.minSize || weight > bounds.maxSize) {
       return c.json(
         { error: `Weight must be between ${bounds.minSize} and ${bounds.maxSize}` },
         422,
@@ -43,7 +69,16 @@ productsRoutes.post('/', async (c) => {
   const now = new Date().toISOString();
   const result = await adminDb
     .insert(adminProducts)
-    .values({ ...body, createdAt: now, updatedAt: now })
+    .values({
+      name: body.name.trim(),
+      color: body.color.trim(),
+      scent: body.scent.trim(),
+      shape: body.shape.trim(),
+      weight: Math.trunc(weight),
+      price: Math.trunc(price),
+      createdAt: now,
+      updatedAt: now,
+    })
     .returning();
 
   return c.json(result[0], 201);
@@ -51,6 +86,9 @@ productsRoutes.post('/', async (c) => {
 
 productsRoutes.delete('/:id', async (c) => {
   const id = Number(c.req.param('id'));
+  if (!Number.isInteger(id) || id <= 0) {
+    return c.json({ error: 'Invalid id' }, 400);
+  }
   const product = await adminDb
     .select()
     .from(adminProducts)

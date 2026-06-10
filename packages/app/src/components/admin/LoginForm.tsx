@@ -2,23 +2,50 @@ import { useState } from 'react';
 import { useAdminStore } from '@/stores/useAdminStore';
 import { useNavigate } from '@tanstack/react-router';
 
-const ADMIN_PASSWORD = '3984';
+const API_BASE = (import.meta.env.VITE_API_URL ?? '').replace(/\/+$/, '');
 
 export function LoginForm() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const setAuth = useAdminStore((s) => s.setAuth);
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     setError(null);
+    setIsSubmitting(true);
 
-    if (password === ADMIN_PASSWORD) {
-      setAuth(`admin-${ADMIN_PASSWORD}`);
+    try {
+      const res = await fetch(`${API_BASE}/api/admin/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+
+      if (res.status === 429) {
+        setError('Too many attempts. Please wait a minute and try again.');
+        return;
+      }
+      if (!res.ok) {
+        setError('Invalid password');
+        return;
+      }
+
+      const data = (await res.json()) as { token?: string };
+      if (!data.token) {
+        setError('Server returned an invalid response');
+        return;
+      }
+
+      setAuth(data.token);
       navigate({ to: '/admin' });
-    } else {
-      setError('Invalid password');
+    } catch {
+      setError('Network error. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+      setPassword('');
     }
   };
 
@@ -39,16 +66,17 @@ export function LoginForm() {
               className="w-full px-3 py-2 border border-stone-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
               placeholder="Enter admin password"
               required
+              autoComplete="current-password"
+              disabled={isSubmitting}
             />
           </div>
-          {error && (
-            <p className="text-red-600 text-sm">{error}</p>
-          )}
+          {error && <p className="text-red-600 text-sm">{error}</p>}
           <button
             type="submit"
-            className="w-full bg-amber-600 text-white py-2 px-4 rounded-md hover:bg-amber-700 transition-colors"
+            disabled={isSubmitting}
+            className="w-full bg-amber-600 text-white py-2 px-4 rounded-md hover:bg-amber-700 transition-colors disabled:opacity-50"
           >
-            Login
+            {isSubmitting ? 'Signing in…' : 'Login'}
           </button>
         </form>
       </div>

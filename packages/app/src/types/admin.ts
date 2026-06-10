@@ -1,114 +1,43 @@
+// These types mirror the SQLite-backed admin API in @lotr/db/admin and the
+// `admin-sqlite.ts` schema. The previously-typed `AdminProduct` shape (with
+// basePrice/minWeight/maxWeight) described the unused Postgres schema
+// `admin-catalog.ts` and was rot — the real wire format from
+// `/api/admin/products` is the SQLite row below.
+
 export interface AdminProduct {
-  id: string;
+  id: number;
   name: string;
+  color: string;
+  scent: string;
+  shape: string;
+  weight: number;
+  price: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminOptions {
+  id: number;
+  minPrice: number;
+  maxPrice: number;
+  minSize: number;
+  maxSize: number;
+  updatedAt: string;
+}
+
+export interface AdminDiscount {
+  id: number;
+  percentage: number;
   description: string;
-  basePrice: number;
-  minWeight: number;
-  maxWeight: number;
-  enabled: boolean;
-  options: ProductOption[];
+  active: number;
   createdAt: string;
   updatedAt: string;
-}
-
-export interface ProductOption {
-  optionId: string;
-  extraPrice: number;
-}
-
-export interface CatalogOption {
-  id: string;
-  type: 'scent' | 'color' | 'shape';
-  name: string;
-  slug: string;
-  description: string | null;
-  hexValue: string | null;
-  displayOrder: number;
-  enabled: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface Discount {
-  id: string;
-  code: string;
-  type: 'percentage' | 'fixed';
-  value: number;
-  minOrderValue: number;
-  maxUses: number | null;
-  usesCount: number;
-  startsAt: string;
-  expiresAt: string;
-  enabled: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface AuditLogEntry {
-  id: string;
-  entityType: 'product' | 'option' | 'discount';
-  entityId: string;
-  action: 'create' | 'update' | 'delete';
-  adminId: string;
-  changes: Record<string, { old: unknown; new: unknown }>;
-  createdAt: string;
-}
-
-export interface UpdateProductRequest {
-  name?: string;
-  description?: string;
-  basePrice?: number;
-  minWeight?: number;
-  maxWeight?: number;
-  enabled?: boolean;
-}
-
-export interface CreateOptionRequest {
-  type: 'scent' | 'color' | 'shape';
-  name: string;
-  description?: string;
-  hexValue?: string;
-  displayOrder?: number;
-}
-
-export interface UpdateOptionRequest {
-  name?: string;
-  description?: string;
-  displayOrder?: number;
-  enabled?: boolean;
-}
-
-export interface CreateDiscountRequest {
-  code: string;
-  type: 'percentage' | 'fixed';
-  value: number;
-  minOrderValue?: number;
-  maxUses?: number;
-  startsAt: string;
-  expiresAt: string;
-}
-
-export interface UpdateDiscountRequest {
-  code?: string;
-  type?: 'percentage' | 'fixed';
-  value?: number;
-  minOrderValue?: number;
-  maxUses?: number;
-  startsAt?: string;
-  expiresAt?: string;
-  enabled?: boolean;
-}
-
-export interface AddProductOptionRequest {
-  optionId: string;
-  extraPrice?: number;
 }
 
 export interface AdminCatalogState {
   products: AdminProduct[];
-  options: CatalogOption[];
-  discounts: Discount[];
-  auditLog: AuditLogEntry[];
+  options: AdminOptions[];
+  discounts: AdminDiscount[];
   isLoading: boolean;
   error: string | null;
 }

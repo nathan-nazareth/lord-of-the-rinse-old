@@ -1,8 +1,13 @@
-import { Hono } from 'hono';
 import { db } from '@lotr/db';
-import { catalogAttributes, soapVariants, variantAttributes, commerceSettings } from '@lotr/db/schema';
-import { eq, and, inArray, asc } from 'drizzle-orm';
+import {
+  catalogAttributes,
+  commerceSettings,
+  soapVariants,
+  variantAttributes,
+} from '@lotr/db/schema';
 import type { AttributeType, CatalogAttribute, SoapVariant } from '@lotr/shared';
+import { and, asc, eq, inArray } from 'drizzle-orm';
+import { Hono } from 'hono';
 
 const PUBLIC_SETTINGS = new Set(['shop_open', 'currency', 'discount_tiers']);
 

@@ -108,8 +108,8 @@ export const useCartStore = create<CartState>()(
             }
 
             const cleanItems: CartItem[] = rawItems
-              .filter((raw): raw is Record<string, unknown> =>
-                typeof raw === 'object' && raw !== null,
+              .filter(
+                (raw): raw is Record<string, unknown> => typeof raw === 'object' && raw !== null,
               )
               .map((raw) => {
                 const q = parseInt(String(raw.quantity), 10);
@@ -117,16 +117,14 @@ export const useCartStore = create<CartState>()(
 
                 return {
                   id: typeof raw.id === 'string' ? raw.id : crypto.randomUUID(),
-                  variantId:
-                    typeof raw.variantId === 'string' ? raw.variantId : 'unknown',
+                  variantId: typeof raw.variantId === 'string' ? raw.variantId : 'unknown',
                   shape: typeof raw.shape === 'string' ? raw.shape : 'Unknown',
                   scent: typeof raw.scent === 'string' ? raw.scent : 'Unknown',
                   price: Number.isFinite(p) && p >= 0 ? p : 0,
                   color: typeof raw.color === 'string' ? raw.color : 'Unknown',
                   quantity: Number.isFinite(q) && q > 0 ? q : 1,
                   size: typeof raw.size === 'string' && raw.size.length > 0 ? raw.size : '100',
-                  addedAt:
-                    typeof raw.addedAt === 'string' ? raw.addedAt : new Date().toISOString(),
+                  addedAt: typeof raw.addedAt === 'string' ? raw.addedAt : new Date().toISOString(),
                 };
               });
 

@@ -1,8 +1,8 @@
-import { Hono } from 'hono';
 import { db, sql } from '@lotr/db';
-import { stockMovements, soapVariants } from '@lotr/db/schema';
-import { eq, and, desc, gte, lte, inArray } from 'drizzle-orm';
-import { stockAdjustmentSchema, movementTypeSchema } from '@lotr/shared';
+import { soapVariants, stockMovements } from '@lotr/db/schema';
+import { movementTypeSchema, stockAdjustmentSchema } from '@lotr/shared';
+import { and, desc, eq, gte, inArray, lte } from 'drizzle-orm';
+import { Hono } from 'hono';
 
 const stockMovementsRoutes = new Hono<{
   Variables: {
@@ -75,10 +75,7 @@ stockMovementsRoutes.get('/stock-level/:variantId', async (c) => {
 
 // Get stock levels for all variants
 stockMovementsRoutes.get('/stock-levels', async (c) => {
-  const variants = await db
-    .select()
-    .from(soapVariants)
-    .where(eq(soapVariants.archived, false));
+  const variants = await db.select().from(soapVariants).where(eq(soapVariants.archived, false));
 
   const variantIds = variants.map((v) => v.id);
 

@@ -3,6 +3,7 @@
 import type { CartItem } from '../types/cart';
 import type { Customer, WebhookLogEntry, WebhookStatus } from '../types/webhook';
 import {
+  logError,
   logWeb3FormsError,
   logWeb3FormsRateLimit,
   logWeb3FormsSuccess,
@@ -114,7 +115,10 @@ export async function submitCartToWebhook(
 
       clearTimeout(timeoutId);
 
-      const responseData: Web3FormsResponse = await response.json();
+      const responseData: Web3FormsResponse = await response.json().catch(() => ({
+        success: false,
+        message: `Non-JSON response (HTTP ${response.status})`,
+      }));
 
       const logEntry: WebhookLogEntry = {
         orderId,
@@ -131,32 +135,44 @@ export async function submitCartToWebhook(
       if (responseData.success) {
         logWeb3FormsSuccess(orderId);
 
+        // Mirror the order to the admin API so the shop owner has a record even
+        // when the customer-facing checkout API is unavailable. Don't fail the
+        // submission if this secondary request fails — but log it loudly so
+        // the gap is visible.
+        const adminPayload = {
+          orderId,
+          customer,
+          items: items.map((i) => ({
+            id: i.id,
+            variantId: i.variantId,
+            shape: i.shape,
+            scent: i.scent,
+            color: i.color,
+            quantity: i.quantity,
+            size: i.size,
+            price: i.price,
+          })),
+          totalQuantity,
+          subtotal,
+          discountPercentage,
+          discountAmount,
+          finalTotal,
+        };
+
         try {
-          await fetch('/api/orders', {
+          const adminRes = await fetch('/api/orders', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              orderId,
-              customer,
-              items: items.map((i) => ({
-                id: i.id,
-                variantId: i.variantId,
-                shape: i.shape,
-                scent: i.scent,
-                color: i.color,
-                quantity: i.quantity,
-                size: i.size,
-                price: i.price,
-              })),
-              totalQuantity,
-              subtotal,
-              discountPercentage,
-              discountAmount,
-              finalTotal,
-            }),
+            body: JSON.stringify(adminPayload),
           });
+          if (!adminRes.ok) {
+            logError(
+              new Error(`Admin order mirror failed: HTTP ${adminRes.status} for order ${orderId}`),
+              'runtime',
+            );
+          }
         } catch (e) {
-          console.warn('[Webhook] Failed to save order to admin API:', e);
+          logError(e instanceof Error ? e : new Error(String(e)), 'runtime', undefined);
         }
 
         if (onStatusChange) {

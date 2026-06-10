@@ -1,10 +1,12 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { mocks } = vi.hoisted(() => {
   const chain = () => {
     const c = {} as Record<string, ReturnType<typeof vi.fn>>;
     let _resolve: (v: unknown) => void;
-    const _promise = new Promise((r) => { _resolve = r; });
+    const _promise = new Promise((r) => {
+      _resolve = r;
+    });
     c.then = (onFulfilled: (v: unknown) => unknown) => _promise.then(onFulfilled);
 
     c.orderBy = vi.fn(() => chain());
@@ -38,14 +40,23 @@ vi.mock('@lotr/db', () => ({
 vi.mock('@lotr/db/schema', () => {
   const col = (name: string) => name;
   const variantCols = Object.fromEntries(
-    ['id', 'name', 'slug', 'unitPrice', 'enabled', 'archived', 'createdAt', 'updatedAt'].map(k => [k, col(k)])
+    ['id', 'name', 'slug', 'unitPrice', 'enabled', 'archived', 'createdAt', 'updatedAt'].map(
+      (k) => [k, col(k)],
+    ),
   );
   const attrCols = Object.fromEntries(
-    ['id', 'type', 'name', 'slug', 'displayOrder', 'archived', 'createdAt', 'updatedAt'].map(k => [k, col(k)])
+    ['id', 'type', 'name', 'slug', 'displayOrder', 'archived', 'createdAt', 'updatedAt'].map(
+      (k) => [k, col(k)],
+    ),
   );
   return {
     soapVariants: variantCols,
-    variantAttributes: { id: col('id'), variantId: col('variantId'), attributeId: col('attributeId'), value: col('value') },
+    variantAttributes: {
+      id: col('id'),
+      variantId: col('variantId'),
+      attributeId: col('attributeId'),
+      value: col('value'),
+    },
     catalogAttributes: attrCols,
     users: { id: col('id'), email: col('email'), name: col('name'), role: col('role') },
     sessions: { id: col('id'), userId: col('userId'), token: col('token') },
@@ -58,14 +69,25 @@ vi.mock('@lotr/shared', () => {
   function createVariantSchema() {
     return {
       safeParse(data: unknown) {
-        if (typeof data !== 'object' || data === null) return { success: false, error: { flatten: () => ({ fieldErrors: {}, formErrors: ['Invalid input'] }) } };
+        if (typeof data !== 'object' || data === null)
+          return {
+            success: false,
+            error: { flatten: () => ({ fieldErrors: {}, formErrors: ['Invalid input'] }) },
+          };
         const d = data as Record<string, unknown>;
         const errors: Record<string, string[]> = {};
         if (typeof d.name !== 'string' || d.name.length === 0) errors.name = ['Name is required'];
-        if (typeof d.slug !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(d.slug)) errors.slug = ['Invalid slug'];
-        if (typeof d.unitPrice !== 'string' || !/^\d+(\.\d{1,2})?$/.test(d.unitPrice)) errors.unitPrice = ['Invalid price'];
-        if (!Array.isArray(d.attributes) || d.attributes.length === 0) errors.attributes = ['At least one attribute is required'];
-        if (Object.keys(errors).length > 0) return { success: false as const, error: { flatten: () => ({ fieldErrors: errors, formErrors: [] }) } };
+        if (typeof d.slug !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(d.slug))
+          errors.slug = ['Invalid slug'];
+        if (typeof d.unitPrice !== 'string' || !/^\d+(\.\d{1,2})?$/.test(d.unitPrice))
+          errors.unitPrice = ['Invalid price'];
+        if (!Array.isArray(d.attributes) || d.attributes.length === 0)
+          errors.attributes = ['At least one attribute is required'];
+        if (Object.keys(errors).length > 0)
+          return {
+            success: false as const,
+            error: { flatten: () => ({ fieldErrors: errors, formErrors: [] }) },
+          };
         return { success: true as const, data: d };
       },
     };
@@ -74,7 +96,11 @@ vi.mock('@lotr/shared', () => {
   function updateVariantSchema() {
     return {
       safeParse(data: unknown) {
-        if (typeof data !== 'object' || data === null) return { success: false, error: { flatten: () => ({ fieldErrors: {}, formErrors: ['Invalid input'] }) } };
+        if (typeof data !== 'object' || data === null)
+          return {
+            success: false,
+            error: { flatten: () => ({ fieldErrors: {}, formErrors: ['Invalid input'] }) },
+          };
         return { success: true as const, data };
       },
     };
@@ -88,6 +114,12 @@ vi.mock('@lotr/shared', () => {
 
 vi.mock('../middleware/require-auth', () => ({
   requireAuth: async (_c: unknown, next: () => Promise<void>) => {
+    await next();
+  },
+}));
+
+vi.mock('../middleware/admin-auth', () => ({
+  adminAuth: async (_c: unknown, next: () => Promise<void>) => {
     await next();
   },
 }));
@@ -136,12 +168,17 @@ describe('GET /api/admin/variants', () => {
   it('returns list of variants with attributes', async () => {
     // First select: variants
     setupSelectChain([
-      { id: 'v1', name: 'Lavender Soap', slug: 'lavender-soap', unitPrice: '9.99', enabled: true, archived: false },
+      {
+        id: 'v1',
+        name: 'Lavender Soap',
+        slug: 'lavender-soap',
+        unitPrice: '9.99',
+        enabled: true,
+        archived: false,
+      },
     ]);
     // Second select: variant_attributes
-    setupSelectChain([
-      { id: 'va1', variantId: 'v1', attributeId: 'a1', value: 'lavender' },
-    ]);
+    setupSelectChain([{ id: 'va1', variantId: 'v1', attributeId: 'a1', value: 'lavender' }]);
 
     const res = await app.request('/api/admin/variants');
     expect(res.status).toBe(200);
@@ -168,12 +205,17 @@ describe('GET /api/admin/variants/:id', () => {
 
   it('returns a single variant with attributes', async () => {
     setupSelectChain([
-      { id: 'v1', name: 'Lavender Soap', slug: 'lavender-soap', unitPrice: '9.99', enabled: true, archived: false },
+      {
+        id: 'v1',
+        name: 'Lavender Soap',
+        slug: 'lavender-soap',
+        unitPrice: '9.99',
+        enabled: true,
+        archived: false,
+      },
     ]);
     // Second select: attributes for the variant
-    setupSelectChain([
-      { attributeId: 'a1', value: 'lavender' },
-    ]);
+    setupSelectChain([{ attributeId: 'a1', value: 'lavender' }]);
 
     const res = await app.request('/api/admin/variants/v1');
     expect(res.status).toBe(200);
@@ -203,7 +245,14 @@ describe('POST /api/admin/variants', () => {
     setupSelectChain([{ id: 'a1' }]);
     // Insert variant
     setupInsertChain([
-      { id: 'v1', name: 'Rose Soap', slug: 'rose-soap', unitPrice: '12.99', enabled: true, archived: false },
+      {
+        id: 'v1',
+        name: 'Rose Soap',
+        slug: 'rose-soap',
+        unitPrice: '12.99',
+        enabled: true,
+        archived: false,
+      },
     ]);
     // Insert variant_attributes
     setupInsertChain([]);
@@ -286,12 +335,18 @@ describe('PATCH /api/admin/variants/:id', () => {
   it('updates a variant', async () => {
     setupUpdateChain(
       { id: 'v1', name: 'Lavender Soap', slug: 'lavender-soap', unitPrice: '9.99', enabled: true },
-      [{ id: 'v1', name: 'Lavender Deluxe', slug: 'lavender-soap', unitPrice: '9.99', enabled: true }],
+      [
+        {
+          id: 'v1',
+          name: 'Lavender Deluxe',
+          slug: 'lavender-soap',
+          unitPrice: '9.99',
+          enabled: true,
+        },
+      ],
     );
     // Select for current attributes (after update)
-    setupSelectChain([
-      { attributeId: 'a1', value: 'lavender' },
-    ]);
+    setupSelectChain([{ attributeId: 'a1', value: 'lavender' }]);
 
     const res = await app.request('/api/admin/variants/v1', {
       method: 'PATCH',
@@ -319,7 +374,15 @@ describe('PATCH /api/admin/variants/:id', () => {
   it('toggles enabled status', async () => {
     setupUpdateChain(
       { id: 'v1', name: 'Lavender Soap', slug: 'lavender-soap', unitPrice: '9.99', enabled: true },
-      [{ id: 'v1', name: 'Lavender Soap', slug: 'lavender-soap', unitPrice: '9.99', enabled: false }],
+      [
+        {
+          id: 'v1',
+          name: 'Lavender Soap',
+          slug: 'lavender-soap',
+          unitPrice: '9.99',
+          enabled: false,
+        },
+      ],
     );
     setupSelectChain([]);
 
@@ -337,7 +400,16 @@ describe('PATCH /api/admin/variants/:id', () => {
   it('archives a variant', async () => {
     setupUpdateChain(
       { id: 'v1', name: 'Lavender Soap', slug: 'lavender-soap', unitPrice: '9.99', enabled: true },
-      [{ id: 'v1', name: 'Lavender Soap', slug: 'lavender-soap', unitPrice: '9.99', enabled: true, archived: true }],
+      [
+        {
+          id: 'v1',
+          name: 'Lavender Soap',
+          slug: 'lavender-soap',
+          unitPrice: '9.99',
+          enabled: true,
+          archived: true,
+        },
+      ],
     );
     setupSelectChain([]);
 
@@ -361,7 +433,16 @@ describe('DELETE /api/admin/variants/:id', () => {
   it('archives a variant via DELETE', async () => {
     setupUpdateChain(
       { id: 'v1', name: 'Lavender Soap', slug: 'lavender-soap', unitPrice: '9.99', enabled: true },
-      [{ id: 'v1', name: 'Lavender Soap', slug: 'lavender-soap', unitPrice: '9.99', enabled: true, archived: true }],
+      [
+        {
+          id: 'v1',
+          name: 'Lavender Soap',
+          slug: 'lavender-soap',
+          unitPrice: '9.99',
+          enabled: true,
+          archived: true,
+        },
+      ],
     );
     // Select attributes for the response
     setupSelectChain([]);

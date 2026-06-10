@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-type FormStep = 'landing' | 'shape' | 'scent' | 'color' | 'size' | 'quantity';
+export type FormStep = 'landing' | 'shape' | 'scent' | 'color' | 'size' | 'quantity';
 
 export interface FormState {
   shape: string | null;
@@ -9,6 +9,7 @@ export interface FormState {
   color: string | null;
   size: number | null;
   quantity: string;
+  hasLavenderPieces: boolean;
   currentStep: FormStep;
   visited: boolean;
 }
@@ -26,6 +27,7 @@ const initialState: FormState = {
   color: null,
   size: null,
   quantity: '',
+  hasLavenderPieces: false,
   currentStep: 'landing',
   visited: false,
 };
@@ -41,10 +43,24 @@ export const useFormStore = create<FormState & FormActions>()(
     }),
     {
       name: 'soap_form_state',
+      version: 1,
       storage: {
         getItem: (name) => {
-          const item = localStorage.getItem(name);
-          return item ? JSON.parse(item) : null;
+          try {
+            const item = localStorage.getItem(name);
+            if (!item) return null;
+            const parsed: unknown = JSON.parse(item);
+            if (
+              typeof parsed !== 'object' ||
+              parsed === null ||
+              (parsed as { state?: unknown }).state === undefined
+            ) {
+              return null;
+            }
+            return parsed as { state: unknown; version?: number };
+          } catch {
+            return null;
+          }
         },
         setItem: (name, value) => {
           localStorage.setItem(name, JSON.stringify(value));

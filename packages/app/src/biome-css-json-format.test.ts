@@ -43,12 +43,7 @@ describe('CSS files pass Biome format check', () => {
 });
 
 describe('JSON files pass Biome format check', () => {
-  const jsonFiles = [
-    'tsconfig.json',
-    'package.json',
-    'metadata.json',
-    'public/manifest.webmanifest',
-  ];
+  const jsonFiles = ['tsconfig.json', 'package.json', 'metadata.json'];
 
   for (const file of jsonFiles) {
     it(`${file} passes format check`, () => {

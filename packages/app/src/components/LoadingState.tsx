@@ -15,24 +15,22 @@ export const LoadingState: React.FC<{ children: React.ReactNode; timeout?: numbe
   timeout = 3000,
 }) => {
   const [isLoading, setIsLoading] = useState(true);
-  const [timedOut, setTimedOut] = useState(false);
 
   useEffect(() => {
-    const checkLoaded = () => {
-      if (document.readyState === 'complete') setIsLoading(false);
-      else window.addEventListener('load', () => setIsLoading(false), { once: true });
-    };
-    checkLoaded();
-    const timeoutId = setTimeout(() => {
-      setTimedOut(true);
+    if (document.readyState === 'complete') {
       setIsLoading(false);
-    }, timeout);
+      return;
+    }
+    const onLoad = () => setIsLoading(false);
+    window.addEventListener('load', onLoad, { once: true });
+    const timeoutId = setTimeout(() => setIsLoading(false), timeout);
     return () => {
+      window.removeEventListener('load', onLoad);
       clearTimeout(timeoutId);
     };
   }, [timeout]);
 
-  if (isLoading && !timedOut) return <LoadingSpinner message="Preparing your soap experience..." />;
+  if (isLoading) return <LoadingSpinner message="Preparing your soap experience..." />;
   return <>{children}</>;
 };
 

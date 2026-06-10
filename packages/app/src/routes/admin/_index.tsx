@@ -15,10 +15,7 @@ function AdminIndex() {
         <div className="text-center">
           <h1 className="text-2xl font-bold text-stone-800 mb-4">Admin Login</h1>
           <p className="text-stone-600 mb-4">Please log in to access the admin dashboard.</p>
-          <Link
-            to="/admin"
-            className="text-amber-600 hover:text-amber-700"
-          >
+          <Link to="/admin" className="text-amber-600 hover:text-amber-700">
             Go to Login
           </Link>
         </div>
@@ -33,6 +30,7 @@ function AdminIndex() {
           <nav className="flex items-center justify-between">
             <h1 className="text-xl font-semibold text-stone-800">Admin</h1>
             <button
+              type="button"
               onClick={() => clearAuth()}
               className="text-sm text-stone-600 hover:text-stone-900 px-3 py-2 rounded-md hover:bg-stone-100"
             >

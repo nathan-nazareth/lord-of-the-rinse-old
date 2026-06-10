@@ -35,7 +35,7 @@ const CartPage: React.FC<{
 }) => {
   const { data: catalog } = useCatalog();
   const currency = catalog?.settings?.currency ?? 'Rs. ';
-  const subtotal = cart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const subtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const safesubtotal = Number.isFinite(subtotal) ? subtotal : 0;
   const { discountPercentage, discountAmount, total } = calculateDiscount(
     safesubtotal,
@@ -255,9 +255,9 @@ const CartPage: React.FC<{
                         <IconSparkles className="w-3.5 h-3.5" />
                         Discount ({discountPercentage}%)
                       </span>
-                        <span>
-                          - {currency} {(discountAmount || 0).toFixed(2)}
-                        </span>
+                      <span>
+                        - {currency} {(discountAmount || 0).toFixed(2)}
+                      </span>
                     </div>
                   )}
                   <div className="flex justify-between text-xl font-display font-semibold text-ink-700 pt-3 border-t border-parchment-300">

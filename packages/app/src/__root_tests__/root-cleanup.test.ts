@@ -3,7 +3,7 @@ import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 describe('root cleanup', () => {
-  const root = resolve(__dirname, '../..');
+  const root = resolve(__dirname, '..', '..', '..', '..');
 
   it('root should NOT have src/ directory', () => {
     expect(existsSync(resolve(root, 'src'))).toBe(false);

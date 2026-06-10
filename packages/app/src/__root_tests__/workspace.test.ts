@@ -3,7 +3,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 describe('packages/app workspace', () => {
-  const packageJsonPath = resolve(__dirname, 'package.json');
+  const packageJsonPath = resolve(__dirname, '..', '..', 'package.json');
 
   it('package.json exists in packages/app', () => {
     expect(existsSync(packageJsonPath)).toBe(true);

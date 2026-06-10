@@ -41,6 +41,7 @@
       "version": "0.0.0",
       "dependencies": {
         "@better-auth/drizzle-adapter": "^1.6.11",
+        "@hono/node-server": "^1.13.7",
         "@libsql/client": "^0.17.3",
         "@lotr/db": "workspace:*",
         "@lotr/shared": "workspace:*",
@@ -68,7 +69,6 @@
         "clsx": "^2.1.1",
         "cmdk": "^1.1.1",
         "hono": "^4.12.23",
-        "lucide-react": "^1.16.0",
         "react": "^19.2.3",
         "react-dom": "^19.2.3",
         "shadcn": "^4.8.0",
@@ -1337,8 +1337,6 @@
     "log-symbols": ["log-symbols@6.0.0", "", { "dependencies": { "chalk": "^5.3.0", "is-unicode-supported": "^1.3.0" } }, "sha512-i24m8rpwhmPIS4zscNzK6MSEhk0DUWa/8iYQWxhffV8jkI4Phvs3F+quL5xvS0gdQR0FyTCMMH33Y78dDTzzIw=="],
 
     "lru-cache": ["lru-cache@11.4.0", "", {}, "sha512-W+R+kFL4HgVxONq2bhXPi3bGpzGe/yEhVOp233qw9wCRtgncJ15P3bC+e4zZMu4Cq7d+WAJjXGW0uUkifhcatA=="],
-
-    "lucide-react": ["lucide-react@1.16.0", "", { "peerDependencies": { "react": "^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0" } }, "sha512-dYwyPzb4MEKpGUmNYk3WKWPnMrHs3FKM+q94kAnJrcDIqqn1hq2xY8scaS2ovsOCM5D51ey2gaRG3PBb1vgoYQ=="],
 
     "lz-string": ["lz-string@1.5.0", "", { "bin": { "lz-string": "bin/bin.js" } }, "sha512-h5bgJWpxJNswbU7qCrV0tIKQCaS3blPDrqKWx+QxzuzL1zGUzij9XCWLrSLsJPu5t+eWA/ycetzYAO5IOMcWAQ=="],
 

@@ -218,8 +218,8 @@ export const Cart: React.FC<CartProps> = ({
   })();
 
   React.useEffect(() => {
-    if (cooldownRemaining !== null && !showRateLimitModal) setShowRateLimitModal(true);
-  }, [cooldownRemaining, showRateLimitModal]);
+    if (cooldownRemaining !== null) setShowRateLimitModal(true);
+  }, [cooldownRemaining]);
 
   React.useEffect(() => {
     if (isOpen && !showConfirmation && !showCheckout && !showAddedToCart) {

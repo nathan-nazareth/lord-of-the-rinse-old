@@ -1,10 +1,12 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { mocks } = vi.hoisted(() => {
   const chain = () => {
     const c = {} as Record<string, ReturnType<typeof vi.fn>>;
     let _resolve: (v: unknown) => void;
-    const _promise = new Promise((r) => { _resolve = r; });
+    const _promise = new Promise((r) => {
+      _resolve = r;
+    });
     c.then = (onFulfilled: (v: unknown) => unknown) => _promise.then(onFulfilled);
 
     c.orderBy = vi.fn(() => chain());
@@ -39,14 +41,26 @@ vi.mock('@lotr/db/schema', () => {
   const col = (name: string) => name;
   return {
     soapVariants: Object.fromEntries(
-      ['id', 'name', 'slug', 'unitPrice', 'enabled', 'archived', 'createdAt', 'updatedAt'].map(k => [k, col(k)]),
+      ['id', 'name', 'slug', 'unitPrice', 'enabled', 'archived', 'createdAt', 'updatedAt'].map(
+        (k) => [k, col(k)],
+      ),
     ),
     stockMovements: Object.fromEntries(
-      ['id', 'variantId', 'type', 'quantity', 'reason', 'referenceId', 'createdAt'].map(k => [k, col(k)]),
+      ['id', 'variantId', 'type', 'quantity', 'reason', 'referenceId', 'createdAt'].map((k) => [
+        k,
+        col(k),
+      ]),
     ),
-    variantAttributes: { id: col('id'), variantId: col('variantId'), attributeId: col('attributeId'), value: col('value') },
+    variantAttributes: {
+      id: col('id'),
+      variantId: col('variantId'),
+      attributeId: col('attributeId'),
+      value: col('value'),
+    },
     catalogAttributes: Object.fromEntries(
-      ['id', 'type', 'name', 'slug', 'displayOrder', 'archived', 'createdAt', 'updatedAt'].map(k => [k, col(k)]),
+      ['id', 'type', 'name', 'slug', 'displayOrder', 'archived', 'createdAt', 'updatedAt'].map(
+        (k) => [k, col(k)],
+      ),
     ),
     users: { id: col('id'), email: col('email'), name: col('name'), role: col('role') },
     sessions: { id: col('id'), userId: col('userId'), token: col('token') },
@@ -58,13 +72,22 @@ vi.mock('@lotr/db/schema', () => {
 vi.mock('@lotr/shared', () => ({
   stockAdjustmentSchema: {
     safeParse(data: unknown) {
-      if (typeof data !== 'object' || data === null) return { success: false as const, error: { flatten: () => ({ fieldErrors: {}, formErrors: ['Invalid input'] }) } };
+      if (typeof data !== 'object' || data === null)
+        return {
+          success: false as const,
+          error: { flatten: () => ({ fieldErrors: {}, formErrors: ['Invalid input'] }) },
+        };
       const d = data as Record<string, unknown>;
       const errors: Record<string, string[]> = {};
-      if (typeof d.variantId !== 'string' || !d.variantId) errors.variantId = ['Variant ID is required'];
+      if (typeof d.variantId !== 'string' || !d.variantId)
+        errors.variantId = ['Variant ID is required'];
       if (typeof d.quantity !== 'number') errors.quantity = ['Quantity must be a number'];
       if (typeof d.reason !== 'string' || !d.reason) errors.reason = ['Reason is required'];
-      if (Object.keys(errors).length > 0) return { success: false as const, error: { flatten: () => ({ fieldErrors: errors, formErrors: [] }) } };
+      if (Object.keys(errors).length > 0)
+        return {
+          success: false as const,
+          error: { flatten: () => ({ fieldErrors: errors, formErrors: [] }) },
+        };
       return { success: true as const, data: d };
     },
   },
@@ -81,6 +104,12 @@ vi.mock('@lotr/shared', () => ({
 
 vi.mock('../middleware/require-auth', () => ({
   requireAuth: async (_c: unknown, next: () => Promise<void>) => {
+    await next();
+  },
+}));
+
+vi.mock('../middleware/admin-auth', () => ({
+  adminAuth: async (_c: unknown, next: () => Promise<void>) => {
     await next();
   },
 }));
@@ -118,7 +147,15 @@ describe('GET /api/admin/stock-movements', () => {
 
   it('returns list of stock movements', async () => {
     setupSelectChain([
-      { id: 'm1', variantId: 'v1', type: 'adjustment', quantity: 10, reason: 'Initial stock', referenceId: null, createdAt: '2024-01-01T00:00:00Z' },
+      {
+        id: 'm1',
+        variantId: 'v1',
+        type: 'adjustment',
+        quantity: 10,
+        reason: 'Initial stock',
+        referenceId: null,
+        createdAt: '2024-01-01T00:00:00Z',
+      },
     ]);
 
     const res = await app.request('/api/admin/stock-movements');
@@ -146,7 +183,9 @@ describe('GET /api/admin/stock-movements', () => {
   it('filters by date range', async () => {
     setupSelectChain([]);
 
-    const res = await app.request('/api/admin/stock-movements?from=2024-01-01T00:00:00Z&to=2024-12-31T23:59:59Z');
+    const res = await app.request(
+      '/api/admin/stock-movements?from=2024-01-01T00:00:00Z&to=2024-12-31T23:59:59Z',
+    );
     expect(res.status).toBe(200);
   });
 });
@@ -236,7 +275,15 @@ describe('POST /api/admin/stock-movements', () => {
     setupSelectChain([{ id: 'v1' }]);
     // Insert
     setupInsertChain([
-      { id: 'm1', variantId: 'v1', type: 'adjustment', quantity: 10, reason: 'New batch', referenceId: null, createdAt: '2024-01-01T00:00:00Z' },
+      {
+        id: 'm1',
+        variantId: 'v1',
+        type: 'adjustment',
+        quantity: 10,
+        reason: 'New batch',
+        referenceId: null,
+        createdAt: '2024-01-01T00:00:00Z',
+      },
     ]);
 
     const res = await app.request('/api/admin/stock-movements', {
@@ -258,7 +305,15 @@ describe('POST /api/admin/stock-movements', () => {
     setupSelectChain([{ total: 20 }]);
     // Insert
     setupInsertChain([
-      { id: 'm2', variantId: 'v1', type: 'adjustment', quantity: -5, reason: 'Correction', referenceId: null, createdAt: '2024-01-01T00:00:00Z' },
+      {
+        id: 'm2',
+        variantId: 'v1',
+        type: 'adjustment',
+        quantity: -5,
+        reason: 'Correction',
+        referenceId: null,
+        createdAt: '2024-01-01T00:00:00Z',
+      },
     ]);
 
     const res = await app.request('/api/admin/stock-movements', {

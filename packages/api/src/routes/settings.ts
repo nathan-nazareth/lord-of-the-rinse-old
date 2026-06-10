@@ -1,8 +1,8 @@
-import { Hono } from 'hono';
-import { eq } from 'drizzle-orm';
 import { db } from '@lotr/db';
 import { commerceSettings } from '@lotr/db/schema';
 import { settingsUpdateSchema } from '@lotr/shared/schemas';
+import { eq } from 'drizzle-orm';
+import { Hono } from 'hono';
 
 const settings = new Hono();
 
@@ -88,10 +88,7 @@ settings.put('/batch', async (c) => {
 settings.delete('/:key', async (c) => {
   const key = c.req.param('key');
 
-  const result = await db
-    .delete(commerceSettings)
-    .where(eq(commerceSettings.key, key))
-    .returning();
+  const result = await db.delete(commerceSettings).where(eq(commerceSettings.key, key)).returning();
 
   if (result.length === 0) {
     return c.json({ error: 'Setting not found' }, 404);

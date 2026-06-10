@@ -1,7 +1,9 @@
 import { useMemo } from 'react';
 import type { CatalogVariant, DiscountTier } from '../types/catalog';
 import { calculateDiscount, getDiscountPercentage } from '../utils/pricing';
-import { SOAP_OPTIONS } from '../../types';
+import { LAVENDER_PIECES_PRICE, SOAP_OPTIONS } from '../../types';
+
+const SIZE_PRICE_PER_GRAM = 0.6;
 
 export function useVariantPrice(
   selectedAttributes: Record<string, string | null>,
@@ -46,10 +48,12 @@ export function useCartTotals(items: { price: number; quantity: number }[], tota
 export function useSoapPricing(scent: string | null, size: number, hasLavenderPieces: boolean) {
   return useMemo(() => {
     const baseOption = SOAP_OPTIONS.find((o) => o.scent === scent);
-    let totalPrice = baseOption?.price ?? 100;
-    if (hasLavenderPieces) totalPrice += 5;
+    const basePrice = baseOption?.price ?? 100;
+    const sizeAdjustment = Math.max(0, size) * SIZE_PRICE_PER_GRAM;
+    const addon = hasLavenderPieces ? LAVENDER_PIECES_PRICE : 0;
+    const totalPrice = Math.round((basePrice + sizeAdjustment + addon) * 100) / 100;
     return { totalPrice };
-  }, [scent, hasLavenderPieces]);
+  }, [scent, size, hasLavenderPieces]);
 }
 
 export { calculateDiscount, getDiscountPercentage };

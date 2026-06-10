@@ -5,9 +5,10 @@ import { useCommandStore } from '../stores/useCommandStore';
 
 const SURFACE_LABELS: Record<CommandSurface, string> = {
   storefront: 'Storefront',
+  admin: 'Admin',
 };
 
-const SURFACE_ORDER: CommandSurface[] = ['storefront'];
+const SURFACE_ORDER: CommandSurface[] = ['storefront', 'admin'];
 
 export function CommandBar() {
   const [open, setOpen] = useState(false);

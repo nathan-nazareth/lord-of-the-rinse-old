@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { useCommandStore } from '@/src/stores/useCommandStore';
+import { useCommandStore } from '@/stores/useCommandStore';
 
 describe('useCommandStore', () => {
   beforeEach(() => {

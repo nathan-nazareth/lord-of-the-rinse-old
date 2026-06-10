@@ -20,14 +20,9 @@ import {
 } from '../../types';
 import { useSoapPricing } from '../hooks/useSoapPricing';
 import { useFormStore } from '../stores/useFormStore';
+import type { FormStep } from '../stores/useFormStore';
 import type { CartItem } from '../types/cart';
 import { calculateDiscount } from '../utils/pricing';
-
-const _SIZE_OPTIONS = [
-  { label: 'S', weight: 50 },
-  { label: 'M', weight: 75 },
-  { label: 'L', weight: 100 },
-];
 
 type SizeLabel = 'S' | 'M' | 'L';
 
@@ -58,8 +53,6 @@ const COLOR_CONFIG = [
   { label: 'Sky', value: SoapColor.BLUE, hex: '#A8D8EA' },
   { label: 'Lilac', value: SoapColor.PURPLE, hex: '#D4A5E0' },
 ];
-
-type FormStep = 'landing' | 'shape' | 'scent' | 'color' | 'quantity';
 
 const STEPS: FormStep[] = ['shape', 'scent', 'color', 'quantity'];
 
@@ -162,7 +155,7 @@ interface SoapFormProps {
     price: number,
     color: string,
     quantity: string,
-    size: number,
+    size: string,
     hasLavenderPieces: boolean,
   ) => void;
   onGoToCart: () => void;
@@ -242,12 +235,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({
 
   const isScentStepValid = scent && size !== null;
   const isFormValid =
-    shape &&
-    scent &&
-    color &&
-    size !== null &&
-    quantity.length > 0 &&
-    parseInt(quantity, 10) > 0;
+    shape && scent && color && size !== null && quantity.length > 0 && parseInt(quantity, 10) > 0;
 
   const handleStepNavigate = (step: FormStep) => {
     const stepIdx = STEPS.indexOf(step);
@@ -273,7 +261,15 @@ export const SoapForm: React.FC<SoapFormProps> = ({
     const scentVal = scent!;
     // biome-ignore lint/style/noNonNullAssertion: validated by isFormValid before submit
     const colorVal = color!;
-    onAddToCart(shapeVal, scentVal, totalPrice, colorVal, quantity, String(size), hasLavenderPieces);
+    onAddToCart(
+      shapeVal,
+      scentVal,
+      totalPrice,
+      colorVal,
+      quantity,
+      String(size),
+      hasLavenderPieces,
+    );
     clear();
     setCurrentStep('shape');
   };
