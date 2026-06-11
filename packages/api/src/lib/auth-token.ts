@@ -95,7 +95,7 @@ export function verifyAdminToken(token: string): AdminTokenPayload | null {
   // 30s clock skew tolerance in both directions.
   const SKEW_MS = 30_000;
   if (payload.iat - SKEW_MS > now) return null;
-  if (payload.exp < now) return null;
+  if (payload.exp + SKEW_MS < now) return null;
 
   return payload;
 }

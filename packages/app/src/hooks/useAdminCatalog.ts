@@ -199,7 +199,7 @@ export function useUpdateDiscount() {
   const authToken = useAdminStore((s) => s.authToken);
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<AdminDiscount> }) =>
+    mutationFn: ({ id, data }: { id: number; data: Partial<Pick<AdminDiscount, 'percentage' | 'description' | 'active'>> }) =>
       fetchWithAuth<AdminDiscount>(
         `${API_BASE}/discounts/${id}`,
         { method: 'PUT', body: JSON.stringify(data) },

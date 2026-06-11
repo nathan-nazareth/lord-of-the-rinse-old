@@ -50,6 +50,7 @@ const CheckoutPage: React.FC<{
       setErrors(newErrors);
       return;
     }
+    setErrors({});
     await onSubmit({ name: formData.name, email: formData.email, phone: formData.phone });
   };
 
@@ -91,7 +92,7 @@ const CheckoutPage: React.FC<{
               <div className="border-t border-parchment-300 pt-2 flex justify-between text-sm text-ink-500">
                 <span>Subtotal</span>
                 <span className="font-medium">
-                  {currency} {subtotal}
+                  {currency} {subtotal.toFixed(2)}
                 </span>
               </div>
               {discountPercentage > 0 && (

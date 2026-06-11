@@ -1,5 +1,7 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
+import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { adminAuth } from './middleware/admin-auth';
 import { rateLimit } from './middleware/rate-limit';
 import adminAuthRoutes from './routes/admin-auth';
@@ -37,9 +39,9 @@ if (corsOrigin === '*' && process.env.CORS_ALLOW_CREDENTIALS === 'true') {
 }
 
 const devOrigins = ['http://localhost:3000', 'http://localhost:5173'];
-const originSetting: string | string[] = isProduction
-  ? (corsOrigin as string)
-  : (corsOrigin ? corsOrigin.split(',').map((s) => s.trim()) : devOrigins);
+const originSetting: string | string[] = corsOrigin
+  ? (corsOrigin === '*' ? '*' : corsOrigin.split(',').map((s) => s.trim()))
+  : devOrigins;
 
 app.use(
   '/api/*',
@@ -107,7 +109,7 @@ app.route('/api/admin/settings', settingsRoutes);
 
 const port = Number(process.env.PORT) || 3001;
 
-const isMainModule = import.meta.url === `file://${process.argv[1]}`;
+const isMainModule = resolve(fileURLToPath(import.meta.url)) === resolve(process.argv[1]);
 
 if (isMainModule) {
   const { serve } = await import('@hono/node-server');
