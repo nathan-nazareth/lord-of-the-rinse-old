@@ -59,6 +59,8 @@ variantsRoutes.get('/', async (c) => {
 // Get single variant with attributes
 variantsRoutes.get('/:id', async (c) => {
   const id = c.req.param('id');
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id))
+    return c.json({ error: 'Invalid ID format' }, 400);
 
   const [variant] = await db.select().from(soapVariants).where(eq(soapVariants.id, id));
 
@@ -136,6 +138,8 @@ variantsRoutes.post('/', async (c) => {
 // Update variant (name, slug, price, enabled, archived, attributes)
 variantsRoutes.patch('/:id', async (c) => {
   const id = c.req.param('id');
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id))
+    return c.json({ error: 'Invalid ID format' }, 400);
   const body = await c.req.json();
   const parsed = updateVariantSchema.safeParse(body);
 
@@ -228,6 +232,8 @@ variantsRoutes.patch('/:id', async (c) => {
 // Archive variant (soft delete)
 variantsRoutes.delete('/:id', async (c) => {
   const id = c.req.param('id');
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id))
+    return c.json({ error: 'Invalid ID format' }, 400);
 
   try {
     const [existing] = await db.select().from(soapVariants).where(eq(soapVariants.id, id));

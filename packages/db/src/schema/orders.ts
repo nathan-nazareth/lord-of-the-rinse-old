@@ -1,4 +1,4 @@
-import { integer, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { index, integer, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 import { soapVariants } from './catalog';
 
 export const orders = pgTable('orders', {
@@ -25,4 +25,6 @@ export const orderLines = pgTable('order_lines', {
   allocatedFromStock: integer('allocated_from_stock').default(0).notNull(),
   quantityToProduce: integer('quantity_to_produce').default(0).notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-});
+}, (t) => ({
+  orderLinesOrderIdx: index().on(t.orderId),
+}));

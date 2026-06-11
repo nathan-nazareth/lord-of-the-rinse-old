@@ -1,4 +1,4 @@
-import { integer, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { index, integer, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 import { soapVariants } from './catalog';
 
 export const stockMovements = pgTable('stock_movements', {
@@ -11,4 +11,6 @@ export const stockMovements = pgTable('stock_movements', {
   reason: text('reason'),
   referenceId: uuid('reference_id'), // links to order or other entity
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-});
+}, (t) => ({
+  stockMovementsVariantIdx: index().on(t.variantId),
+}));

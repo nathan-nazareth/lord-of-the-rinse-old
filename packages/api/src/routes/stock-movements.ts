@@ -59,6 +59,8 @@ stockMovementsRoutes.get('/', async (c) => {
 // Get current stock level for a variant
 stockMovementsRoutes.get('/stock-level/:variantId', async (c) => {
   const variantId = c.req.param('variantId');
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(variantId))
+    return c.json({ error: 'Invalid variant ID format' }, 400);
 
   // Verify variant exists
   const [variant] = await db

@@ -159,7 +159,7 @@ describe('GET /api/admin/stock-movements', () => {
     setupSelectChain([
       {
         id: 'm1',
-        variantId: 'v1',
+        variantId: 'b0000000-0000-0000-0000-000000000001',
         type: 'adjustment',
         quantity: 10,
         reason: 'Initial stock',
@@ -179,7 +179,7 @@ describe('GET /api/admin/stock-movements', () => {
   it('filters by variantId', async () => {
     setupSelectChain([]);
 
-    const res = await app.request('/api/admin/stock-movements?variantId=v1');
+    const res = await app.request('/api/admin/stock-movements?variantId=b0000000-0000-0000-0000-000000000001');
     expect(res.status).toBe(200);
   });
 
@@ -207,30 +207,30 @@ describe('GET /api/admin/stock-movements/stock-level/:variantId', () => {
 
   it('returns current stock level for a variant', async () => {
     // Variant exists check
-    setupSelectChain([{ id: 'v1' }]);
+    setupSelectChain([{ id: 'b0000000-0000-0000-0000-000000000001' }]);
     // Stock sum
     setupSelectChain([{ total: 25 }]);
 
-    const res = await app.request('/api/admin/stock-movements/stock-level/v1');
+    const res = await app.request('/api/admin/stock-movements/stock-level/b0000000-0000-0000-0000-000000000001');
     expect(res.status).toBe(200);
 
     const body = await res.json();
     expect(body.stock).toBe(25);
-    expect(body.variantId).toBe('v1');
+    expect(body.variantId).toBe('b0000000-0000-0000-0000-000000000001');
   });
 
   it('returns 404 for nonexistent variant', async () => {
     setupSelectChain([]);
 
-    const res = await app.request('/api/admin/stock-movements/stock-level/nonexistent');
+    const res = await app.request('/api/admin/stock-movements/stock-level/00000000-0000-0000-0000-000000000000');
     expect(res.status).toBe(404);
   });
 
   it('returns 0 stock when no movements exist', async () => {
-    setupSelectChain([{ id: 'v1' }]);
+    setupSelectChain([{ id: 'b0000000-0000-0000-0000-000000000001' }]);
     setupSelectChain([{ total: 0 }]);
 
-    const res = await app.request('/api/admin/stock-movements/stock-level/v1');
+    const res = await app.request('/api/admin/stock-movements/stock-level/b0000000-0000-0000-0000-000000000001');
     expect(res.status).toBe(200);
 
     const body = await res.json();
@@ -246,13 +246,13 @@ describe('GET /api/admin/stock-movements/stock-levels', () => {
   it('returns stock levels for all non-archived variants', async () => {
     // Variants list
     setupSelectChain([
-      { id: 'v1', name: 'Lavender Soap' },
-      { id: 'v2', name: 'Rose Soap' },
+      { id: 'b0000000-0000-0000-0000-000000000001', name: 'Lavender Soap' },
+      { id: 'b0000000-0000-0000-0000-000000000002', name: 'Rose Soap' },
     ]);
     // Stock totals
     setupSelectChain([
-      { variantId: 'v1', total: 10 },
-      { variantId: 'v2', total: 5 },
+      { variantId: 'b0000000-0000-0000-0000-000000000001', total: 10 },
+      { variantId: 'b0000000-0000-0000-0000-000000000002', total: 5 },
     ]);
 
     const res = await app.request('/api/admin/stock-movements/stock-levels');
@@ -282,12 +282,12 @@ describe('POST /api/admin/stock-movements', () => {
 
   it('creates a positive stock adjustment', async () => {
     // Variant exists check
-    setupSelectChain([{ id: 'v1' }]);
+    setupSelectChain([{ id: 'b0000000-0000-0000-0000-000000000001' }]);
     // Insert
     setupInsertChain([
       {
         id: 'm1',
-        variantId: 'v1',
+        variantId: 'b0000000-0000-0000-0000-000000000001',
         type: 'adjustment',
         quantity: 10,
         reason: 'New batch',
@@ -299,7 +299,7 @@ describe('POST /api/admin/stock-movements', () => {
     const res = await app.request('/api/admin/stock-movements', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ variantId: 'v1', quantity: 10, reason: 'New batch' }),
+      body: JSON.stringify({ variantId: 'b0000000-0000-0000-0000-000000000001', quantity: 10, reason: 'New batch' }),
     });
 
     expect(res.status).toBe(201);
@@ -310,14 +310,14 @@ describe('POST /api/admin/stock-movements', () => {
 
   it('creates a negative stock adjustment when sufficient stock', async () => {
     // Variant exists check
-    setupSelectChain([{ id: 'v1' }]);
+    setupSelectChain([{ id: 'b0000000-0000-0000-0000-000000000001' }]);
     // Current stock check
     setupSelectChain([{ total: 20 }]);
     // Insert
     setupInsertChain([
       {
         id: 'm2',
-        variantId: 'v1',
+        variantId: 'b0000000-0000-0000-0000-000000000001',
         type: 'adjustment',
         quantity: -5,
         reason: 'Correction',
@@ -329,7 +329,7 @@ describe('POST /api/admin/stock-movements', () => {
     const res = await app.request('/api/admin/stock-movements', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ variantId: 'v1', quantity: -5, reason: 'Correction' }),
+      body: JSON.stringify({ variantId: 'b0000000-0000-0000-0000-000000000001', quantity: -5, reason: 'Correction' }),
     });
 
     expect(res.status).toBe(201);
@@ -339,14 +339,14 @@ describe('POST /api/admin/stock-movements', () => {
 
   it('rejects negative adjustment that would go below zero', async () => {
     // Variant exists check
-    setupSelectChain([{ id: 'v1' }]);
+    setupSelectChain([{ id: 'b0000000-0000-0000-0000-000000000001' }]);
     // Current stock check
     setupSelectChain([{ total: 3 }]);
 
     const res = await app.request('/api/admin/stock-movements', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ variantId: 'v1', quantity: -5, reason: 'Too much' }),
+      body: JSON.stringify({ variantId: 'b0000000-0000-0000-0000-000000000001', quantity: -5, reason: 'Too much' }),
     });
 
     expect(res.status).toBe(400);
@@ -374,7 +374,7 @@ describe('POST /api/admin/stock-movements', () => {
     const res = await app.request('/api/admin/stock-movements', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ variantId: 'nonexistent', quantity: 10, reason: 'Test' }),
+      body: JSON.stringify({ variantId: '00000000-0000-0000-0000-000000000000', quantity: 10, reason: 'Test' }),
     });
 
     expect(res.status).toBe(404);

@@ -253,7 +253,7 @@ describe('GET /api/admin/attributes/:id', () => {
   it('returns a single attribute', async () => {
     setupSelectChain([
       {
-        id: 'abc-123',
+        id: 'a0000000-0000-0000-0000-000000000001',
         type: 'scent',
         name: 'Lavender',
         slug: 'lavender',
@@ -262,7 +262,7 @@ describe('GET /api/admin/attributes/:id', () => {
       },
     ]);
 
-    const res = await app.request('/api/admin/attributes/abc-123');
+    const res = await app.request('/api/admin/attributes/a0000000-0000-0000-0000-000000000001');
     expect(res.status).toBe(200);
 
     const body = await res.json();
@@ -272,7 +272,7 @@ describe('GET /api/admin/attributes/:id', () => {
   it('returns 404 when not found', async () => {
     setupSelectChain([]);
 
-    const res = await app.request('/api/admin/attributes/nonexistent');
+    const res = await app.request('/api/admin/attributes/00000000-0000-0000-0000-000000000000');
     expect(res.status).toBe(404);
   });
 });
@@ -336,11 +336,11 @@ describe('PATCH /api/admin/attributes/:id', () => {
 
   it('updates an attribute', async () => {
     setupUpdateChain(
-      { id: 'abc', type: 'scent', name: 'Lavender', slug: 'lavender', displayOrder: 0 },
-      [{ id: 'abc', type: 'scent', name: 'Lavender Supreme', slug: 'lavender', displayOrder: 0 }],
+      { id: 'a0000000-0000-0000-0000-000000000001', type: 'scent', name: 'Lavender', slug: 'lavender', displayOrder: 0 },
+      [{ id: 'a0000000-0000-0000-0000-000000000001', type: 'scent', name: 'Lavender Supreme', slug: 'lavender', displayOrder: 0 }],
     );
 
-    const res = await app.request('/api/admin/attributes/abc', {
+    const res = await app.request('/api/admin/attributes/a0000000-0000-0000-0000-000000000001', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: 'Lavender Supreme' }),
@@ -354,7 +354,7 @@ describe('PATCH /api/admin/attributes/:id', () => {
   it('returns 404 for nonexistent attribute', async () => {
     setupUpdateChain(null, []);
 
-    const res = await app.request('/api/admin/attributes/nonexistent', {
+    const res = await app.request('/api/admin/attributes/00000000-0000-0000-0000-000000000000', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: 'Test' }),
@@ -366,12 +366,12 @@ describe('PATCH /api/admin/attributes/:id', () => {
   it('rejects duplicate slug on update', async () => {
     // First select: existing attribute found
     setupSelectChain([
-      { id: 'abc', type: 'scent', name: 'Lavender', slug: 'lavender', displayOrder: 0 },
+      { id: 'a0000000-0000-0000-0000-000000000001', type: 'scent', name: 'Lavender', slug: 'lavender', displayOrder: 0 },
     ]);
     // Second select: slug conflict check
     setupSelectChain([{ id: 'other-id' }]);
 
-    const res = await app.request('/api/admin/attributes/abc', {
+    const res = await app.request('/api/admin/attributes/a0000000-0000-0000-0000-000000000001', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ slug: 'taken-slug' }),
@@ -382,10 +382,10 @@ describe('PATCH /api/admin/attributes/:id', () => {
 
   it('archives an attribute', async () => {
     setupUpdateChain(
-      { id: 'abc', type: 'scent', name: 'Lavender', slug: 'lavender', displayOrder: 0 },
+      { id: 'a0000000-0000-0000-0000-000000000001', type: 'scent', name: 'Lavender', slug: 'lavender', displayOrder: 0 },
       [
         {
-          id: 'abc',
+          id: 'a0000000-0000-0000-0000-000000000001',
           type: 'scent',
           name: 'Lavender',
           slug: 'lavender',
@@ -395,7 +395,7 @@ describe('PATCH /api/admin/attributes/:id', () => {
       ],
     );
 
-    const res = await app.request('/api/admin/attributes/abc', {
+    const res = await app.request('/api/admin/attributes/a0000000-0000-0000-0000-000000000001', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ archived: true }),
@@ -415,10 +415,10 @@ describe('DELETE /api/admin/attributes/:id', () => {
 
   it('archives an attribute via DELETE', async () => {
     setupUpdateChain(
-      { id: 'abc', type: 'scent', name: 'Lavender', slug: 'lavender', displayOrder: 0 },
+      { id: 'a0000000-0000-0000-0000-000000000001', type: 'scent', name: 'Lavender', slug: 'lavender', displayOrder: 0 },
       [
         {
-          id: 'abc',
+          id: 'a0000000-0000-0000-0000-000000000001',
           type: 'scent',
           name: 'Lavender',
           slug: 'lavender',
@@ -428,7 +428,7 @@ describe('DELETE /api/admin/attributes/:id', () => {
       ],
     );
 
-    const res = await app.request('/api/admin/attributes/abc', {
+    const res = await app.request('/api/admin/attributes/a0000000-0000-0000-0000-000000000001', {
       method: 'DELETE',
     });
 
@@ -440,7 +440,7 @@ describe('DELETE /api/admin/attributes/:id', () => {
   it('returns 404 for nonexistent attribute', async () => {
     setupUpdateChain(null, []);
 
-    const res = await app.request('/api/admin/attributes/nonexistent', {
+    const res = await app.request('/api/admin/attributes/00000000-0000-0000-0000-000000000000', {
       method: 'DELETE',
     });
 

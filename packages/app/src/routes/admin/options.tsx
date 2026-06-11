@@ -19,7 +19,9 @@ function validateField(field: Field, raw: unknown): number | string {
 
 export const Route = createFileRoute('/admin/options')({
   beforeLoad: () => {
-    if (!useAdminStore.getState().isAuthenticated) {
+    const store = useAdminStore.getState();
+    if (store.isTokenExpired()) store.clearAuth();
+    if (!store.isAuthenticated) {
       throw redirect({ to: '/admin' });
     }
   },

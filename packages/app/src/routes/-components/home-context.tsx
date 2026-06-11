@@ -246,12 +246,8 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
         if (err instanceof Error && err.name === 'AbortError') return fail();
         console.error('Order submission error:', err);
       } finally {
-        // releaseController() runs inside finalizeSuccess/fail for the success
-        // path. For the Web3Forms-failure path, release here so the spinner
-        // never gets stuck.
         if (inFlightController.current === controller) {
           inFlightController.current = null;
-          setIsSubmitting(false);
         }
       }
       return fail();

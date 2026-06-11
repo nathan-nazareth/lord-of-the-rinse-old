@@ -5,6 +5,8 @@ import { and, desc, eq, type SQL } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { dispatchNotification } from '../lib/notifications';
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 const ordersRoutes = new Hono<{
   Variables: {
     user: unknown;
@@ -33,6 +35,7 @@ ordersRoutes.get('/', async (c) => {
 // Get single order with lines and notification attempts
 ordersRoutes.get('/:id', async (c) => {
   const id = c.req.param('id');
+  if (!UUID_RE.test(id)) return c.json({ error: 'Invalid ID format' }, 400);
 
   const [order] = await db.select().from(orders).where(eq(orders.id, id));
 
@@ -53,6 +56,7 @@ ordersRoutes.get('/:id', async (c) => {
 // Update order status with valid transitions only
 ordersRoutes.patch('/:id/status', async (c) => {
   const id = c.req.param('id');
+  if (!UUID_RE.test(id)) return c.json({ error: 'Invalid ID format' }, 400);
   let body: unknown;
   try {
     body = await c.req.json();
@@ -157,6 +161,7 @@ ordersRoutes.patch('/:id/status', async (c) => {
 // Retry notification dispatch for an order
 ordersRoutes.post('/:id/retry-notification', async (c) => {
   const id = c.req.param('id');
+  if (!UUID_RE.test(id)) return c.json({ error: 'Invalid ID format' }, 400);
 
   try {
     // Validate the attempt inside the same transaction we use to flip its

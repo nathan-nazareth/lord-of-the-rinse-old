@@ -13,8 +13,7 @@ async function parseApiError(response: Response): Promise<string> {
   // raw HTML / stack traces into Error.message. We also cap the body size
   // so a 50MB error page can't OOM the client.
   try {
-    const cloned = response.clone();
-    const text = await cloned.text();
+    const text = await response.text();
     if (text.length > 0 && text.length < 4096) {
       try {
         const parsed = JSON.parse(text) as ApiErrorBody;

@@ -1,4 +1,4 @@
-import { boolean, integer, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { boolean, integer, pgTable, text, timestamp, unique, uuid } from 'drizzle-orm/pg-core';
 
 export const catalogAttributes = pgTable('catalog_attributes', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -31,4 +31,6 @@ export const variantAttributes = pgTable('variant_attributes', {
     .notNull()
     .references(() => catalogAttributes.id),
   value: text('value').notNull(),
-});
+}, (t) => ({
+  variantAttributeUnique: unique().on(t.variantId, t.attributeId),
+}));

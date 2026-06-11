@@ -202,6 +202,7 @@ export const Cart: React.FC<CartProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showRateLimitModal, setShowRateLimitModal] = useState(false);
   const closeButtonRef = React.useRef<HTMLButtonElement>(null);
+  const abortRef = React.useRef<AbortController | null>(null);
   // Subscribe to the smallest possible slice of the store so we don't
   // re-render the entire cart on every mutation of unrelated fields.
   const isAllowed = useRateLimitStore((s) => s.isAllowed(10, 300_000));
@@ -266,6 +267,13 @@ export const Cart: React.FC<CartProps> = ({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
+  React.useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+      abortRef.current = null;
+    };
+  }, []);
+
   const rawSubtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const subtotal = Number.isFinite(rawSubtotal) ? rawSubtotal : 0;
   const { discountPercentage, discountAmount, total } = calculateDiscount(
@@ -289,21 +297,63 @@ export const Cart: React.FC<CartProps> = ({
     }
     setIsSubmitting(true);
     setErrorMessage(null);
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
     try {
-      const result = await submitCartToWebhook(customer, cart.items);
+      const checkoutItems = cart.items.map((item) => ({
+        variantId: item.variantId,
+        displayName: `${item.scent} (${item.shape}, ${item.color}, ${item.size}g${item.hasLavenderPieces ? ', lavender pieces' : ''})`,
+        quantity: item.quantity,
+        unitPrice: item.price.toFixed(2),
+      }));
+
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerName: customer.name,
+          customerEmail: customer.email,
+          customerPhone: customer.phone,
+          items: checkoutItems,
+        }),
+        signal: controller.signal,
+      });
+
+      if (response.ok) {
+        let data: { reference?: string } = {};
+        try {
+          data = (await response.json()) as { reference?: string };
+        } catch {
+          data = {};
+        }
+        if (data.reference) {
+          recordSubmission(WINDOW_MS);
+          setOrderItemCount(cart.totalQuantity);
+          setShowConfirmation(true);
+          onClearCart();
+          return;
+        }
+      }
+
+      if (response.status >= 400 && response.status < 500) {
+        setErrorMessage('Order failed. Please try again.');
+        return;
+      }
+
+      const result = await submitCartToWebhook(customer, cart.items, undefined, undefined, {
+        signal: controller.signal,
+      });
       if (result.success) {
-        // Only record the rate-limit hit on a confirmed success. Failed
-        // attempts must NOT consume the budget, otherwise a flapping
-        // network would lock the user out.
         recordSubmission(WINDOW_MS);
-        const itemsOrdered = cart.totalQuantity;
-        setOrderItemCount(itemsOrdered);
+        setOrderItemCount(cart.totalQuantity);
         setShowConfirmation(true);
         onClearCart();
       } else {
         setErrorMessage('Failed to send order. Please try again.');
       }
     } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') return;
       console.error('[Cart] Checkout error:', err);
       setErrorMessage('An error occurred. Please try again.');
     } finally {

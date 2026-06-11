@@ -5,6 +5,8 @@ import { and, asc, eq, type SQL } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { adminAuth } from '../middleware/admin-auth';
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 const attributesRoutes = new Hono<{
   Variables: {
     user: unknown;
@@ -46,6 +48,7 @@ attributesRoutes.get('/', async (c) => {
 // Get single attribute
 attributesRoutes.get('/:id', async (c) => {
   const id = c.req.param('id');
+  if (!UUID_RE.test(id)) return c.json({ error: 'Invalid ID format' }, 400);
 
   const [result] = await db.select().from(catalogAttributes).where(eq(catalogAttributes.id, id));
 
@@ -93,6 +96,7 @@ attributesRoutes.post('/', async (c) => {
 // Update attribute
 attributesRoutes.patch('/:id', async (c) => {
   const id = c.req.param('id');
+  if (!UUID_RE.test(id)) return c.json({ error: 'Invalid ID format' }, 400);
   const body = await c.req.json();
   const parsed = updateAttributeSchema.safeParse(body);
 
@@ -100,45 +104,48 @@ attributesRoutes.patch('/:id', async (c) => {
     return c.json({ error: 'Validation failed', details: parsed.error.flatten() }, 400);
   }
 
-  // Check attribute exists
-  const [existing] = await db.select().from(catalogAttributes).where(eq(catalogAttributes.id, id));
+  try {
+    const [existing] = await db.select().from(catalogAttributes).where(eq(catalogAttributes.id, id));
 
-  if (!existing) {
-    return c.json({ error: 'Attribute not found' }, 404);
-  }
-
-  // Check for duplicate slug if slug is being changed
-  if (parsed.data.slug && parsed.data.slug !== existing.slug) {
-    const [slugConflict] = await db
-      .select({ id: catalogAttributes.id })
-      .from(catalogAttributes)
-      .where(eq(catalogAttributes.slug, parsed.data.slug));
-
-    if (slugConflict) {
-      return c.json({ error: 'An attribute with this slug already exists' }, 409);
+    if (!existing) {
+      return c.json({ error: 'Attribute not found' }, 404);
     }
-  }
 
-  const [updated] = await db
-    .update(catalogAttributes)
-    .set({
-      ...parsed.data,
-      updatedAt: sql`now()`,
-    })
-    .where(eq(catalogAttributes.id, id))
-    .returning();
+    if (parsed.data.slug && parsed.data.slug !== existing.slug) {
+      const [slugConflict] = await db
+        .select({ id: catalogAttributes.id })
+        .from(catalogAttributes)
+        .where(eq(catalogAttributes.slug, parsed.data.slug));
 
-  if (!updated) {
-    console.error('[attributes] update returned no row for id', id);
+      if (slugConflict) {
+        return c.json({ error: 'An attribute with this slug already exists' }, 409);
+      }
+    }
+
+    const [updated] = await db
+      .update(catalogAttributes)
+      .set({
+        ...parsed.data,
+        updatedAt: sql`now()`,
+      })
+      .where(eq(catalogAttributes.id, id))
+      .returning();
+
+    if (!updated) {
+      return c.json({ error: 'Attribute not found' }, 404);
+    }
+
+    return c.json({ attribute: updated });
+  } catch (err) {
+    console.error('[attributes] update failed:', err);
     return c.json({ error: 'Failed to update attribute' }, 500);
   }
-
-  return c.json({ attribute: updated });
 });
 
 // Archive attribute
 attributesRoutes.delete('/:id', async (c) => {
   const id = c.req.param('id');
+  if (!UUID_RE.test(id)) return c.json({ error: 'Invalid ID format' }, 400);
 
   try {
     const [existing] = await db
@@ -152,7 +159,7 @@ attributesRoutes.delete('/:id', async (c) => {
 
     const [archived] = await db
       .update(catalogAttributes)
-      .set({ archived: true, updatedAt: sql`now()`, displayOrder: existing.displayOrder })
+      .set({ archived: true, updatedAt: sql`now()` })
       .where(eq(catalogAttributes.id, id))
       .returning();
 

@@ -4,7 +4,12 @@ import { LoginForm } from '@/components/admin/LoginForm';
 
 export const Route = createFileRoute('/admin/_index')({
   beforeLoad: () => {
-    if (useAdminStore.getState().isAuthenticated) {
+    const store = useAdminStore.getState();
+    if (store.isTokenExpired()) {
+      store.clearAuth();
+      return;
+    }
+    if (store.isAuthenticated) {
       throw redirect({ to: '/admin/products' });
     }
   },

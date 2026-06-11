@@ -56,7 +56,14 @@ export function LoginForm() {
         return;
       }
 
-      setAuth(token);
+      const expiresIn =
+        typeof data === 'object' &&
+        data !== null &&
+        typeof (data as { expiresIn?: unknown }).expiresIn === 'number'
+          ? (data as { expiresIn: number }).expiresIn
+          : undefined;
+
+      setAuth(token, expiresIn);
       navigate({ to: '/admin/products' });
     } catch {
       setError('Network error. Please try again.');

@@ -6,7 +6,9 @@ export const Route = createFileRoute('/admin/products/$id')({
   // Server-side route guard: an unauthenticated visitor never sees the
   // product detail page, so the route doesn't even render.
   beforeLoad: () => {
-    if (!useAdminStore.getState().isAuthenticated) {
+    const store = useAdminStore.getState();
+    if (store.isTokenExpired()) store.clearAuth();
+    if (!store.isAuthenticated) {
       throw redirect({ to: '/admin' });
     }
   },

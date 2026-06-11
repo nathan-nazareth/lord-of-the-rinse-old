@@ -188,7 +188,7 @@ describe('GET /api/admin/variants', () => {
     // First select: variants
     setupSelectChain([
       {
-        id: 'v1',
+        id: 'b0000000-0000-0000-0000-000000000001',
         name: 'Lavender Soap',
         slug: 'lavender-soap',
         unitPrice: '9.99',
@@ -197,7 +197,7 @@ describe('GET /api/admin/variants', () => {
       },
     ]);
     // Second select: variant_attributes
-    setupSelectChain([{ id: 'va1', variantId: 'v1', attributeId: 'a1', value: 'lavender' }]);
+    setupSelectChain([{ id: 'va1', variantId: 'b0000000-0000-0000-0000-000000000001', attributeId: 'a1', value: 'lavender' }]);
 
     const res = await app.request('/api/admin/variants');
     expect(res.status).toBe(200);
@@ -225,7 +225,7 @@ describe('GET /api/admin/variants/:id', () => {
   it('returns a single variant with attributes', async () => {
     setupSelectChain([
       {
-        id: 'v1',
+        id: 'b0000000-0000-0000-0000-000000000001',
         name: 'Lavender Soap',
         slug: 'lavender-soap',
         unitPrice: '9.99',
@@ -236,7 +236,7 @@ describe('GET /api/admin/variants/:id', () => {
     // Second select: attributes for the variant
     setupSelectChain([{ attributeId: 'a1', value: 'lavender' }]);
 
-    const res = await app.request('/api/admin/variants/v1');
+    const res = await app.request('/api/admin/variants/b0000000-0000-0000-0000-000000000001');
     expect(res.status).toBe(200);
 
     const body = await res.json();
@@ -247,7 +247,7 @@ describe('GET /api/admin/variants/:id', () => {
   it('returns 404 when not found', async () => {
     setupSelectChain([]);
 
-    const res = await app.request('/api/admin/variants/nonexistent');
+    const res = await app.request('/api/admin/variants/00000000-0000-0000-0000-000000000000');
     expect(res.status).toBe(404);
   });
 });
@@ -265,7 +265,7 @@ describe('POST /api/admin/variants', () => {
     // Insert variant
     setupInsertChain([
       {
-        id: 'v1',
+        id: 'b0000000-0000-0000-0000-000000000001',
         name: 'Rose Soap',
         slug: 'rose-soap',
         unitPrice: '12.99',
@@ -353,10 +353,10 @@ describe('PATCH /api/admin/variants/:id', () => {
 
   it('updates a variant', async () => {
     setupUpdateChain(
-      { id: 'v1', name: 'Lavender Soap', slug: 'lavender-soap', unitPrice: '9.99', enabled: true },
+      { id: 'b0000000-0000-0000-0000-000000000001', name: 'Lavender Soap', slug: 'lavender-soap', unitPrice: '9.99', enabled: true },
       [
         {
-          id: 'v1',
+          id: 'b0000000-0000-0000-0000-000000000001',
           name: 'Lavender Deluxe',
           slug: 'lavender-soap',
           unitPrice: '9.99',
@@ -367,7 +367,7 @@ describe('PATCH /api/admin/variants/:id', () => {
     // Select for current attributes (after update)
     setupSelectChain([{ attributeId: 'a1', value: 'lavender' }]);
 
-    const res = await app.request('/api/admin/variants/v1', {
+    const res = await app.request('/api/admin/variants/b0000000-0000-0000-0000-000000000001', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: 'Lavender Deluxe' }),
@@ -381,7 +381,7 @@ describe('PATCH /api/admin/variants/:id', () => {
   it('returns 404 for nonexistent variant', async () => {
     setupUpdateChain(null, []);
 
-    const res = await app.request('/api/admin/variants/nonexistent', {
+    const res = await app.request('/api/admin/variants/00000000-0000-0000-0000-000000000000', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: 'Test' }),
@@ -392,10 +392,10 @@ describe('PATCH /api/admin/variants/:id', () => {
 
   it('toggles enabled status', async () => {
     setupUpdateChain(
-      { id: 'v1', name: 'Lavender Soap', slug: 'lavender-soap', unitPrice: '9.99', enabled: true },
+      { id: 'b0000000-0000-0000-0000-000000000001', name: 'Lavender Soap', slug: 'lavender-soap', unitPrice: '9.99', enabled: true },
       [
         {
-          id: 'v1',
+          id: 'b0000000-0000-0000-0000-000000000001',
           name: 'Lavender Soap',
           slug: 'lavender-soap',
           unitPrice: '9.99',
@@ -405,7 +405,7 @@ describe('PATCH /api/admin/variants/:id', () => {
     );
     setupSelectChain([]);
 
-    const res = await app.request('/api/admin/variants/v1', {
+    const res = await app.request('/api/admin/variants/b0000000-0000-0000-0000-000000000001', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ enabled: false }),
@@ -418,10 +418,10 @@ describe('PATCH /api/admin/variants/:id', () => {
 
   it('archives a variant', async () => {
     setupUpdateChain(
-      { id: 'v1', name: 'Lavender Soap', slug: 'lavender-soap', unitPrice: '9.99', enabled: true },
+      { id: 'b0000000-0000-0000-0000-000000000001', name: 'Lavender Soap', slug: 'lavender-soap', unitPrice: '9.99', enabled: true },
       [
         {
-          id: 'v1',
+          id: 'b0000000-0000-0000-0000-000000000001',
           name: 'Lavender Soap',
           slug: 'lavender-soap',
           unitPrice: '9.99',
@@ -432,7 +432,7 @@ describe('PATCH /api/admin/variants/:id', () => {
     );
     setupSelectChain([]);
 
-    const res = await app.request('/api/admin/variants/v1', {
+    const res = await app.request('/api/admin/variants/b0000000-0000-0000-0000-000000000001', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ archived: true }),
@@ -451,10 +451,10 @@ describe('DELETE /api/admin/variants/:id', () => {
 
   it('archives a variant via DELETE', async () => {
     setupUpdateChain(
-      { id: 'v1', name: 'Lavender Soap', slug: 'lavender-soap', unitPrice: '9.99', enabled: true },
+      { id: 'b0000000-0000-0000-0000-000000000001', name: 'Lavender Soap', slug: 'lavender-soap', unitPrice: '9.99', enabled: true },
       [
         {
-          id: 'v1',
+          id: 'b0000000-0000-0000-0000-000000000001',
           name: 'Lavender Soap',
           slug: 'lavender-soap',
           unitPrice: '9.99',
@@ -466,7 +466,7 @@ describe('DELETE /api/admin/variants/:id', () => {
     // Select attributes for the response
     setupSelectChain([]);
 
-    const res = await app.request('/api/admin/variants/v1', {
+    const res = await app.request('/api/admin/variants/b0000000-0000-0000-0000-000000000001', {
       method: 'DELETE',
     });
 
@@ -478,7 +478,7 @@ describe('DELETE /api/admin/variants/:id', () => {
   it('returns 404 for nonexistent variant', async () => {
     setupUpdateChain(null, []);
 
-    const res = await app.request('/api/admin/variants/nonexistent', {
+    const res = await app.request('/api/admin/variants/00000000-0000-0000-0000-000000000000', {
       method: 'DELETE',
     });
 

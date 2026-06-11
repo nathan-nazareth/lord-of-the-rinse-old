@@ -4,7 +4,9 @@ import { useAdminStore } from '@/stores/useAdminStore';
 
 export const Route = createFileRoute('/admin/products/')({
   beforeLoad: () => {
-    if (!useAdminStore.getState().isAuthenticated) {
+    const store = useAdminStore.getState();
+    if (store.isTokenExpired()) store.clearAuth();
+    if (!store.isAuthenticated) {
       throw redirect({ to: '/admin' });
     }
   },
