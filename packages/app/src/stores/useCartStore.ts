@@ -218,13 +218,28 @@ export const useCartStore = create<CartState>()(
           }
         },
         setItem: (name, value) => {
-          // Stamp the wall-clock so getItem() can enforce CART_EXPIRY_MS.
-          // Without this, NaN > ms is always false and the cart never expires.
-          const payload = { ...value, updatedAt: Date.now() };
-          localStorage.setItem(name, JSON.stringify(payload));
+          try {
+            // Stamp the wall-clock so getItem() can enforce CART_EXPIRY_MS.
+            // Without this, NaN > ms is always false and the cart never expires.
+            const payload = { ...value, updatedAt: Date.now() };
+            localStorage.setItem(name, JSON.stringify(payload));
+          } catch (err) {
+            // QuotaExceededError (cart + discounts + settings can easily
+            // blow past the 5MB budget) or SecurityError (private mode).
+            // Swallow so a misconfigured browser doesn't crash checkout;
+            // the in-memory cart is still usable for the current session.
+            if (import.meta.env.DEV) {
+              console.warn('[useCartStore] failed to persist cart', err);
+            }
+          }
         },
         removeItem: (name) => {
-          localStorage.removeItem(name);
+          try {
+            localStorage.removeItem(name);
+          } catch {
+            // Ignore — privacy mode or sandboxed iframes may disable
+            // localStorage; the in-memory store still works.
+          }
         },
       },
     },

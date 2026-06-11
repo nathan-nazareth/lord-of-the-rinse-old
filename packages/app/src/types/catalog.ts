@@ -26,9 +26,14 @@ export interface DiscountTier {
 }
 
 export interface CatalogSettings {
-  shop_open: boolean;
-  currency: string;
-  discount_tiers: DiscountTier[];
+  // The API returns Record<string, unknown> for settings; we keep the
+  // type loose to mirror the wire format and let consumers narrow
+  // per-key as needed. Marking the well-known keys optional is more
+  // honest than claiming they're always present and well-typed.
+  shop_open?: boolean;
+  currency?: string;
+  discount_tiers?: DiscountTier[];
+  [key: string]: unknown;
 }
 
 export interface CatalogResponse {

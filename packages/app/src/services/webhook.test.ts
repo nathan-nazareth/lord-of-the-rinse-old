@@ -62,14 +62,14 @@ describe('submitCartToWebhook discount logic', () => {
 
   it('applies 0% discount for a single item', async () => {
     const payload = await extractPayload([makeItem()]);
-    expect(payload.Discount).toBe('0% (Rs. 0)');
-    expect(payload['Final Total']).toBe('Rs. 200');
+    expect(payload.Discount).toBe('0% (Rs. 0.00)');
+    expect(payload['Final Total']).toBe('Rs. 200.00');
   });
 
   it('applies 10% discount for 2 items', async () => {
     const payload = await extractPayload([makeItem({ id: 'a' }), makeItem({ id: 'b' })]);
-    expect(payload.Discount).toBe('10% (Rs. 40)');
-    expect(payload['Final Total']).toBe('Rs. 360');
+    expect(payload.Discount).toBe('10% (Rs. 40.00)');
+    expect(payload['Final Total']).toBe('Rs. 360.00');
   });
 
   it('applies 15% discount for 4 items', async () => {
@@ -77,8 +77,8 @@ describe('submitCartToWebhook discount logic', () => {
       makeItem({ id: 'a', quantity: 2 }),
       makeItem({ id: 'b', quantity: 2 }),
     ]);
-    expect(payload.Discount).toBe('15% (Rs. 120)');
-    expect(payload['Final Total']).toBe('Rs. 680');
+    expect(payload.Discount).toBe('15% (Rs. 120.00)');
+    expect(payload['Final Total']).toBe('Rs. 680.00');
   });
 
   it('keeps 10% discount for exactly 3 items (needs 4+ for 15%)', async () => {
@@ -87,7 +87,7 @@ describe('submitCartToWebhook discount logic', () => {
       makeItem({ id: 'b', quantity: 1 }),
     ]);
     // 3 items: still 10% tier (need 4+ for 15%)
-    expect(payload.Discount).toBe('10% (Rs. 60)');
-    expect(payload['Final Total']).toBe('Rs. 540');
+    expect(payload.Discount).toBe('10% (Rs. 60.00)');
+    expect(payload['Final Total']).toBe('Rs. 540.00');
   });
 });

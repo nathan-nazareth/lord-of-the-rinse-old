@@ -123,6 +123,24 @@ export async function dispatchNotification(orderId: string): Promise<void> {
     return;
   }
 
+  // Atomically CLAIM the attempt so two concurrent retries can't both
+  // dispatch the same notification. We do this in a short transaction
+  // (no external I/O inside the tx) and then perform the network call
+  // with the lock released. If the row's status isn't 'pending' we
+  // assume another caller already claimed it and bail.
+  const claim = await db.transaction(async (tx) => {
+    const [attempt] = await tx
+      .select()
+      .from(notificationAttempts)
+      .where(eq(notificationAttempts.orderId, orderId))
+      .for('update')
+      .limit(1);
+    if (!attempt) return { claimed: false as const };
+    if (attempt.status !== 'pending') return { claimed: false as const };
+    return { claimed: true as const, attemptId: attempt.id };
+  });
+  if (!claim.claimed) return;
+
   // Fetch order
   const [order] = await db.select().from(orders).where(eq(orders.id, orderId)).limit(1);
 
@@ -131,7 +149,8 @@ export async function dispatchNotification(orderId: string): Promise<void> {
   // Fetch lines
   const lines = await db.select().from(orderLines).where(eq(orderLines.orderId, orderId));
 
-  // Fetch pending notification attempt for this order
+  // Fetch the latest attempt row (status may have changed in another tx
+  // between our claim and here; we still want the current id).
   const [attempt] = await db
     .select()
     .from(notificationAttempts)

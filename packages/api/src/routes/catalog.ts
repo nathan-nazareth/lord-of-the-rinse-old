@@ -109,8 +109,19 @@ catalog.get('/', async (c) => {
     .from(commerceSettings)
     .where(inArray(commerceSettings.key, settingKeys));
 
+  // Cap the value size so a misconfigured admin can't dump 5MB of JSON
+  // into every public catalog request.
+  const MAX_SETTING_VALUE_BYTES = 4096;
   const settings: Record<string, unknown> = {};
   for (const row of settingsRows) {
+    if (row.value.length > MAX_SETTING_VALUE_BYTES) {
+      console.warn(
+        '[catalog] dropping oversize setting',
+        row.key,
+        `(${row.value.length} bytes > ${MAX_SETTING_VALUE_BYTES})`,
+      );
+      continue;
+    }
     try {
       settings[row.key] = JSON.parse(row.value);
     } catch {

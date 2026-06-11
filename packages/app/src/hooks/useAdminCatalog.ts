@@ -35,6 +35,18 @@ async function parseApiError(response: Response): Promise<string> {
   return `HTTP ${response.status}`;
 }
 
+// Side-effecting: on a 401 from any admin endpoint, drop the local
+// auth state so the route guard redirects to /admin on the next
+// render. Without this, an expired token leaves the user on a
+// perpetually-failing admin page.
+function handleUnauthorized(response: Response): void {
+  if (response.status !== 401) return;
+  const state = useAdminStore.getState();
+  if (state.isAuthenticated || state.authToken) {
+    state.clearAuth();
+  }
+}
+
 async function fetchWithAuth<T>(
   url: string,
   options: RequestInit = {},
@@ -56,6 +68,7 @@ async function fetchWithAuth<T>(
     throw new Error(err instanceof Error ? `Network error: ${err.message}` : 'Network error');
   }
   if (!response.ok) {
+    handleUnauthorized(response);
     throw new Error(await parseApiError(response));
   }
   if (response.status === 204) return undefined as T;
