@@ -38,33 +38,30 @@ describe('settingsUpdateSchema', () => {
 describe('shopStatusSchema', () => {
   it('accepts valid shop status', () => {
     const result = shopStatusSchema.safeParse({
-      shopOpen: true,
+      shop_open: true,
       currency: 'USD',
-      discountTiers: [
+      discount_tiers: [
         { minItems: 2, percent: 10 },
         { minItems: 4, percent: 15 },
       ],
-      contactEmail: 'admin@example.com',
     });
     expect(result.success).toBe(true);
   });
 
   it('rejects invalid currency code', () => {
     const result = shopStatusSchema.safeParse({
-      shopOpen: true,
+      shop_open: true,
       currency: 'US',
-      discountTiers: [],
-      contactEmail: 'admin@example.com',
+      discount_tiers: [],
     });
     expect(result.success).toBe(false);
   });
 
   it('rejects discount percent over 100', () => {
     const result = shopStatusSchema.safeParse({
-      shopOpen: true,
+      shop_open: true,
       currency: 'USD',
-      discountTiers: [{ minItems: 2, percent: 150 }],
-      contactEmail: 'admin@example.com',
+      discount_tiers: [{ minItems: 2, percent: 150 }],
     });
     expect(result.success).toBe(false);
   });

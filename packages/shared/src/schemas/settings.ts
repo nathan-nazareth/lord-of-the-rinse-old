@@ -12,12 +12,16 @@ export const settingsUpdateSchema = z.object({
   value: z.string(),
 });
 
+// Mirrors the public portion of the catalog response shape (see
+// packages/api/src/routes/catalog.ts and `PUBLIC_SETTINGS`).
+// Uses snake_case to match the keys the API actually returns — the
+// previous camelCase version was dead code that would have failed
+// validation against the real wire format.
 export const shopStatusSchema = z.object({
-  shopOpen: z.boolean(),
+  shop_open: z.boolean(),
   currency: z.string().length(3),
-  discountTiers: z.array(z.object({
+  discount_tiers: z.array(z.object({
     minItems: z.number().int().positive(),
     percent: z.number().min(0).max(100),
   })),
-  contactEmail: z.string().email(),
 });

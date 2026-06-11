@@ -175,6 +175,9 @@ export const useCartStore = create<CartState>()(
                 return null;
               }
             }
+            // Legacy v1 carts don't carry `updatedAt`. We don't reject
+            // them — the next setItem will stamp the current time and
+            // the expiry clock starts running from there.
 
             const cleanItems: CartItem[] = rawItems
               .filter(

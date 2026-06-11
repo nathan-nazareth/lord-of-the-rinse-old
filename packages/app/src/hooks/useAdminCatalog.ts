@@ -47,6 +47,8 @@ function handleUnauthorized(response: Response): void {
   }
 }
 
+const ADMIN_TIMEOUT_MS = 15_000;
+
 async function fetchWithAuth<T>(
   url: string,
   options: RequestInit = {},
@@ -59,13 +61,36 @@ async function fetchWithAuth<T>(
   if (token) {
     headers.set('Authorization', `Bearer ${token}`);
   }
+  // Cap the request duration so a hung server can't trap the admin
+  // UI in a perpetual loading state.
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), ADMIN_TIMEOUT_MS);
+  // If the caller already supplied a signal, cascade it into our
+  // internal controller so cancellation propagates.
+  const externalSignal = options.signal;
+  const onExternalAbort = () => controller.abort();
+  if (externalSignal) {
+    if (externalSignal.aborted) controller.abort();
+    else externalSignal.addEventListener('abort', onExternalAbort, { once: true });
+  }
   let response: Response;
   try {
-    response = await fetch(url, { ...options, headers });
+    response = await fetch(url, { ...options, headers, signal: controller.signal });
   } catch (err) {
+    if (err instanceof Error && err.name === 'AbortError') {
+      if (externalSignal?.aborted) {
+        throw new Error('Request was cancelled');
+      }
+      throw new Error(`Request timed out after ${ADMIN_TIMEOUT_MS}ms`);
+    }
     // network / DNS / CORS — never let this become an unhandled rejection
     // inside react-query.
     throw new Error(err instanceof Error ? `Network error: ${err.message}` : 'Network error');
+  } finally {
+    clearTimeout(timeoutId);
+    if (externalSignal) {
+      externalSignal.removeEventListener('abort', onExternalAbort);
+    }
   }
   if (!response.ok) {
     handleUnauthorized(response);
