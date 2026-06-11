@@ -15,6 +15,6 @@ export const checkoutRequestSchema = z.object({
 });
 
 export const checkoutResponseSchema = z.object({
-  orderReference: z.string(),
-  total: z.string(),
+  reference: z.string(),
+  status: z.string(),
 });

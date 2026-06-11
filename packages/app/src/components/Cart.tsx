@@ -17,6 +17,8 @@ import type { Customer } from '../types/webhook';
 import { calculateDiscount } from '../utils/pricing';
 import { validateEmail, validateName, validatePhone } from '../utils/validators';
 
+const API_BASE = (import.meta.env.VITE_API_URL ?? '').replace(/\/+$/, '');
+
 interface CartProps {
   cart: {
     items: CartItemType[];
@@ -308,7 +310,7 @@ export const Cart: React.FC<CartProps> = ({
         unitPrice: item.price.toFixed(2),
       }));
 
-      const response = await fetch('/api/checkout', {
+      const response = await fetch(`${API_BASE}/api/checkout`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

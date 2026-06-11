@@ -79,8 +79,8 @@ describe('checkoutRequestSchema', () => {
 describe('checkoutResponseSchema', () => {
   it('accepts valid response', () => {
     const result = checkoutResponseSchema.safeParse({
-      orderReference: 'LOR-20260522-0001',
-      total: '25.98',
+      reference: 'LOR-20260522-0001',
+      status: 'new',
     });
     expect(result.success).toBe(true);
   });

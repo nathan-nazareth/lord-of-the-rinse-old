@@ -90,7 +90,8 @@ export const useRateLimitStore = create<RateLimitState & RateLimitActions>()(
             if (!raw) return null;
             const parsed: unknown = JSON.parse(raw);
             if (typeof parsed !== 'object' || parsed === null) return null;
-            const sanitized = sanitizePersisted(parsed);
+            const state = (parsed as { state?: unknown }).state ?? parsed;
+            const sanitized = sanitizePersisted(state);
             // If the persisted blob is missing every recognised field,
             // bail so zustand falls back to the initial state.
             if (!sanitized || Object.keys(sanitized).length === 0) return null;

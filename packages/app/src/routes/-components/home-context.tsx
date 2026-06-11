@@ -14,6 +14,8 @@ import type { CartItem } from '../../types/cart';
 import type { Customer } from '../../types/webhook';
 import { submitCartToWebhook } from '../../services/webhook';
 
+const API_BASE = (import.meta.env.VITE_API_URL ?? '').replace(/\/+$/, '');
+
 interface HomeContextValue {
   cart: { items: CartItem[]; totalQuantity: number };
   formSectionRef: React.RefObject<HTMLDivElement | null>;
@@ -193,7 +195,7 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
           unitPrice: item.price.toFixed(2),
         }));
 
-        const response = await fetch('/api/checkout', {
+        const response = await fetch(`${API_BASE}/api/checkout`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

@@ -76,9 +76,23 @@ export const useFormStore = create<FormState & FormActions>()(
             // older-format localStorage value can't leave the form on
             // a step the UI doesn't know how to render.
             if (typeof state === 'object' && state !== null) {
-              const step = (state as { currentStep?: unknown }).currentStep;
+              const s = state as Record<string, unknown>;
+              const step = s.currentStep;
               if (!isFormStep(step)) {
-                (state as { currentStep: FormStep }).currentStep = 'landing';
+                s.currentStep = 'landing';
+              }
+              if (s.size !== null && typeof s.size !== 'number') {
+                const n = Number(s.size);
+                s.size = Number.isFinite(n) ? n : null;
+              }
+              if (typeof s.visited !== 'boolean') {
+                s.visited = Boolean(s.visited);
+              }
+              if (typeof s.hasLavenderPieces !== 'boolean') {
+                s.hasLavenderPieces = Boolean(s.hasLavenderPieces);
+              }
+              if (typeof s.quantity !== 'string') {
+                s.quantity = String(s.quantity ?? '');
               }
             }
             return parsed as { state: unknown; version?: number };
