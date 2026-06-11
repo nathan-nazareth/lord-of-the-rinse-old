@@ -183,7 +183,7 @@ checkoutRoutes.post('/', async (c) => {
         if (!variant) continue;
 
         const currentStock = await getStockLevelTx(tx, item.variantId);
-        const allocatedFromStock = Math.min(currentStock, item.quantity);
+        const allocatedFromStock = Math.max(0, Math.min(currentStock, item.quantity));
         const quantityToProduce = item.quantity - allocatedFromStock;
 
         await tx.insert(orderLines).values({

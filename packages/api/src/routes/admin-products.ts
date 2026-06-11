@@ -122,7 +122,15 @@ productsRoutes.delete('/:id', async (c) => {
     return c.json({ error: 'Product not found' }, 404);
   }
 
-  await adminDb.delete(adminProducts).where(eq(adminProducts.id, id));
+  try {
+    await adminDb.delete(adminProducts).where(eq(adminProducts.id, id));
+  } catch (err) {
+    const code = (err as { code?: string })?.code;
+    if (code === 'SQLITE_CONSTRAINT_FOREIGNKEY' || code === '23503') {
+      return c.json({ error: 'Cannot delete product referenced by orders' }, 409);
+    }
+    throw err;
+  }
   return c.json({ success: true });
 });
 

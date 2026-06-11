@@ -20,7 +20,7 @@ export const createAttributeSchema = z.object({
   type: attributeTypeSchema,
   name: z.string().min(1, 'Name is required').max(100),
   slug: z.string().min(1, 'Slug is required').max(100).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Slug must be lowercase alphanumeric with dashes'),
-  displayOrder: z.number().int().default(0),
+  displayOrder: z.number().int().min(0).default(0),
 });
 
 export const updateAttributeSchema = z.object({
