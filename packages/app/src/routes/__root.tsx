@@ -13,65 +13,54 @@ import { useAdminStore } from '../stores/useAdminStore';
 
 function GlobalCommands() {
   const navigate = useNavigate();
-  const register = useCommandStore((s) => s.register);
+  const registerMany = useCommandStore((s) => s.registerMany);
   const isAdmin = useAdminStore((s) => s.isAuthenticated);
 
   useEffect(() => {
-    const unregisters: Array<() => void> = [];
-    unregisters.push(
-      register({
+    const storefrontCommands = [
+      {
         id: 'go-home',
         label: 'Go to Home',
-        surface: 'storefront',
+        surface: 'storefront' as const,
         action: () => navigate({ to: '/' }),
-      }),
-    );
-    unregisters.push(
-      register({
+      },
+      {
         id: 'go-cart',
         label: 'Open Cart',
-        surface: 'storefront',
+        surface: 'storefront' as const,
         action: () => navigate({ to: '/cart' }),
-      }),
-    );
-    unregisters.push(
-      register({
+      },
+      {
         id: 'go-checkout',
         label: 'Checkout',
-        surface: 'storefront',
+        surface: 'storefront' as const,
         action: () => navigate({ to: '/checkout' }),
-      }),
-    );
-    if (isAdmin) {
-      unregisters.push(
-        register({
-          id: 'admin-products',
-          label: 'Admin: Products',
-          surface: 'admin',
-          action: () => navigate({ to: '/admin/products' }),
-        }),
-      );
-      unregisters.push(
-        register({
-          id: 'admin-options',
-          label: 'Admin: Options',
-          surface: 'admin',
-          action: () => navigate({ to: '/admin/options' }),
-        }),
-      );
-      unregisters.push(
-        register({
-          id: 'admin-discounts',
-          label: 'Admin: Discounts',
-          surface: 'admin',
-          action: () => navigate({ to: '/admin/discounts' }),
-        }),
-      );
-    }
-    return () => {
-      for (const u of unregisters) u();
-    };
-  }, [register, navigate, isAdmin]);
+      },
+    ];
+    const adminCommands = isAdmin
+      ? [
+          {
+            id: 'admin-products',
+            label: 'Admin: Products',
+            surface: 'admin' as const,
+            action: () => navigate({ to: '/admin/products' }),
+          },
+          {
+            id: 'admin-options',
+            label: 'Admin: Options',
+            surface: 'admin' as const,
+            action: () => navigate({ to: '/admin/options' }),
+          },
+          {
+            id: 'admin-discounts',
+            label: 'Admin: Discounts',
+            surface: 'admin' as const,
+            action: () => navigate({ to: '/admin/discounts' }),
+          },
+        ]
+      : [];
+    return registerMany([...storefrontCommands, ...adminCommands]);
+  }, [registerMany, navigate, isAdmin]);
 
   return null;
 }

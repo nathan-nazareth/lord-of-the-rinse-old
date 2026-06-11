@@ -26,6 +26,9 @@ export function CommandBar() {
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        // Ignore the key-repeat fire so holding Cmd+K doesn't toggle
+        // the palette in a tight loop (the user can still tap it).
+        if (e.repeat) return;
         e.preventDefault();
         setOpen((prev) => !prev);
       }

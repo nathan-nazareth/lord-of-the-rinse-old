@@ -28,6 +28,11 @@ function AdminProductsIndex() {
           ← Back
         </Link>
       </div>
+      {deleteProduct.isError && (
+        <p className="text-red-600 text-sm mb-3">
+          Failed to delete product: {deleteProduct.error?.message ?? 'Unknown error'}
+        </p>
+      )}
       <ul className="space-y-2">
         {products?.map((p) => (
           <li
@@ -40,9 +45,10 @@ function AdminProductsIndex() {
             <button
               type="button"
               onClick={() => deleteProduct.mutate(p.id)}
-              className="text-red-500 text-sm hover:underline"
+              disabled={deleteProduct.isPending}
+              className="text-red-500 text-sm hover:underline disabled:opacity-50"
             >
-              Delete
+              {deleteProduct.isPending ? 'Deleting…' : 'Delete'}
             </button>
           </li>
         ))}
