@@ -199,7 +199,11 @@ export const SoapForm: React.FC<SoapFormProps> = ({
     }),
     [shape, scent, color, size],
   );
-  const { matchedVariant } = useVariantPrice(selectedAttributes, catalog?.variants ?? []);
+  const { matchedVariant } = useVariantPrice(
+    selectedAttributes,
+    catalog?.variants ?? [],
+    catalog?.attributes ?? {},
+  );
   const matchedVariantId = matchedVariant?.id ?? null;
 
   const cartSubtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);

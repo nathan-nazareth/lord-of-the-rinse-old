@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { CatalogVariant, DiscountTier } from '../types/catalog';
+import type { CatalogAttribute, CatalogVariant, DiscountTier } from '../types/catalog';
 import { calculateDiscount, getDiscountPercentage } from '../utils/pricing';
 import { LAVENDER_PIECES_PRICE, SOAP_OPTIONS } from '../../types';
 
@@ -14,16 +14,60 @@ export function isUuid(value: string | null | undefined): value is string {
 export function useVariantPrice(
   selectedAttributes: Record<string, string | null>,
   variants: CatalogVariant[],
+  catalogAttributes: Record<string, CatalogAttribute[]> = {},
 ) {
   return useMemo(() => {
     const selectedEntries = Object.entries(selectedAttributes).filter(([, v]) => v !== null);
     if (selectedEntries.length === 0) return { unitPrice: 0, matchedVariant: null };
 
+    // Build a per-type index of (value -> set of attribute IDs). We use
+    // both the attribute slug and the human-readable name because the
+    // form stores the human-readable name as the selected value, while
+    // the catalog may canonicalize on slug.
+    const valueToAttrIdsByType: Record<string, Map<string, Set<string>>> = {};
+    for (const [type, attrs] of Object.entries(catalogAttributes)) {
+      const byValue = new Map<string, Set<string>>();
+      for (const attr of attrs) {
+        for (const v of [attr.slug, attr.name]) {
+          let ids = byValue.get(v);
+          if (!ids) {
+            ids = new Set<string>();
+            byValue.set(v, ids);
+          }
+          ids.add(attr.id);
+        }
+      }
+      valueToAttrIdsByType[type] = byValue;
+    }
+
     const matched = variants.find((v) => {
       if (!v.enabled) return false;
-      return selectedEntries.every(([, selectedValue]) =>
-        v.attributes.some((a) => a.value === selectedValue),
-      );
+      // The variant must carry at least one attribute value that maps
+      // back, via the catalog, to each selected (type, value) pair.
+      // We track consumed variant-attribute IDs so the same attribute
+      // slot can't satisfy two different selected types.
+      const consumed = new Set<string>();
+      for (const [type, selectedValue] of selectedEntries) {
+        if (selectedValue === null) continue;
+        const byValue = valueToAttrIdsByType[type];
+        if (!byValue) {
+          // No catalog data for this type — fall back to value-only match.
+          const attr = v.attributes.find(
+            (a) => a.value === selectedValue && !consumed.has(a.attributeId),
+          );
+          if (!attr) return false;
+          consumed.add(attr.attributeId);
+          continue;
+        }
+        const matchingAttrIds = byValue.get(selectedValue);
+        if (!matchingAttrIds || matchingAttrIds.size === 0) return false;
+        const attr = v.attributes.find(
+          (a) => matchingAttrIds.has(a.attributeId) && !consumed.has(a.attributeId),
+        );
+        if (!attr) return false;
+        consumed.add(attr.attributeId);
+      }
+      return true;
     });
 
     if (!matched) return { unitPrice: 0, matchedVariant: null };
@@ -32,7 +76,7 @@ export function useVariantPrice(
       unitPrice: Number.isFinite(unitPrice) ? unitPrice : 0,
       matchedVariant: matched,
     };
-  }, [selectedAttributes, variants]);
+  }, [selectedAttributes, variants, catalogAttributes]);
 }
 
 export function calculateCatalogDiscount(

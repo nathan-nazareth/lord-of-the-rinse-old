@@ -64,10 +64,25 @@ export const useFormStore = create<FormState & FormActions>()(
           }
         },
         setItem: (name, value) => {
-          localStorage.setItem(name, JSON.stringify(value));
+          try {
+            localStorage.setItem(name, JSON.stringify(value));
+          } catch (err) {
+            // QuotaExceededError / SecurityError (private mode) — swallow so
+            // a misconfigured browser doesn't crash the form. The user's
+            // in-progress selection still works for the current session.
+            if (import.meta.env.DEV) {
+              console.warn('[useFormStore] failed to persist form state', err);
+            }
+          }
         },
         removeItem: (name) => {
-          localStorage.removeItem(name);
+          try {
+            localStorage.removeItem(name);
+          } catch {
+            // Ignore — localStorage may be disabled entirely (privacy mode,
+            // sandboxed iframe). The store still works for the current
+            // session.
+          }
         },
       },
     },

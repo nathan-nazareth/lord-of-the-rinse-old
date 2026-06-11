@@ -140,24 +140,31 @@ attributesRoutes.patch('/:id', async (c) => {
 attributesRoutes.delete('/:id', async (c) => {
   const id = c.req.param('id');
 
-  const [existing] = await db.select().from(catalogAttributes).where(eq(catalogAttributes.id, id));
+  try {
+    const [existing] = await db
+      .select()
+      .from(catalogAttributes)
+      .where(eq(catalogAttributes.id, id));
 
-  if (!existing) {
-    return c.json({ error: 'Attribute not found' }, 404);
-  }
+    if (!existing) {
+      return c.json({ error: 'Attribute not found' }, 404);
+    }
 
-  const [archived] = await db
-    .update(catalogAttributes)
-    .set({ archived: true, updatedAt: sql`now()`, displayOrder: existing.displayOrder })
-    .where(eq(catalogAttributes.id, id))
-    .returning();
+    const [archived] = await db
+      .update(catalogAttributes)
+      .set({ archived: true, updatedAt: sql`now()`, displayOrder: existing.displayOrder })
+      .where(eq(catalogAttributes.id, id))
+      .returning();
 
-  if (!archived) {
-    console.error('[attributes] archive returned no row for id', id);
+    if (!archived) {
+      return c.json({ error: 'Attribute not found' }, 404);
+    }
+
+    return c.json({ attribute: archived });
+  } catch (err) {
+    console.error('[attributes] archive failed:', err);
     return c.json({ error: 'Failed to archive attribute' }, 500);
   }
-
-  return c.json({ attribute: archived });
 });
 
 export default attributesRoutes;

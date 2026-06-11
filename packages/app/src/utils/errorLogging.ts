@@ -42,6 +42,14 @@ export const logResourceError = (event: Event): void => {
     src = target.href;
   } else if (target instanceof HTMLImageElement) {
     src = target.src;
+  } else if (target instanceof HTMLVideoElement || target instanceof HTMLAudioElement) {
+    // Media elements expose `src` directly; HLS / DASH sources come from
+    // <source> children which fire their own error events.
+    src = target.src;
+  } else if (target instanceof HTMLIFrameElement) {
+    src = target.src;
+  } else if (target instanceof HTMLSourceElement || target instanceof HTMLTrackElement) {
+    src = target.src;
   }
 
   const error: StructuredError = {

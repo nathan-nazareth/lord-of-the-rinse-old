@@ -229,28 +229,36 @@ variantsRoutes.patch('/:id', async (c) => {
 variantsRoutes.delete('/:id', async (c) => {
   const id = c.req.param('id');
 
-  const [existing] = await db.select().from(soapVariants).where(eq(soapVariants.id, id));
+  try {
+    const [existing] = await db.select().from(soapVariants).where(eq(soapVariants.id, id));
 
-  if (!existing) {
-    return c.json({ error: 'Variant not found' }, 404);
+    if (!existing) {
+      return c.json({ error: 'Variant not found' }, 404);
+    }
+
+    const [archived] = await db
+      .update(soapVariants)
+      .set({ archived: true, updatedAt: sql`now()` })
+      .where(eq(soapVariants.id, id))
+      .returning();
+
+    if (!archived) {
+      return c.json({ error: 'Variant not found' }, 404);
+    }
+
+    const attrs = await db
+      .select({
+        attributeId: variantAttributes.attributeId,
+        value: variantAttributes.value,
+      })
+      .from(variantAttributes)
+      .where(eq(variantAttributes.variantId, id));
+
+    return c.json({ variant: { ...archived, attributes: attrs } });
+  } catch (err) {
+    console.error('[variants] archive failed:', err);
+    return c.json({ error: 'Failed to archive variant' }, 500);
   }
-
-  const [archived] = await db
-    .update(soapVariants)
-    .set({ archived: true, updatedAt: sql`now()` })
-    .where(eq(soapVariants.id, id))
-    .returning();
-
-  // Fetch current attributes for the response
-  const attrs = await db
-    .select({
-      attributeId: variantAttributes.attributeId,
-      value: variantAttributes.value,
-    })
-    .from(variantAttributes)
-    .where(eq(variantAttributes.variantId, id));
-
-  return c.json({ variant: { ...archived, attributes: attrs } });
 });
 
 export default variantsRoutes;

@@ -25,6 +25,7 @@ const ALLOWED_FIELDS = new Set([
   'from_name',
   'replyto',
   'message',
+  'submission_timestamp',
 ]);
 
 function sanitizeString(value: unknown, max: number): string {
@@ -37,6 +38,14 @@ function sanitizeField(key: string, value: unknown): string | number | undefined
   if (key === 'Total items') {
     const n = Number(value);
     return Number.isInteger(n) && n >= 0 ? n : undefined;
+  }
+  if (key === 'submission_timestamp') {
+    // Reject anything that isn't a parseable ISO-8601 datetime so an
+    // attacker can't smuggle a hand-crafted header into the email body.
+    if (typeof value !== 'string') return undefined;
+    const t = Date.parse(value);
+    if (!Number.isFinite(t)) return undefined;
+    return new Date(t).toISOString();
   }
   if (typeof value === 'number' && Number.isFinite(value)) {
     return Math.trunc(value);
@@ -94,12 +103,16 @@ webhookRoutes.post('/submit', async (c) => {
     }
 
     if (!response.ok || !parsed.success) {
+      // 502 Bad Gateway is the right code regardless of which side
+      // rejected the call: the client request was valid, but the
+      // upstream email provider either returned a non-2xx or a
+      // success=false payload.
       return c.json(
         {
           success: false,
           error: parsed.message || `Webhook returned status ${response.status}`,
         },
-        response.ok ? 502 : 502,
+        502,
       );
     }
 

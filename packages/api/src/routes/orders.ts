@@ -186,10 +186,14 @@ ordersRoutes.post('/:id/retry-notification', async (c) => {
     });
 
     if ('notFound' in result) {
+      // The order itself is the parent resource. An "attempt-not-found" means
+      // the order exists but has no notification row — still 404 because the
+      // URL resource (an attempt on this order) doesn't exist.
       const message =
-        result.notFound === 'order' ? 'Order not found' : 'No notification attempt found for this order';
-      const status = result.notFound === 'order' ? 404 : 404;
-      return c.json({ error: message }, status);
+        result.notFound === 'order'
+          ? 'Order not found'
+          : 'No notification attempt found for this order';
+      return c.json({ error: message }, 404);
     }
     if ('invalidStatus' in result) {
       return c.json(

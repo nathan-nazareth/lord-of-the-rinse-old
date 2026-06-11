@@ -75,6 +75,11 @@ export async function submitCartToWebhook(
   const safeEmail = sanitize(customer.email, 200);
   const safePhone = sanitize(customer.phone ?? '', 50);
 
+  // Format prices as fixed-decimal strings so very large subtotals don't
+  // // bleed into scientific notation when they hit the email body.
+  const fmtMoney = (n: number): string =>
+    Number.isFinite(n) ? n.toFixed(2) : '0.00';
+
   const web3FormsPayload: Record<string, string | number | undefined> = {
     Name: safeName,
     Email: safeEmail,
@@ -82,9 +87,9 @@ export async function submitCartToWebhook(
     'Soap Shape': sanitize(allShapes, 500),
     'Order Details': sanitize(orderItemsFormatted, 4000),
     'Total items': totalQuantity,
-    Subtotal: `Rs. ${subtotal}`,
-    Discount: `${discountPercentage}% (Rs. ${discountAmount})`,
-    'Final Total': `Rs. ${finalTotal}`,
+    Subtotal: `Rs. ${fmtMoney(subtotal)}`,
+    Discount: `${discountPercentage}% (Rs. ${fmtMoney(discountAmount)})`,
+    'Final Total': `Rs. ${fmtMoney(finalTotal)}`,
     order_id: orderId,
     submission_timestamp: new Date().toISOString(),
     from_name: safeName,
@@ -179,14 +184,23 @@ export async function submitCartToWebhook(
           continue;
         }
       } else if (response.status === 401) {
+        // 401 means our access key is misconfigured — retrying won't help
+        // and would only burn the rate-limit budget.
         logWeb3FormsError(orderId, 'unauthorized', 'Invalid Web3Forms access key', attempt);
+        lastError = new Error('Invalid Web3Forms access key');
+        break;
       } else if (response.status === 400) {
+        // 400 means the request was malformed; retrying with the same body
+        // is guaranteed to fail. Break out so the user gets immediate
+        // feedback instead of waiting through 3 attempts × 10s timeout.
         logWeb3FormsError(
           orderId,
           'validation',
           responseData.message || 'Validation failed',
           attempt,
         );
+        lastError = new Error(responseData.message || 'Validation failed');
+        break;
       } else if (response.status >= 500) {
         logWeb3FormsError(orderId, 'server_error', responseData.message || 'Server error', attempt);
       } else {
