@@ -3,6 +3,19 @@ import { persist } from 'zustand/middleware';
 
 export type FormStep = 'landing' | 'shape' | 'scent' | 'color' | 'size' | 'quantity';
 
+const VALID_STEPS: readonly FormStep[] = [
+  'landing',
+  'shape',
+  'scent',
+  'color',
+  'size',
+  'quantity',
+] as const;
+
+function isFormStep(value: unknown): value is FormStep {
+  return typeof value === 'string' && (VALID_STEPS as readonly string[]).includes(value);
+}
+
 export interface FormState {
   shape: string | null;
   scent: string | null;
@@ -57,6 +70,16 @@ export const useFormStore = create<FormState & FormActions>()(
               (parsed as { state?: unknown }).state === null
             ) {
               return null;
+            }
+            const state = (parsed as { state: unknown }).state;
+            // Sanitize the persisted `currentStep` so a hand-crafted or
+            // older-format localStorage value can't leave the form on
+            // a step the UI doesn't know how to render.
+            if (typeof state === 'object' && state !== null) {
+              const step = (state as { currentStep?: unknown }).currentStep;
+              if (!isFormStep(step)) {
+                (state as { currentStep: FormStep }).currentStep = 'landing';
+              }
             }
             return parsed as { state: unknown; version?: number };
           } catch {

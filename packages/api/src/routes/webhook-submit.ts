@@ -33,6 +33,10 @@ function sanitizeString(value: unknown, max: number): string {
   return value.replace(/[\r\n\t\0\v\f]/g, ' ').slice(0, max);
 }
 
+// ISO-8601 datetime with required date+time. Lenient `Date.parse` accepts
+// partial strings ("2024", "+1 day") that we don't want to forward.
+const ISO_8601_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})$/;
+
 function sanitizeField(key: string, value: unknown): string | number | undefined {
   const max = key === 'message' || key === 'Order Details' ? 4000 : 200;
   if (key === 'Total items') {
@@ -40,9 +44,12 @@ function sanitizeField(key: string, value: unknown): string | number | undefined
     return Number.isInteger(n) && n >= 0 ? n : undefined;
   }
   if (key === 'submission_timestamp') {
-    // Reject anything that isn't a parseable ISO-8601 datetime so an
+    // Reject anything that isn't a strict ISO-8601 datetime so an
     // attacker can't smuggle a hand-crafted header into the email body.
+    // `Date.parse` is too permissive (it accepts "2024", "+1 day", etc.),
+    // so we require the ISO-8601 regex shape AND a finite parse result.
     if (typeof value !== 'string') return undefined;
+    if (!ISO_8601_REGEX.test(value)) return undefined;
     const t = Date.parse(value);
     if (!Number.isFinite(t)) return undefined;
     return new Date(t).toISOString();
