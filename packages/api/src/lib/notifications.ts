@@ -137,6 +137,10 @@ export async function dispatchNotification(orderId: string): Promise<void> {
       .limit(1);
     if (!attempt) return { claimed: false as const };
     if (attempt.status !== 'pending') return { claimed: false as const };
+    await tx
+      .update(notificationAttempts)
+      .set({ status: 'sending', updatedAt: new Date() })
+      .where(eq(notificationAttempts.id, attempt.id));
     return { claimed: true as const, attemptId: attempt.id };
   });
   if (!claim.claimed) return;
@@ -177,7 +181,7 @@ export async function dispatchNotification(orderId: string): Promise<void> {
       // echo back the submitted access_key / replyto in 4xx responses,
       // which would otherwise leak into the admin UI and logs.
       const sanitized = rawText
-        .replace(/access_key=[^&\s"]+/gi, 'access_key=[redacted]')
+        .replace(/access_key["'\s:=]+[^"'\s,}&]+/gi, 'access_key=[redacted]')
         .replace(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g, '[email]')
         .slice(0, 200);
       throw new Error(`Web3Forms ${response.status}: ${sanitized}`);

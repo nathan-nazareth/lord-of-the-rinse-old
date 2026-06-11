@@ -22,6 +22,7 @@ export const orderSchema = z.object({
   status: orderStatusSchema,
   customerName: z.string(),
   customerEmail: z.string().email(),
+  customerPhone: z.string().nullable().optional(),
   total: z.string(),
   createdAt: z.string(),
 });

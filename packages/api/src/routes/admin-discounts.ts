@@ -123,10 +123,14 @@ discountsRoutes.put('/:id', async (c) => {
 
   let trimmedDescription: string | undefined;
   if (body.description !== undefined) {
-    if (typeof body.description !== 'string' || body.description.length > MAX_DESCRIPTION_LENGTH) {
+    if (
+      typeof body.description !== 'string' ||
+      body.description.trim().length === 0 ||
+      body.description.length > MAX_DESCRIPTION_LENGTH
+    ) {
       return c.json(
         {
-          error: `Description must be a string of at most ${MAX_DESCRIPTION_LENGTH} characters`,
+          error: `Description must be a non-empty string of at most ${MAX_DESCRIPTION_LENGTH} characters`,
         },
         422,
       );

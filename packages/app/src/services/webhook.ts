@@ -18,8 +18,19 @@ function generateOrderId(): string {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
-async function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+async function sleep(ms: number, signal?: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(new DOMException('Aborted', 'AbortError'));
+      return;
+    }
+    const timer = setTimeout(resolve, ms);
+    const onAbort = () => {
+      clearTimeout(timer);
+      reject(new DOMException('Aborted', 'AbortError'));
+    };
+    signal?.addEventListener('abort', onAbort, { once: true });
+  });
 }
 
 function getRetryDelay(attempt: number): number {
@@ -150,7 +161,7 @@ export async function submitCartToWebhook(
         lastError = new Error(`Non-JSON response (HTTP ${response.status})`);
         // Network-shape failure: retry with backoff instead of bailing.
         if (attempt < MAX_RETRIES) {
-          await sleep(getRetryDelay(attempt));
+          await sleep(getRetryDelay(attempt), options.signal);
         }
         continue;
       }
@@ -180,7 +191,7 @@ export async function submitCartToWebhook(
       if (response.status === 429) {
         logWeb3FormsRateLimit(orderId, attempt, MAX_RETRIES);
         if (attempt < MAX_RETRIES) {
-          await sleep(getRetryDelay(attempt));
+          await sleep(getRetryDelay(attempt), options.signal);
           continue;
         }
       } else if (response.status === 401) {
@@ -234,7 +245,7 @@ export async function submitCartToWebhook(
       }
 
       if (attempt < MAX_RETRIES) {
-        await sleep(getRetryDelay(attempt));
+        await sleep(getRetryDelay(attempt), options.signal);
       }
     } finally {
       clearTimeout(timeoutId);

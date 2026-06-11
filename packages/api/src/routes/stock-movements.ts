@@ -32,11 +32,19 @@ stockMovementsRoutes.get('/', async (c) => {
   }
 
   if (from) {
-    conditions.push(gte(stockMovements.createdAt, new Date(from)));
+    const fromDate = new Date(from);
+    if (!Number.isFinite(fromDate.getTime())) {
+      return c.json({ error: 'Invalid "from" date parameter' }, 400);
+    }
+    conditions.push(gte(stockMovements.createdAt, fromDate));
   }
 
   if (to) {
-    conditions.push(lte(stockMovements.createdAt, new Date(to)));
+    const toDate = new Date(to);
+    if (!Number.isFinite(toDate.getTime())) {
+      return c.json({ error: 'Invalid "to" date parameter' }, 400);
+    }
+    conditions.push(lte(stockMovements.createdAt, toDate));
   }
 
   const movements = await db

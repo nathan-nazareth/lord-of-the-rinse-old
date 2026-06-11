@@ -7,7 +7,7 @@ export const attributeSchema = z.object({
   type: attributeTypeSchema,
   name: z.string(),
   slug: z.string(),
-  displayOrder: z.number(),
+  displayOrder: z.number().int(),
 });
 
 export const attributeAdminSchema = attributeSchema.extend({

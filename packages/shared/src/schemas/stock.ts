@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const stockAdjustmentSchema = z.object({
   variantId: z.string().uuid(),
-  quantity: z.number().int(),
+  quantity: z.number().int().refine((n) => n !== 0, { message: 'Quantity must not be zero' }),
   reason: z.string().min(1),
 });
 

@@ -770,7 +770,9 @@ export const SoapForm: React.FC<SoapFormProps> = ({
                           <div className="flex justify-between text-orange-600 text-sm">
                             <span>
                               Add{' '}
-                              {2 - qty > 0 ? `${2 - qty} more for 10% off` : `2 more for 15% off`}
+                              {totalQty < 2
+                                ? `${2 - totalQty} more for 10% off`
+                                : `${4 - totalQty} more for 15% off`}
                             </span>
                           </div>
                         )}

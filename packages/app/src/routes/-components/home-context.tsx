@@ -220,7 +220,12 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
           return finalizeSuccess(data.reference);
         }
 
-        console.warn(`[Checkout] API responded ${response.status}, falling back to Web3Forms`);
+        if (response.status >= 400 && response.status < 500) {
+          console.error(`[Checkout] API client error ${response.status}, not falling back to Web3Forms`);
+          return fail();
+        }
+
+        console.warn(`[Checkout] API server error ${response.status}, falling back to Web3Forms`);
       } catch (err) {
         if (err instanceof Error && err.name === 'AbortError') {
           return fail();

@@ -37,6 +37,13 @@ function sanitizeString(value: unknown, max: number): string {
 // partial strings ("2024", "+1 day") that we don't want to forward.
 const ISO_8601_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})$/;
 
+function sanitizeUpstreamMessage(raw: string): string {
+  return raw
+    .replace(/access_key["'\s:=]+[^"'\s,}&]+/gi, 'access_key=[redacted]')
+    .replace(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g, '[email]')
+    .slice(0, 200);
+}
+
 function sanitizeField(key: string, value: unknown): string | number | undefined {
   const max = key === 'message' || key === 'Order Details' ? 4000 : 200;
   if (key === 'Total items') {
@@ -55,7 +62,7 @@ function sanitizeField(key: string, value: unknown): string | number | undefined
     return new Date(t).toISOString();
   }
   if (typeof value === 'number' && Number.isFinite(value)) {
-    return Math.trunc(value);
+    return value;
   }
   if (typeof value === 'string') return sanitizeString(value, max);
   return undefined;
@@ -117,7 +124,9 @@ webhookRoutes.post('/submit', async (c) => {
       return c.json(
         {
           success: false,
-          error: parsed.message || `Webhook returned status ${response.status}`,
+          error: sanitizeUpstreamMessage(
+            parsed.message || `Webhook returned status ${response.status}`,
+          ),
         },
         502,
       );

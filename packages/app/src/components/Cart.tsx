@@ -38,7 +38,7 @@ const CheckoutForm: React.FC<{
   const [formData, setFormData] = useState({ name: '', email: '', phone: '' });
   const [errors, setErrors] = useState<{ name?: string; email?: string; phone?: string }>({});
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     e.stopPropagation();
     const newErrors: { name?: string; email?: string; phone?: string } = {};
@@ -50,7 +50,7 @@ const CheckoutForm: React.FC<{
       setErrors(newErrors);
       return;
     }
-    onSubmit({ name: formData.name, email: formData.email, phone: formData.phone });
+    await onSubmit({ name: formData.name, email: formData.email, phone: formData.phone });
   };
 
   return (
