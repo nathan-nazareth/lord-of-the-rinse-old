@@ -249,12 +249,14 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
       } catch (err) {
         if (err instanceof Error && err.name === 'AbortError') return fail();
         console.error('Order submission error:', err);
-      } finally {
-        if (inFlightController.current === controller) {
-          inFlightController.current = null;
-        }
       }
-      return fail();
+      // Single point of release. Previously the `finally` block also
+      // nulled `inFlightController.current`, which made the
+      // `releaseController()` inside `fail()` a no-op and left the
+      // release logic split across two paths (easy to break in a
+      // refactor). One call site keeps the invariant in one place.
+      releaseController();
+      return undefined;
     },
     [clearCart, clearFormState],
   );

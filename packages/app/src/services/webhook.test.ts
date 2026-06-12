@@ -90,4 +90,35 @@ describe('submitCartToWebhook discount logic', () => {
     expect(payload.Discount).toBe('10% (Rs. 60.00)');
     expect(payload['Final Total']).toBe('Rs. 540.00');
   });
+
+  it('regression: sleep() does not leak abort listeners on a long-lived signal across retries', async () => {
+    // Force 3 retries (each calls sleep() with the same AbortSignal).
+    // If the listener isn't removed after the timer fires, the
+    // AbortSignal's listener list grows by one per attempt. The bug
+    // is invisible to the user-facing test contract but exhausts the
+    // 6-listener soft cap Node imposes on EventTarget-like objects
+    // under sustained load.
+    mockFetch.mockReset();
+    mockFetch.mockResolvedValue({
+      ok: true,
+      status: 429,
+      json: () => Promise.resolve({ success: false, message: 'rate limited' }),
+    });
+
+    const controller = new AbortController();
+    const signal = controller.signal;
+    // Expose the signal's internal listener count via the spec's
+    // undocumented but widely-implemented property.
+    const initialListenerCount =
+      // @ts-expect-error — node-specific debug property
+      signal.listenerCount?.('abort') ?? 0;
+
+    const items = [makeItem()];
+    await submitCartToWebhook(customer, items, undefined, undefined, { signal });
+
+    const finalListenerCount =
+      // @ts-expect-error — node-specific debug property
+      signal.listenerCount?.('abort') ?? 0;
+    expect(finalListenerCount).toBe(initialListenerCount);
+  });
 });

@@ -202,6 +202,12 @@ export const SoapForm: React.FC<SoapFormProps> = ({
     catalog?.variants ?? [],
     catalog?.attributes ?? {},
   );
+  // Catalog price when a variant matches; otherwise fall back to the
+  // formula so the form remains usable while the catalog is still
+  // loading or for selections that don't map to a real SKU. The
+  // server-side checkout re-validates the price against the DB and
+  // rejects mismatches — this fallback is purely for the user-facing
+  // display total.
   const totalPrice = matchedVariant && catalogPrice > 0 ? catalogPrice : formulaPrice;
   const matchedVariantId = matchedVariant?.id ?? null;
 
@@ -275,11 +281,25 @@ export const SoapForm: React.FC<SoapFormProps> = ({
     const value = e.target.value.replace(/[^0-9]/g, '');
     setField('quantity', value);
   };
-
   const isScentStepValid = scent && size !== null;
-  const isFormValid =
-    shape && scent && color && size !== null && quantity.length > 0 && parseInt(quantity, 10) > 0;
-
+  // The effective price mirrors the cart-line price: catalog when
+  // available and matched, otherwise the formula. Refuse to submit
+  // when the effective price would be $0 — that's the silent-$0-line
+  // bug we want to prevent. The form being submittable on a
+  // formula-only fallback (e.g. the catalog hasn't loaded yet, or no
+  // variant matches the current shape/scent/color/size) is intentional
+  // and the server re-validates the price anyway.
+  const effectivePrice = matchedVariant && catalogPrice > 0 ? catalogPrice : formulaPrice;
+  const hasPositivePrice = Number.isFinite(effectivePrice) && effectivePrice > 0;
+  const isFormValid = Boolean(
+    shape &&
+      scent &&
+      color &&
+      size !== null &&
+      quantity.length > 0 &&
+      parseInt(quantity, 10) > 0 &&
+      hasPositivePrice,
+  );
   const handleStepNavigate = (step: FormStep) => {
     const stepIdx = STEPS.indexOf(step);
     const currentIdx = STEPS.indexOf(currentStep);
@@ -297,6 +317,9 @@ export const SoapForm: React.FC<SoapFormProps> = ({
   };
 
   const handleAddToCart = () => {
+    // Defence in depth: even though the button is disabled, a future
+    // refactor that wires a different submit path must not be able to
+    // push a $0 line into the cart.
     if (!isFormValid) return;
     setShowAddedToast(true);
     if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
@@ -809,6 +832,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({
                     onClick={handleAddToCart}
                     disabled={!isFormValid}
                     className={`btn-apothecary btn-primary flex-1 ${!isFormValid ? 'opacity-40 cursor-not-allowed' : ''}`}
+                    title={!hasPositivePrice ? 'Price is not yet known' : undefined}
                   >
                     <IconShoppingCart className="w-4 h-4" />
                     Add to Cart

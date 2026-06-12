@@ -24,11 +24,27 @@ async function sleep(ms: number, signal?: AbortSignal): Promise<void> {
       reject(new DOMException('Aborted', 'AbortError'));
       return;
     }
-    const timer = setTimeout(resolve, ms);
-    const onAbort = () => {
+    let onAbort: (() => void) | null = null;
+    const cleanup = () => {
+      if (onAbort && signal) {
+        signal.removeEventListener('abort', onAbort);
+        onAbort = null;
+      }
+    };
+    const timer = setTimeout(() => {
+      cleanup();
+      resolve();
+    }, ms);
+    onAbort = () => {
       clearTimeout(timer);
+      cleanup();
       reject(new DOMException('Aborted', 'AbortError'));
     };
+    // Without an explicit removeEventListener after the timer fires, each
+    // call to sleep() against a long-lived `signal` (the checkout's
+    // AbortController is reused across retry attempts) would attach a
+    // fresh listener that never gets cleaned up. { once: true } only
+    // removes the listener on abort — not on resolve.
     signal?.addEventListener('abort', onAbort, { once: true });
   });
 }

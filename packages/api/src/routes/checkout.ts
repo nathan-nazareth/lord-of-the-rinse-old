@@ -7,7 +7,7 @@ import {
   soapVariants,
   stockMovements,
 } from '@lotr/db/schema';
-import { checkoutRequestSchema } from '@lotr/shared';
+import { checkoutRequestSchema, discountTiersSchema } from '@lotr/shared';
 import { desc, eq, inArray, like, sql as drizzleSql } from 'drizzle-orm';
 import type { Context } from 'hono';
 import { Hono } from 'hono';
@@ -153,7 +153,27 @@ checkoutRoutes.post('/', async (c) => {
     return c.json({ error: 'Invalid customer name' }, 400);
   }
 
-  const variantIds = items.map((item) => item.variantId);
+  // Coalesce repeated line items that share the same variantId. Without
+  // this, a client could split e.g. 6 of a variant into two lines of 3
+  // and bypass the stock-allocation guard (each line would see the
+  // full available stock and allocate independently, oversubscribing
+  // inventory). Summing first also keeps the per-line insert and
+  // allocation math consistent.
+  const coalescedItems = new Map<string, (typeof items)[number]>();
+  for (const item of items) {
+    const existing = coalescedItems.get(item.variantId);
+    if (existing) {
+      coalescedItems.set(item.variantId, {
+        ...existing,
+        quantity: existing.quantity + item.quantity,
+      });
+    } else {
+      coalescedItems.set(item.variantId, item);
+    }
+  }
+  const mergedItems = Array.from(coalescedItems.values());
+
+  const variantIds = mergedItems.map((item) => item.variantId);
 
   try {
     const result = await db.transaction(async (tx) => {
@@ -172,7 +192,7 @@ checkoutRoutes.post('/', async (c) => {
       const variantMap = new Map(variantRows.map((v) => [v.id, v]));
 
       const invalidItems: string[] = [];
-      for (const item of items) {
+      for (const item of mergedItems) {
         const variant = variantMap.get(item.variantId);
         if (!variant) {
           invalidItems.push(`Variant ${item.variantId} not found`);
@@ -188,7 +208,7 @@ checkoutRoutes.post('/', async (c) => {
 
       let subtotalCents = 0;
       let totalQuantity = 0;
-      for (const item of items) {
+      for (const item of mergedItems) {
         const variant = variantMap.get(item.variantId);
         if (!variant) continue;
         const price = Number.parseFloat(variant.unitPrice);
@@ -207,11 +227,33 @@ checkoutRoutes.post('/', async (c) => {
       let discountTiers: DiscountTier[] = [];
       if (discountRow?.value) {
         try {
-          const parsed = JSON.parse(discountRow.value);
-          if (Array.isArray(parsed)) discountTiers = parsed;
-        } catch { /* no discount */ }
+          const parsed: unknown = JSON.parse(discountRow.value);
+          // Validate each tier with Zod so a hand-crafted admin setting
+          // (e.g. `{minItems: -1, percent: 9999}`) can't drive the
+          // order total negative. Anything that fails validation is
+          // silently dropped to "no discount" — a misconfigured setting
+          // should not be able to break checkouts.
+          const validated = discountTiersSchema.safeParse(parsed);
+          if (validated.success) {
+            discountTiers = validated.data;
+          } else {
+            console.warn(
+              '[checkout] discount_tiers setting is malformed; ignoring',
+              validated.error.flatten(),
+            );
+          }
+        } catch {
+          // Malformed JSON — treat as no discount.
+        }
       }
       const { totalCents } = applyDiscountTiers(subtotalCents, totalQuantity, discountTiers);
+      // Defence in depth: if a future regression in `applyDiscountTiers`
+      // (or a malformed tier in the DB that the Zod schema doesn't
+      // catch) ever produces a negative order total, refuse to insert
+      // the row rather than write a negative-priced order.
+      if (!Number.isFinite(totalCents) || totalCents < 0) {
+        return { error: ['Computed order total is invalid'] } as const;
+      }
       const total = (totalCents / 100).toFixed(2);
 
       const reference = await generateOrderReferenceTx(tx);
@@ -232,7 +274,7 @@ checkoutRoutes.post('/', async (c) => {
         throw new Error('Failed to create order');
       }
 
-      for (const item of items) {
+      for (const item of mergedItems) {
         const variant = variantMap.get(item.variantId);
         if (!variant) continue;
 
@@ -295,6 +337,16 @@ checkoutRoutes.post('/', async (c) => {
     return c.json({ reference: result.reference, status: 'new' }, 201);
   } catch (err) {
     console.error('[checkout] transaction failed:', err);
+    // The advisory lock on `generateOrderReferenceTx` makes a
+    // duplicate `orders.reference` vanishingly unlikely, but if a
+    // future refactor drops the lock and a unique-violation slips
+    // through, surface it as 409 instead of a misleading 500. The
+    // global error handler also maps this, but it's already too late
+    // to influence the response by the time it runs.
+    const code = (err as { code?: unknown })?.code;
+    if (code === '23505' || code === 'SQLITE_CONSTRAINT_UNIQUE') {
+      return c.json({ error: 'A conflicting order was just placed; please retry' }, 409);
+    }
     return c.json({ error: 'Failed to place order' }, 500);
   }
 });

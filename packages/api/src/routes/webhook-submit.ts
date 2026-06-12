@@ -39,7 +39,18 @@ const ISO_8601_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|
 
 function sanitizeUpstreamMessage(raw: string): string {
   return raw
-    .replace(/access_key["'\s:=]+[^"'\s,}&]+/gi, 'access_key=[redacted]')
+    // Defang Web3Forms' "Access Key" and friends in any case/format the
+    // upstream might echo them. The `=` / `:` / `:` / space separators
+    // cover `access_key=...`, `"access_key": ...`, `access-key: ...`,
+    // and `access_key : ...`. The `\b` boundaries stop a key shape
+    // inside a longer token (e.g. a URL slug) from being redacted.
+    .replace(
+      /\baccess[-_]?key\b["'\s:=]+[^"'\s,}&<]+/gi,
+      'access_key=[redacted]',
+    )
+    // Same treatment for the Web3Forms "secret" field, which has
+    // historically appeared in some error payloads.
+    .replace(/\bsecret\b["'\s:=]+[^"'\s,}&<]+/gi, 'secret=[redacted]')
     .replace(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g, '[email]')
     .slice(0, 200);
 }
@@ -134,8 +145,26 @@ webhookRoutes.post('/submit', async (c) => {
 
     return c.json({ success: true });
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
-    return c.json({ success: false, error: message }, 502);
+    // Sanitize the error before echoing it to the client — fetch's
+    // TypeError can include the full URL (with internal hostnames /
+    // ports) of the upstream, and a future refactor that swaps the
+    // endpoint for an internal service would silently leak infra
+    // topology. Map the known shapes to safe messages and fall through
+    // to a generic line for anything else.
+    const errName = err instanceof Error ? err.name : '';
+    const errMessage = err instanceof Error ? err.message : 'Unknown error';
+    let safeMessage: string;
+    if (errName === 'AbortError') {
+      safeMessage = 'Webhook request timed out';
+    } else if (/failed to fetch|networkerror|fetch failed/i.test(errMessage)) {
+      safeMessage = 'Webhook endpoint is unreachable';
+    } else {
+      safeMessage = 'Webhook proxy failed';
+    }
+    // Full detail stays in the server log for ops, but the client only
+    // sees the sanitized message.
+    console.error('[webhook-submit] fetch error:', err);
+    return c.json({ success: false, error: safeMessage }, 502);
   } finally {
     clearTimeout(timeoutId);
   }

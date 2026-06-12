@@ -47,9 +47,21 @@ const shutdown = () => {
   }
 };
 
-process.once('SIGINT', shutdown);
-process.once('SIGTERM', shutdown);
-process.once('beforeExit', shutdown);
+// Bun's --watch / Vitest worker re-evaluations re-import this module
+// on every reload. Each call to `process.once(...)` adds another
+// listener that never fires (process is the long-lived handle), and
+// each evaluation creates a new adminClient (captured by the
+// `shutdown` closure above) but only the first is tracked. Guard
+// against re-registration via a global symbol so hot reloads are
+// idempotent and we don't leave a half-closed client dangling.
+const REGISTRATION_KEY = Symbol.for('@lotr/db/admin:shutdown-registered');
+const globalScope = globalThis as unknown as { [k: symbol]: boolean | undefined };
+if (!globalScope[REGISTRATION_KEY]) {
+  globalScope[REGISTRATION_KEY] = true;
+  process.once('SIGINT', shutdown);
+  process.once('SIGTERM', shutdown);
+  process.once('beforeExit', shutdown);
+}
 
 export { adminSchema, adminClient };
 export const { adminProducts, adminOptions, adminDiscounts } = adminSchema;
