@@ -13,7 +13,13 @@ export class ErrorBoundary extends Component<EBProps, EBState> {
   }
 
   componentDidCatch(error: Error, errorInfo: import('react').ErrorInfo) {
-    logError(error, 'render', { componentStack: errorInfo.componentStack });
+    logError(error, 'render', {
+      // React's componentStack is typed as `string | null | undefined`
+      // depending on the build/React version. Normalize to `undefined`
+      // so the StructuredError contract (string | undefined) isn't
+      // violated by an unexpected `null` slipping through.
+      componentStack: errorInfo.componentStack ?? undefined,
+    });
   }
 
   handleRetry = () => {

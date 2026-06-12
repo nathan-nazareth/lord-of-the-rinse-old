@@ -90,21 +90,26 @@ productsRoutes.post('/', async (c) => {
   }
 
   const now = new Date().toISOString();
-  const result = await adminDb
-    .insert(adminProducts)
-    .values({
-      name: (body.name as string).trim(),
-      color: (body.color as string).trim(),
-      scent: (body.scent as string).trim(),
-      shape: (body.shape as string).trim(),
-      weight,
-      price,
-      createdAt: now,
-      updatedAt: now,
-    })
-    .returning();
+  try {
+    const result = await adminDb
+      .insert(adminProducts)
+      .values({
+        name: (body.name as string).trim(),
+        color: (body.color as string).trim(),
+        scent: (body.scent as string).trim(),
+        shape: (body.shape as string).trim(),
+        weight,
+        price,
+        createdAt: now,
+        updatedAt: now,
+      })
+      .returning();
 
-  return c.json(result[0], 201);
+    return c.json(result[0], 201);
+  } catch (err) {
+    console.error('[admin-products] create failed:', err);
+    return c.json({ error: 'Failed to create product' }, 500);
+  }
 });
 
 productsRoutes.delete('/:id', async (c) => {

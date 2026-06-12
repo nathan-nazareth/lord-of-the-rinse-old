@@ -1,6 +1,6 @@
 import { db, sql } from '@lotr/db';
 import { notificationAttempts, orderLines, orders, stockMovements } from '@lotr/db/schema';
-import { statusTransitionSchema, validTransitions } from '@lotr/shared';
+import { orderStatusSchema, statusTransitionSchema, validTransitions } from '@lotr/shared';
 import { and, desc, eq, type SQL } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { dispatchNotification } from '../lib/notifications';
@@ -21,7 +21,16 @@ ordersRoutes.get('/', async (c) => {
 
   const conditions: SQL[] = [];
   if (status) {
-    conditions.push(eq(orders.status, status));
+    // Validate against the schema so an attacker can't enumerate valid
+    // statuses by passing random strings (the query is parameterized
+    // either way, but invalid input returning empty results is a
+    // bad UX — and worse, a future refactor that interpolates the
+    // value would lose SQLi protection).
+    const parsed = orderStatusSchema.safeParse(status);
+    if (!parsed.success) {
+      return c.json({ error: 'Invalid status filter' }, 400);
+    }
+    conditions.push(eq(orders.status, parsed.data));
   }
 
   const result = await db

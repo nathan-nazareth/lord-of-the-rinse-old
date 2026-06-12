@@ -59,6 +59,10 @@ function GlobalCommands() {
           },
         ]
       : [];
+    // `registerMany` returns a cleanup function; we MUST invoke it on
+    // unmount or when the commands change. Otherwise the palette
+    // accumulates duplicate entries (e.g. in StrictMode the effect
+    // runs twice and we'd register twice without ever unregistering).
     return registerMany([...storefrontCommands, ...adminCommands]);
   }, [registerMany, navigate, isAdmin]);
 

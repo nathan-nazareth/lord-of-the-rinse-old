@@ -178,10 +178,15 @@ export async function dispatchNotification(orderId: string): Promise<void> {
       const rawText = await response.text().catch(() => 'Unknown error');
       // Sanitize Web3Forms' response body before persisting it as
       // `lastError`. The downstream email provider has been known to
-      // echo back the submitted access_key / replyto in 4xx responses,
-      // which would otherwise leak into the admin UI and logs.
+      // echo back the submitted access_key / secret / replyto in 4xx
+      // responses, which would otherwise leak into the admin UI and
+      // logs.
       const sanitized = rawText
-        .replace(/access_key["'\s:=]+[^"'\s,}&]+/gi, 'access_key=[redacted]')
+        .replace(
+          /\baccess[-_]?key\b["'\s:=]+[^"'\s,}&<]+/gi,
+          'access_key=[redacted]',
+        )
+        .replace(/\bsecret\b["'\s:=]+[^"'\s,}&<]+/gi, 'secret=[redacted]')
         .replace(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g, '[email]')
         .slice(0, 200);
       throw new Error(`Web3Forms ${response.status}: ${sanitized}`);

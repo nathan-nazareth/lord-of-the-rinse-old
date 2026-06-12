@@ -81,7 +81,12 @@ variantsRoutes.get('/:id', async (c) => {
 
 // Create variant with attribute references
 variantsRoutes.post('/', async (c) => {
-  const body = await c.req.json();
+  let body: unknown;
+  try {
+    body = await c.req.json();
+  } catch {
+    return c.json({ error: 'Invalid JSON body' }, 400);
+  }
   const parsed = createVariantSchema.safeParse(body);
 
   if (!parsed.success) {
@@ -111,28 +116,40 @@ variantsRoutes.post('/', async (c) => {
     return c.json({ error: 'One or more attribute IDs are invalid' }, 400);
   }
 
-  // Wrap the variant + attribute-link inserts in a single transaction so a
-  // failure on the second insert can't leave a half-created variant with
-  // no attributes visible to the storefront.
-  const result = await db.transaction(async (tx) => {
-    const [created] = await tx
-      .insert(soapVariants)
-      .values({ name, slug, unitPrice })
-      .returning();
-    if (!created) {
-      throw new Error('variant_insert_returned_no_row');
-    }
-    await tx.insert(variantAttributes).values(
-      attributes.map((a) => ({
-        variantId: created.id,
-        attributeId: a.attributeId,
-        value: a.value,
-      })),
-    );
-    return { ...created, attributes };
-  });
+  try {
+    // Wrap the variant + attribute-link inserts in a single transaction so a
+    // failure on the second insert can't leave a half-created variant with
+    // no attributes visible to the storefront.
+    const result = await db.transaction(async (tx) => {
+      const [created] = await tx
+        .insert(soapVariants)
+        .values({ name, slug, unitPrice })
+        .returning();
+      if (!created) {
+        throw new Error('variant_insert_returned_no_row');
+      }
+      await tx.insert(variantAttributes).values(
+        attributes.map((a) => ({
+          variantId: created.id,
+          attributeId: a.attributeId,
+          value: a.value,
+        })),
+      );
+      return { ...created, attributes };
+    });
 
-  return c.json({ variant: result }, 201);
+    return c.json({ variant: result }, 201);
+  } catch (err) {
+    // The unique-slug check above is racy; a concurrent insert can still
+    // win and surface a constraint violation. Map it to a clean 409
+    // instead of a generic 500.
+    const code = (err as { code?: string })?.code;
+    if (code === 'SQLITE_CONSTRAINT_UNIQUE' || code === '23505') {
+      return c.json({ error: 'A variant with this slug already exists' }, 409);
+    }
+    console.error('[variants] create failed:', err);
+    return c.json({ error: 'Failed to create variant' }, 500);
+  }
 });
 
 // Update variant (name, slug, price, enabled, archived, attributes)
@@ -140,7 +157,12 @@ variantsRoutes.patch('/:id', async (c) => {
   const id = c.req.param('id');
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id))
     return c.json({ error: 'Invalid ID format' }, 400);
-  const body = await c.req.json();
+  let body: unknown;
+  try {
+    body = await c.req.json();
+  } catch {
+    return c.json({ error: 'Invalid JSON body' }, 400);
+  }
   const parsed = updateVariantSchema.safeParse(body);
 
   if (!parsed.success) {
@@ -149,84 +171,98 @@ variantsRoutes.patch('/:id', async (c) => {
 
   const { attributes: newAttrs, ...variantFields } = parsed.data;
 
-  // Do existence / slug / attribute-id checks and the mutation inside a
-  // single transaction so a concurrent DELETE can't race the read.
-  const result = await db.transaction(async (tx) => {
-    const [existing] = await tx
-      .select()
-      .from(soapVariants)
-      .where(eq(soapVariants.id, id))
-      .for('update');
-
-    if (!existing) {
-      return { notFound: true as const };
-    }
-
-    // Check for duplicate slug if slug is being changed
-    if (variantFields.slug && variantFields.slug !== existing.slug) {
-      const [slugConflict] = await tx
-        .select({ id: soapVariants.id })
+  try {
+    // Do existence / slug / attribute-id checks and the mutation inside a
+    // single transaction so a concurrent DELETE can't race the read.
+    const result = await db.transaction(async (tx) => {
+      const [existing] = await tx
+        .select()
         .from(soapVariants)
-        .where(eq(soapVariants.slug, variantFields.slug));
-      if (slugConflict) {
-        return { slugConflict: true as const };
+        .where(eq(soapVariants.id, id))
+        .for('update');
+
+      if (!existing) {
+        return { notFound: true as const };
       }
-    }
 
-    // If attributes are provided, validate they exist
-    if (newAttrs) {
-      const attrIds = newAttrs.map((a) => a.attributeId);
-      const foundAttrs = await tx
-        .select({ id: catalogAttributes.id })
-        .from(catalogAttributes)
-        .where(inArray(catalogAttributes.id, attrIds));
-      if (foundAttrs.length !== attrIds.length) {
-        return { invalidAttributes: true as const };
+      // Check for duplicate slug if slug is being changed
+      if (variantFields.slug && variantFields.slug !== existing.slug) {
+        const [slugConflict] = await tx
+          .select({ id: soapVariants.id })
+          .from(soapVariants)
+          .where(eq(soapVariants.slug, variantFields.slug));
+        if (slugConflict) {
+          return { slugConflict: true as const };
+        }
       }
+
+      // If attributes are provided, validate they exist
+      if (newAttrs) {
+        const attrIds = newAttrs.map((a) => a.attributeId);
+        const foundAttrs = await tx
+          .select({ id: catalogAttributes.id })
+          .from(catalogAttributes)
+          .where(inArray(catalogAttributes.id, attrIds));
+        if (foundAttrs.length !== attrIds.length) {
+          return { invalidAttributes: true as const };
+        }
+      }
+
+      const [updated] = await tx
+        .update(soapVariants)
+        .set({
+          ...variantFields,
+          updatedAt: sql`now()`,
+        })
+        .where(eq(soapVariants.id, id))
+        .returning();
+
+      if (!updated) {
+        // The row was locked and visible, so this would only happen if
+        // the column list got out of sync with the schema. Surface it
+        // as 404 rather than 500 to keep the contract honest.
+        return { notFound: true as const };
+      }
+
+      let finalAttrs: { attributeId: string; value: string }[] = await tx
+        .select({
+          attributeId: variantAttributes.attributeId,
+          value: variantAttributes.value,
+        })
+        .from(variantAttributes)
+        .where(eq(variantAttributes.variantId, id));
+
+      if (newAttrs) {
+        await tx.delete(variantAttributes).where(eq(variantAttributes.variantId, id));
+        await tx.insert(variantAttributes).values(
+          newAttrs.map((a) => ({
+            variantId: id,
+            attributeId: a.attributeId,
+            value: a.value,
+          })),
+        );
+        finalAttrs = newAttrs;
+      }
+
+      return { variant: { ...updated, attributes: finalAttrs } };
+    });
+
+    if ('notFound' in result) return c.json({ error: 'Variant not found' }, 404);
+    if ('slugConflict' in result)
+      return c.json({ error: 'A variant with this slug already exists' }, 409);
+    if ('invalidAttributes' in result)
+      return c.json({ error: 'One or more attribute IDs are invalid' }, 400);
+    return c.json(result);
+  } catch (err) {
+    // Race between the SELECT and the UPDATE can still surface a unique
+    // constraint violation. Map to 409 instead of leaking a 500.
+    const code = (err as { code?: string })?.code;
+    if (code === 'SQLITE_CONSTRAINT_UNIQUE' || code === '23505') {
+      return c.json({ error: 'A variant with this slug already exists' }, 409);
     }
-
-    const [updated] = await tx
-      .update(soapVariants)
-      .set({
-        ...variantFields,
-        updatedAt: sql`now()`,
-      })
-      .where(eq(soapVariants.id, id))
-      .returning();
-
-    if (!updated) {
-      throw new Error('variant_update_returned_no_row');
-    }
-
-    let finalAttrs: { attributeId: string; value: string }[] = await tx
-      .select({
-        attributeId: variantAttributes.attributeId,
-        value: variantAttributes.value,
-      })
-      .from(variantAttributes)
-      .where(eq(variantAttributes.variantId, id));
-
-    if (newAttrs) {
-      await tx.delete(variantAttributes).where(eq(variantAttributes.variantId, id));
-      await tx.insert(variantAttributes).values(
-        newAttrs.map((a) => ({
-          variantId: id,
-          attributeId: a.attributeId,
-          value: a.value,
-        })),
-      );
-      finalAttrs = newAttrs;
-    }
-
-    return { variant: { ...updated, attributes: finalAttrs } };
-  });
-
-  if ('notFound' in result) return c.json({ error: 'Variant not found' }, 404);
-  if ('slugConflict' in result)
-    return c.json({ error: 'A variant with this slug already exists' }, 409);
-  if ('invalidAttributes' in result)
-    return c.json({ error: 'One or more attribute IDs are invalid' }, 400);
-  return c.json(result);
+    console.error('[variants] update failed:', err);
+    return c.json({ error: 'Failed to update variant' }, 500);
+  }
 });
 
 // Archive variant (soft delete)

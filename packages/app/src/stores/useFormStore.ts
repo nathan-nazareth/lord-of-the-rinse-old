@@ -85,14 +85,19 @@ export const useFormStore = create<FormState & FormActions>()(
                 const n = Number(s.size);
                 s.size = Number.isFinite(n) ? n : null;
               }
-              if (typeof s.visited !== 'boolean') {
-                s.visited = Boolean(s.visited);
+              // Use strict `===` so a stray truthy value (e.g. `"false"`,
+              // `0`, `1`, an object) doesn't get coerced into `true`. A
+              // hand-crafted localStorage payload could otherwise flip
+              // the form into a "visited" state and skip the landing
+              // page on next load.
+              if (s.visited !== true && s.visited !== false) {
+                s.visited = false;
               }
-              if (typeof s.hasLavenderPieces !== 'boolean') {
-                s.hasLavenderPieces = Boolean(s.hasLavenderPieces);
+              if (s.hasLavenderPieces !== true && s.hasLavenderPieces !== false) {
+                s.hasLavenderPieces = false;
               }
               if (typeof s.quantity !== 'string') {
-                s.quantity = String(s.quantity ?? '');
+                s.quantity = '';
               }
             }
             return parsed as { state: unknown; version?: number };

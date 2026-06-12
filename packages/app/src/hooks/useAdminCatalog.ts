@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAdminStore } from '@/stores/useAdminStore';
+import type { AdminDiscount, AdminOptions, AdminProduct } from '@/types/admin';
 
 const API_BASE = '/api/admin';
 

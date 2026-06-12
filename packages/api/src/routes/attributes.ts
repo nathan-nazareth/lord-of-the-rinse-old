@@ -61,7 +61,12 @@ attributesRoutes.get('/:id', async (c) => {
 
 // Create attribute
 attributesRoutes.post('/', async (c) => {
-  const body = await c.req.json();
+  let body: unknown;
+  try {
+    body = await c.req.json();
+  } catch {
+    return c.json({ error: 'Invalid JSON body' }, 400);
+  }
   const parsed = createAttributeSchema.safeParse(body);
 
   if (!parsed.success) {
@@ -70,27 +75,39 @@ attributesRoutes.post('/', async (c) => {
 
   const { type, name, slug, displayOrder } = parsed.data;
 
-  // Check for duplicate slug
-  const [existing] = await db
-    .select({ id: catalogAttributes.id })
-    .from(catalogAttributes)
-    .where(eq(catalogAttributes.slug, slug));
+  try {
+    // Check for duplicate slug
+    const [existing] = await db
+      .select({ id: catalogAttributes.id })
+      .from(catalogAttributes)
+      .where(eq(catalogAttributes.slug, slug));
 
-  if (existing) {
-    return c.json({ error: 'An attribute with this slug already exists' }, 409);
-  }
+    if (existing) {
+      return c.json({ error: 'An attribute with this slug already exists' }, 409);
+    }
 
-  const [created] = await db
-    .insert(catalogAttributes)
-    .values({ type, name, slug, displayOrder })
-    .returning();
+    const [created] = await db
+      .insert(catalogAttributes)
+      .values({ type, name, slug, displayOrder })
+      .returning();
 
-  if (!created) {
-    console.error('[attributes] insert returned no row');
+    if (!created) {
+      console.error('[attributes] insert returned no row');
+      return c.json({ error: 'Failed to create attribute' }, 500);
+    }
+
+    return c.json({ attribute: created }, 201);
+  } catch (err) {
+    // A race between the SELECT and the INSERT can still produce a
+    // SQLITE_CONSTRAINT_UNIQUE / 23505 even though we just checked.
+    // Surface it as a 409 instead of a misleading 500.
+    const code = (err as { code?: string })?.code;
+    if (code === 'SQLITE_CONSTRAINT_UNIQUE' || code === '23505') {
+      return c.json({ error: 'An attribute with this slug already exists' }, 409);
+    }
+    console.error('[attributes] create failed:', err);
     return c.json({ error: 'Failed to create attribute' }, 500);
   }
-
-  return c.json({ attribute: created }, 201);
 });
 
 // Update attribute

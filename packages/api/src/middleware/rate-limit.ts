@@ -71,10 +71,16 @@ function getKey(
 function evictIfFull(): void {
   if (buckets.size < MAX_BUCKETS) return;
   const now = Date.now();
-  // First pass: drop expired entries.
+  // First pass: collect expired keys, then delete in a second pass.
+  // Mixing iteration and mutation is technically safe on `Map` per
+  // spec, but collecting first is clearer and avoids any chance of a
+  // future spec-quirk (or a polyfill) re-visiting an already-deleted
+  // entry.
+  const expired: string[] = [];
   for (const [key, bucket] of buckets) {
-    if (bucket.resetAt < now) buckets.delete(key);
+    if (bucket.resetAt < now) expired.push(key);
   }
+  for (const key of expired) buckets.delete(key);
   // Still over the cap? Drop the entries that expire soonest.
   if (buckets.size >= MAX_BUCKETS) {
     const sorted = Array.from(buckets.entries()).sort((a, b) => a[1].resetAt - b[1].resetAt);
