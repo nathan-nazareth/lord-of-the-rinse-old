@@ -185,11 +185,9 @@ export const SoapForm: React.FC<SoapFormProps> = ({
   const setVisited = useFormStore((s) => s.setVisited);
   const clear = useFormStore((s) => s.clear);
 
-  const { totalPrice } = useSoapPricing(scent, size ?? 0, hasLavenderPieces);
+  const { totalPrice: formulaPrice } = useSoapPricing(scent, size ?? 0, hasLavenderPieces);
   const { data: catalog } = useCatalog();
 
-  // Resolve the real catalog variant UUID for the currently selected
-  // attributes so the server's checkout handler can match it against the DB.
   const selectedAttributes = useMemo<Record<string, string | null>>(
     () => ({
       shape: shape ?? null,
@@ -199,15 +197,17 @@ export const SoapForm: React.FC<SoapFormProps> = ({
     }),
     [shape, scent, color, size],
   );
-  const { matchedVariant } = useVariantPrice(
+  const { unitPrice: catalogPrice, matchedVariant } = useVariantPrice(
     selectedAttributes,
     catalog?.variants ?? [],
     catalog?.attributes ?? {},
   );
+  const totalPrice = matchedVariant && catalogPrice > 0 ? catalogPrice : formulaPrice;
   const matchedVariantId = matchedVariant?.id ?? null;
 
+  const discountTiers = catalog?.settings?.discount_tiers;
   const cartSubtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const { total: cartTotal } = calculateDiscount(cartSubtotal, cart.totalQuantity);
+  const { total: cartTotal } = calculateDiscount(cartSubtotal, cart.totalQuantity, discountTiers);
 
   const shapeSectionRef = useRef<HTMLDivElement>(null);
   const flavorSectionRef = useRef<HTMLDivElement>(null);
@@ -739,6 +739,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({
                     const { discountPercentage, discountAmount, total } = calculateDiscount(
                       subtotal,
                       totalQty,
+                      discountTiers,
                     );
 
                     return (
@@ -769,10 +770,16 @@ export const SoapForm: React.FC<SoapFormProps> = ({
                         ) : (
                           <div className="flex justify-between text-orange-600 text-sm">
                             <span>
-                              Add{' '}
-                              {totalQty < 2
-                                ? `${2 - totalQty} more for 10% off`
-                                : `${4 - totalQty} more for 15% off`}
+                              {(() => {
+                                const tiers = discountTiers ?? [
+                                  { minItems: 2, percent: 10 },
+                                  { minItems: 4, percent: 15 },
+                                ];
+                                const sorted = [...tiers].sort((a, b) => a.minItems - b.minItems);
+                                const nextTier = sorted.find((t) => totalQty < t.minItems);
+                                if (!nextTier) return null;
+                                return `Add ${nextTier.minItems - totalQty} more for ${nextTier.percent}% off`;
+                              })()}
                             </span>
                           </div>
                         )}

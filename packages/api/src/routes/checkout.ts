@@ -1,5 +1,6 @@
 import { db, sql } from '@lotr/db';
 import {
+  commerceSettings,
   notificationAttempts,
   orderLines,
   orders,
@@ -18,6 +19,19 @@ const checkoutRoutes = new Hono();
 checkoutRoutes.use('/*', rateLimit({ windowMs: 60_000, max: 10 }));
 
 type TxClient = Parameters<Parameters<typeof db.transaction>[0]>[0];
+
+interface DiscountTier {
+  minItems: number;
+  percent: number;
+}
+
+function applyDiscountTiers(subtotalCents: number, totalQuantity: number, tiers: DiscountTier[]) {
+  const sorted = [...tiers].sort((a, b) => b.minItems - a.minItems);
+  const applicable = sorted.find((t) => totalQuantity >= t.minItems);
+  if (!applicable) return { discountPercent: 0, discountCents: 0, totalCents: subtotalCents };
+  const discountCents = Math.round(subtotalCents * (applicable.percent / 100));
+  return { discountPercent: applicable.percent, discountCents, totalCents: subtotalCents - discountCents };
+}
 
 /**
  * Get current stock level for a variant (sum of all movements).
@@ -148,7 +162,8 @@ checkoutRoutes.post('/', async (c) => {
         return { error: invalidItems } as const;
       }
 
-      let totalCents = 0;
+      let subtotalCents = 0;
+      let totalQuantity = 0;
       for (const item of items) {
         const variant = variantMap.get(item.variantId);
         if (!variant) continue;
@@ -156,8 +171,23 @@ checkoutRoutes.post('/', async (c) => {
         if (!Number.isFinite(price) || price < 0) {
           return { error: [`Variant "${variant.name}" has an invalid price`] } as const;
         }
-        totalCents += Math.round(price * 100) * item.quantity;
+        subtotalCents += Math.round(price * 100) * item.quantity;
+        totalQuantity += item.quantity;
       }
+
+      const [discountRow] = await tx
+        .select({ value: commerceSettings.value })
+        .from(commerceSettings)
+        .where(eq(commerceSettings.key, 'discount_tiers'))
+        .limit(1);
+      let discountTiers: DiscountTier[] = [];
+      if (discountRow?.value) {
+        try {
+          const parsed = JSON.parse(discountRow.value);
+          if (Array.isArray(parsed)) discountTiers = parsed;
+        } catch { /* no discount */ }
+      }
+      const { totalCents } = applyDiscountTiers(subtotalCents, totalQuantity, discountTiers);
       const total = (totalCents / 100).toFixed(2);
 
       const reference = await generateOrderReferenceTx(tx);

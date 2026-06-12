@@ -33,11 +33,13 @@ const CheckoutPage: React.FC<{
   const { data: catalog } = useCatalog();
   const currency = resolveCurrencySymbol(catalog?.settings?.currency);
 
+  const discountTiers = catalog?.settings?.discount_tiers;
   const rawSubtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const subtotal = Number.isFinite(rawSubtotal) ? rawSubtotal : 0;
   const { discountPercentage, discountAmount, total } = calculateDiscount(
     subtotal,
     cart.totalQuantity,
+    discountTiers,
   );
 
   const handleSubmit = async (e: React.FormEvent) => {

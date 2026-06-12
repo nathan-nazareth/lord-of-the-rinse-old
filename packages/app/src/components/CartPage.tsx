@@ -48,11 +48,13 @@ const CartPage: React.FC<{
 }) => {
   const { data: catalog } = useCatalog();
   const currency = resolveCurrencySymbol(catalog?.settings?.currency);
+  const discountTiers = catalog?.settings?.discount_tiers;
   const subtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const safesubtotal = Number.isFinite(subtotal) ? subtotal : 0;
   const { discountPercentage, discountAmount, total } = calculateDiscount(
     safesubtotal,
     cart.totalQuantity,
+    discountTiers,
   );
 
   if (justOrdered && cart.items.length === 0) {

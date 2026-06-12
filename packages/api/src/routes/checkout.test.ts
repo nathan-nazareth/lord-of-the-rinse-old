@@ -158,6 +158,20 @@ function setupInsertChain(result: unknown) {
   });
 }
 
+function setupDiscountTiersChain(tiers?: Array<{ minItems: number; percent: number }>) {
+  const value = tiers ? JSON.stringify(tiers) : null;
+  mocks.txStub.select.mockReturnValueOnce({
+    from: vi.fn(() => ({
+      where: vi.fn(() => ({
+        limit: vi.fn(() => ({
+          then: (onFulfilled: (v: unknown) => unknown) =>
+            Promise.resolve(value ? [{ value }] : []).then(onFulfilled),
+        })),
+      })),
+    })),
+  });
+}
+
 function setupStockLevelChain(stockLevel: number) {
   // For the stock level query: select({ total: ... }).from(stockMovements).where(...)
   mocks.txStub.select.mockReturnValueOnce({
@@ -265,7 +279,10 @@ describe('POST /api/checkout', () => {
       },
     ]);
 
-    // 1. Select for reference generation (no existing orders today)
+    // 1. Discount tiers (empty — no discount)
+    setupDiscountTiersChain();
+
+    // 2. Select for reference generation (no existing orders today)
     setupSelectChain([]);
 
     // 2. Insert order (returning)
@@ -309,6 +326,9 @@ describe('POST /api/checkout', () => {
     setupVariantLookup([
       { id: variantId, name: 'Lavender Dreams', unitPrice: '8.66', enabled: true, archived: false },
     ]);
+
+    // Discount tiers (empty)
+    setupDiscountTiersChain();
 
     // Reference generation: one existing order
     setupSelectChain([{ reference: 'LOR-20260523-0001' }]);
@@ -366,6 +386,8 @@ describe('POST /api/checkout', () => {
     ]);
 
     const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    // Discount tiers (empty)
+    setupDiscountTiersChain();
     // Max reference today is LOR-<today>-0005
     setupSelectChain([{ reference: `LOR-${today}-0005` }]);
 
@@ -484,6 +506,8 @@ describe('POST /api/checkout', () => {
       },
     ]);
 
+    // Discount tiers (empty)
+    setupDiscountTiersChain();
     // Reference generation
     setupSelectChain([]);
     // Order insert — server computes total from variant price (12.99 * 1)
