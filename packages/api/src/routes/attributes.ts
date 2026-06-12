@@ -97,7 +97,14 @@ attributesRoutes.post('/', async (c) => {
 attributesRoutes.patch('/:id', async (c) => {
   const id = c.req.param('id');
   if (!UUID_RE.test(id)) return c.json({ error: 'Invalid ID format' }, 400);
-  const body = await c.req.json();
+  // Parse the body BEFORE entering the database try/catch so a malformed
+  // JSON payload is reported as 400, not "Failed to update attribute" 500.
+  let body: unknown;
+  try {
+    body = await c.req.json();
+  } catch {
+    return c.json({ error: 'Invalid JSON body' }, 400);
+  }
   const parsed = updateAttributeSchema.safeParse(body);
 
   if (!parsed.success) {

@@ -21,14 +21,17 @@ async function parseApiError(response: Response): Promise<string> {
           return parsed.error;
         }
       } catch (err) {
+        // Non-JSON error body. console.warn (not console.debug) so the
+        // failure is visible in devtools by default — the dev was
+        // expecting a structured {error:string} and didn't get one.
         if (import.meta.env.DEV) {
-          console.debug('[useAdminCatalog] non-JSON error body', err);
+          console.warn(`[useAdminCatalog] non-JSON error body for HTTP ${response.status}:`, err);
         }
       }
     }
   } catch (err) {
     if (import.meta.env.DEV) {
-      console.debug('[useAdminCatalog] error reading error body', err);
+      console.warn(`[useAdminCatalog] could not read error body for HTTP ${response.status}:`, err);
     }
   }
   return `HTTP ${response.status}`;
@@ -199,7 +202,13 @@ export function useUpdateDiscount() {
   const authToken = useAdminStore((s) => s.authToken);
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: Partial<Pick<AdminDiscount, 'percentage' | 'description' | 'active'>> }) =>
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: number;
+      data: Partial<Pick<AdminDiscount, 'percentage' | 'description' | 'active'>>;
+    }) =>
       fetchWithAuth<AdminDiscount>(
         `${API_BASE}/discounts/${id}`,
         { method: 'PUT', body: JSON.stringify(data) },

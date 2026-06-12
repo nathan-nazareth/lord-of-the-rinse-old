@@ -26,9 +26,7 @@ export const FallbackUI: React.FC<FallbackProps> = ({ error, onRetry }) => {
   // Only surface the raw error message in development. In production we
   // show a generic line so we don't leak server URLs, stack frames, or
   // other internals to end users.
-  const displayedMessage = import.meta.env.DEV
-    ? sanitizeMessage(error?.message)
-    : null;
+  const displayedMessage = import.meta.env.DEV ? sanitizeMessage(error?.message) : null;
 
   return (
     <div className="min-h-screen bg-parchment-100 flex items-center justify-center p-4">

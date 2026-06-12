@@ -30,7 +30,12 @@ function sanitizePersisted(raw: unknown): Partial<RateLimitState> | null {
   if (typeof obj.count === 'number' && Number.isFinite(obj.count) && obj.count >= 0) {
     out.count = Math.floor(obj.count);
   }
-  if (typeof obj.windowStart === 'number' && Number.isFinite(obj.windowStart) && obj.windowStart >= 0 && obj.windowStart <= Date.now() + 60_000) {
+  if (
+    typeof obj.windowStart === 'number' &&
+    Number.isFinite(obj.windowStart) &&
+    obj.windowStart >= 0 &&
+    obj.windowStart <= Date.now() + 60_000
+  ) {
     out.windowStart = obj.windowStart;
   }
   if (typeof obj.lastSubmission === 'number' && Number.isFinite(obj.lastSubmission)) {

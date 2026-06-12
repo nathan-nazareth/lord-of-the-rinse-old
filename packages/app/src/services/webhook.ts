@@ -88,8 +88,7 @@ export async function submitCartToWebhook(
 
   // Format prices as fixed-decimal strings so very large subtotals don't
   // // bleed into scientific notation when they hit the email body.
-  const fmtMoney = (n: number): string =>
-    Number.isFinite(n) ? n.toFixed(2) : '0.00';
+  const fmtMoney = (n: number): string => (Number.isFinite(n) ? n.toFixed(2) : '0.00');
 
   const web3FormsPayload: Record<string, string | number | undefined> = {
     Name: safeName,

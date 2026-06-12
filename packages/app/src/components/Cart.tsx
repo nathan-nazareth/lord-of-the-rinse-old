@@ -219,9 +219,19 @@ export const Cart: React.FC<CartProps> = ({
     return Math.ceil((WINDOW_MS - elapsed) / 1000);
   }, [lastSubmission]);
 
-  // Auto-open the rate limit modal when the user gets blocked.
+  // Auto-open the rate limit modal ONLY when the cooldown first becomes
+  // active. Tracking the previous value in a ref lets us detect the rising
+  // edge — without it, the effect would re-fire every second as
+  // `cooldownRemaining` ticks down and re-pop the modal the user just
+  // dismissed.
+  const prevCooldownRef = React.useRef<number | null>(null);
   React.useEffect(() => {
-    if (cooldownRemaining !== null) setShowRateLimitModal(true);
+    const wasActive = prevCooldownRef.current !== null;
+    const isActive = cooldownRemaining !== null;
+    if (!wasActive && isActive) {
+      setShowRateLimitModal(true);
+    }
+    prevCooldownRef.current = cooldownRemaining;
   }, [cooldownRemaining]);
 
   // Auto-close the modal once the cooldown has fully expired. We anchor the
@@ -339,7 +349,27 @@ export const Cart: React.FC<CartProps> = ({
       }
 
       if (response.status >= 400 && response.status < 500) {
-        setErrorMessage('Order failed. Please try again.');
+        // Surface the server's structured error so the user can see WHY
+        // their order failed (validation, out of stock, rate limit, etc.)
+        // instead of a generic "try again" message. Cap the body so a
+        // pathological 4xx response can't OOM the modal.
+        let serverMessage = 'Order failed. Please try again.';
+        try {
+          const text = await response.text();
+          if (text.length > 0 && text.length < 4096) {
+            try {
+              const parsed = JSON.parse(text) as { error?: unknown; details?: unknown };
+              if (typeof parsed?.error === 'string' && parsed.error.length > 0) {
+                serverMessage = parsed.error;
+              }
+            } catch {
+              // Non-JSON body; keep the generic message.
+            }
+          }
+        } catch {
+          // Body read failed; keep the generic message.
+        }
+        setErrorMessage(serverMessage);
         return;
       }
 

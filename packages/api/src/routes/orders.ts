@@ -4,6 +4,7 @@ import { statusTransitionSchema, validTransitions } from '@lotr/shared';
 import { and, desc, eq, type SQL } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { dispatchNotification } from '../lib/notifications';
+import { rateLimit } from '../middleware/rate-limit';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -158,8 +159,13 @@ ordersRoutes.patch('/:id/status', async (c) => {
   }
 });
 
-// Retry notification dispatch for an order
-ordersRoutes.post('/:id/retry-notification', async (c) => {
+// Retry notification dispatch for an order. Tight rate limit (5/min)
+// because the endpoint is auth-gated but otherwise would let a token
+// holder hammer Web3Forms with a single order's retries.
+ordersRoutes.post(
+  '/:id/retry-notification',
+  rateLimit({ windowMs: 60_000, max: 5 }),
+  async (c) => {
   const id = c.req.param('id');
   if (!UUID_RE.test(id)) return c.json({ error: 'Invalid ID format' }, 400);
 
@@ -224,6 +230,7 @@ ordersRoutes.post('/:id/retry-notification', async (c) => {
     console.error('[orders] retry-notification failed:', err);
     return c.json({ error: 'Failed to retry notification' }, 500);
   }
-});
+  },
+);
 
 export default ordersRoutes;

@@ -107,6 +107,30 @@ class JsonBodyError extends Error {
   }
 }
 
+/**
+ * Derive a stable 32-bit advisory-lock key from a variant UUID. Two
+ * distinct variants will land on different keys with overwhelming
+ * probability (the hash is lossy but spread enough for a per-variant
+ * mutex). The high bit is masked off so the result is a positive
+ * signed 32-bit int, matching Postgres' pg_advisory_xact_lock(int)
+ * signature.
+ */
+function computeVariantAdvisoryKey(variantId: string): number {
+  // Replace dashes with empty so the first 8 hex chars cover the high bits.
+  const hex = variantId.replace(/-/g, '').slice(0, 8);
+  const n = Number.parseInt(hex, 16);
+  if (!Number.isFinite(n)) {
+    // Fall back to a string hash for malformed UUIDs; the lock is only
+    // contended per-variant so an occasional collision is harmless.
+    let h = 0;
+    for (let i = 0; i < variantId.length; i += 1) {
+      h = (h * 31 + variantId.charCodeAt(i)) | 0;
+    }
+    return h & 0x7fffffff;
+  }
+  return n & 0x7fffffff;
+}
+
 checkoutRoutes.post('/', async (c) => {
   let body: unknown;
   try {
@@ -211,6 +235,19 @@ checkoutRoutes.post('/', async (c) => {
       for (const item of items) {
         const variant = variantMap.get(item.variantId);
         if (!variant) continue;
+
+        // Lock the stock ledger for THIS variant with a namespaced
+        // Postgres advisory lock so two concurrent checkouts can't both
+        // observe the same starting balance and over-allocate. The
+        // `for('update')` row lock on `soapVariants` above doesn't
+        // cover the stock_movements sum, so without this guard two
+        // requests for the same variant would each read `currentStock=5`
+        // and each try to allocate the full 5. The advisory key is
+        // derived from the variant UUID's first 4 bytes folded into a
+        // signed 32-bit int — collision-resistant enough for a per-variant
+        // mutex and well within Postgres' 32-bit advisory lock range.
+        const advisory = computeVariantAdvisoryKey(item.variantId);
+        await tx.execute(drizzleSql`SELECT pg_advisory_xact_lock(${advisory})`);
 
         const currentStock = await getStockLevelTx(tx, item.variantId);
         const allocatedFromStock = Math.max(0, Math.min(currentStock, item.quantity));

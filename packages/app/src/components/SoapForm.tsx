@@ -766,6 +766,13 @@ export const SoapForm: React.FC<SoapFormProps> = ({
                               <span>Total</span>
                               <span>Rs. {total}</span>
                             </div>
+                            {/* Only nudge from 10% → 15%; the 0% → 10%
+                                case is handled by the outer `else`. */}
+                            {discountPercentage < 15 ? (
+                              <p className="text-orange-600 text-xs text-center mt-2">
+                                Add {4 - totalQty} more for 15% off
+                              </p>
+                            ) : null}
                           </div>
                         ) : (
                           <div className="flex justify-between text-orange-600 text-sm">
@@ -777,6 +784,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({
                                 ];
                                 const sorted = [...tiers].sort((a, b) => a.minItems - b.minItems);
                                 const nextTier = sorted.find((t) => totalQty < t.minItems);
+                                // Already at the top tier — nothing to nudge toward.
                                 if (!nextTier) return null;
                                 return `Add ${nextTier.minItems - totalQty} more for ${nextTier.percent}% off`;
                               })()}

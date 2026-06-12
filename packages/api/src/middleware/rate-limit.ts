@@ -122,7 +122,12 @@ function startSweepTimer(): void {
   sweepTimer.unref();
 }
 
-startSweepTimer();
+// Don't start the sweep timer in test runs — vitest forks per-file and
+// the timer adds zero value when the middleware itself short-circuits
+// to `next()` below.
+if (process.env.NODE_ENV !== 'test' && process.env.VITEST !== 'true') {
+  startSweepTimer();
+}
 
 export function resetRateLimit(): void {
   buckets.clear();

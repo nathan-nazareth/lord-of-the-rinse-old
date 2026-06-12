@@ -19,6 +19,15 @@ function normalizeActive(raw: unknown): number {
   return 1;
 }
 
+// Whitelist the input types we know how to normalise. Rejecting `null`,
+// arrays, objects, etc. up front stops a hand-crafted `{ active: null }`
+// from silently turning a discount ON (because `normalizeActive(null)`
+// falls through to the "default to active" branch).
+function isNormalizableActive(raw: unknown): raw is number | boolean | string {
+  const t = typeof raw;
+  return t === 'number' || t === 'string' || t === 'boolean';
+}
+
 interface RawDiscountBody {
   percentage?: unknown;
   description?: unknown;
@@ -74,7 +83,18 @@ discountsRoutes.post('/', async (c) => {
     return c.json({ error: `Percentage must be an integer between 0 and ${MAX_PERCENTAGE}` }, 422);
   }
 
-  const active = body.active === undefined ? 1 : normalizeActive(body.active);
+  const active =
+    body.active === undefined
+      ? 1
+      : isNormalizableActive(body.active)
+        ? normalizeActive(body.active)
+        : null;
+  if (active === null) {
+    return c.json(
+      { error: 'active must be a boolean, number, or string ("true"/"false")' },
+      422,
+    );
+  }
 
   const now = new Date().toISOString();
   const result = await adminDb
@@ -144,9 +164,17 @@ discountsRoutes.put('/:id', async (c) => {
   };
   if (body.percentage !== undefined) patch.percentage = body.percentage;
   if (trimmedDescription !== undefined) patch.description = trimmedDescription;
+  let activeOverride: number | null = null;
   if (body.active !== undefined) {
-    patch.active = normalizeActive(body.active);
+    if (!isNormalizableActive(body.active)) {
+      return c.json(
+        { error: 'active must be a boolean, number, or string ("true"/"false")' },
+        422,
+      );
+    }
+    activeOverride = normalizeActive(body.active);
   }
+  if (activeOverride !== null) patch.active = activeOverride;
 
   const result = await adminDb
     .update(adminDiscounts)

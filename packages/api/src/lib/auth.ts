@@ -4,7 +4,6 @@ import { db } from '@lotr/db';
 import * as schema from '@lotr/db/schema';
 import { betterAuth } from 'better-auth';
 import { APIError, createAuthMiddleware } from 'better-auth/api';
-import { countAdminUsers } from './user-repository';
 
 // better-auth generates a random secret at boot if you don't set one. That
 // invalidates all sessions on every restart, so we require an explicit secret
@@ -72,12 +71,17 @@ export const auth = betterAuth({
   hooks: {
     before: createAuthMiddleware(async (ctx) => {
       if (ctx.path === '/sign-up/email') {
-        const count = await countAdminUsers();
-        if (count > 0) {
-          throw new APIError('FORBIDDEN', {
-            message: 'Signup is closed. An admin user already exists.',
-          });
-        }
+        // The public-facing better-auth signup is for CUSTOMER accounts.
+        // Admin provisioning is handled out-of-band (HMAC token + ADMIN_PASSWORD
+        // for the operator panel). The previous gate keyed on
+        // `countAdminUsers() > 0`, but no public signup ever produces an
+        // admin (the `role` additionalField has `defaultValue: 'customer'`),
+        // so the count was perpetually zero and the gate never fired.
+        // Block all public signups outright to stop anonymous account spam.
+        throw new APIError('FORBIDDEN', {
+          message:
+            'Public sign-up is disabled. Please contact the store owner for an account.',
+        });
       }
     }),
   },

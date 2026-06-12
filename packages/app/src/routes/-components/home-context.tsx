@@ -223,7 +223,9 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
         }
 
         if (response.status >= 400 && response.status < 500) {
-          console.error(`[Checkout] API client error ${response.status}, not falling back to Web3Forms`);
+          console.error(
+            `[Checkout] API client error ${response.status}, not falling back to Web3Forms`,
+          );
           return fail();
         }
 
