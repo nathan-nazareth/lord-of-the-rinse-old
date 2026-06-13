@@ -1,4 +1,4 @@
-import type { MiddlewareHandler } from 'hono';
+import type { Context, MiddlewareHandler } from 'hono';
 
 interface Bucket {
   count: number;
@@ -8,7 +8,7 @@ interface Bucket {
 interface RateLimitOptions {
   windowMs: number;
   max: number;
-  keyBy?: (c: { req: { header: (name: string) => string | undefined } }) => string;
+  keyBy?: (c: Context) => string;
 }
 
 // Cap the bucket map to avoid unbounded growth between sweeps. When the cap
@@ -50,15 +50,15 @@ function resolveClientIp(
     // controlled.
     return parts[parts.length - 1] ?? 'unknown';
   }
-  if (realIp) return realIp;
+  // Only honor X-Real-IP when an explicit trusted-proxy allowlist is
+  // configured. Without it, the header is attacker-controlled and would
+  // let any client mint a fresh rate-limit bucket per request by
+  // sending `X-Real-IP: <random>`.
+  if (realIp && TRUSTED_PROXIES.length > 0) return realIp;
   return remoteAddr ?? 'unknown';
 }
 
-function getKey(
-  c: Parameters<MiddlewareHandler>[0],
-  prefix: string,
-  keyBy?: RateLimitOptions['keyBy'],
-): string {
+function getKey(c: Context, prefix: string, keyBy?: RateLimitOptions['keyBy']): string {
   if (keyBy) return `${prefix}:${keyBy(c)}`;
   const ip = resolveClientIp(
     c.env?.remoteAddr,
@@ -95,6 +95,14 @@ function check(
   windowMs: number,
 ): { allowed: boolean; retryAfter: number } {
   const now = Date.now();
+  // Cap-driven eviction: if the Map is well over the cap, drop a chunk of
+  // expired entries before we even look up the bucket. This guards against
+  // the case where the sweep timer is throttled (or paused) and the Map
+  // grows unboundedly under high-cardinality traffic.
+  if (buckets.size > MAX_BUCKETS) {
+    evictIfFull();
+  }
+
   const bucket = buckets.get(key);
 
   if (!bucket || bucket.resetAt < now) {
