@@ -760,8 +760,9 @@ export const SoapForm: React.FC<SoapFormProps> = ({
                     const qty = parseInt(quantity, 10);
                     const subtotal = totalPrice * qty;
                     const totalQty = qty + cart.totalQuantity;
+                    const combinedSubtotal = cartSubtotal + subtotal;
                     const { discountPercentage, discountAmount, total } = calculateDiscount(
-                      subtotal,
+                      combinedSubtotal,
                       totalQty,
                       discountTiers,
                     );
