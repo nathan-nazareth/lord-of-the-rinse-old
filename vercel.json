@@ -1,6 +1,7 @@
 {
   "framework": null,
   "version": 2,
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist"
+  "buildCommand": "cd packages/app && npx vite build",
+  "outputDirectory": "packages/app/dist",
+  "installCommand": "npm install"
 }
