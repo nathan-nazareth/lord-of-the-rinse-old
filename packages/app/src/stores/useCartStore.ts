@@ -168,15 +168,21 @@ export const useCartStore = create<CartState>()(
               return null;
             }
 
-            const updatedAt = (stateOrItems as { updatedAt?: unknown }).updatedAt;
+            // setItem() stamps `updatedAt` at the top level of the payload
+            // (alongside `state`/`version`). Look there first, then fall
+            // back to the legacy inside-state position for carts written
+            // by older builds.
+            const topUpdatedAt = (parsed as { updatedAt?: unknown }).updatedAt;
+            const legacyUpdatedAt = (stateOrItems as { updatedAt?: unknown }).updatedAt;
+            const updatedAt = typeof topUpdatedAt === 'number' ? topUpdatedAt : legacyUpdatedAt;
             if (typeof updatedAt === 'number') {
               if (Date.now() - updatedAt > CART_EXPIRY_MS) {
                 localStorage.removeItem(name);
                 return null;
               }
             }
-            // Legacy v1 carts don't carry `updatedAt`. We don't reject
-            // them — the next setItem will stamp the current time and
+            // Carts without any `updatedAt` (very old v1 builds) are not
+            // rejected — the next setItem will stamp the current time and
             // the expiry clock starts running from there.
 
             const cleanItems: CartItem[] = rawItems

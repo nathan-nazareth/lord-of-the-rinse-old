@@ -261,7 +261,7 @@ describe('useCartStore', () => {
     expect(isUuid(state.items[0].variantId)).toBe(true);
   });
 
-  it('discards expired cart on hydration', async () => {
+  it('discards expired cart on hydration (top-level updatedAt, v2 shape)', async () => {
     const thirtyOneDaysAgo = Date.now() - 31 * 24 * 60 * 60 * 1000;
     const expiredData = {
       state: {
@@ -280,9 +280,9 @@ describe('useCartStore', () => {
           },
         ],
         totalQuantity: 2,
-        updatedAt: thirtyOneDaysAgo,
       },
       version: 2,
+      updatedAt: thirtyOneDaysAgo,
     };
     mockStorage.setItem('organic-soap-cart', JSON.stringify(expiredData));
 
