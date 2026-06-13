@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "dev": "bun run --filter @organic-soap/app dev",
-    "build": "bun run --filter @lotr/app build && mkdir -p dist && cp -r packages/app/dist/. dist/",
+    "build": "bun run --filter @lotr/app build && mkdir -p dist && cp -r packages/app/dist/. dist/ && bun build packages/api/src/vercel-entry.ts --outfile=api/_handler.js --target=node --format=esm",
     "preview": "bun run --filter @organic-soap/app preview",
     "lint": "bun run --filter @organic-soap/app lint",
     "format": "bun run --filter @organic-soap/app format",
