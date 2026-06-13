@@ -87,7 +87,7 @@ export async function submitCartToWebhook(
   const orderItemsFormatted = items
     .map(
       (item, index) =>
-        `${index + 1}. ${item.shape || 'N/A'} | ${item.scent}${item.hasLavenderPieces ? ' (+lavender pieces)' : ''} | Size: ${item.size} | Color: ${item.color} | Qty: ${item.quantity} | Rs. ${item.price * item.quantity}`,
+        `${index + 1}. ${item.shape || 'N/A'} | ${item.scent}${item.hasLavenderPieces ? ' (+lavender pieces)' : ''} | Size: ${item.size} | Color: ${item.color} | Qty: ${item.quantity} | ₹${item.price * item.quantity}`,
     )
     .join('\n');
 
@@ -115,9 +115,9 @@ export async function submitCartToWebhook(
     'Soap Shape': sanitize(allShapes, 500),
     'Order Details': sanitize(orderItemsFormatted, 4000),
     'Total items': totalQuantity,
-    Subtotal: `Rs. ${fmtMoney(subtotal)}`,
-    Discount: `${discountPercentage}% (Rs. ${fmtMoney(discountAmount)})`,
-    'Final Total': `Rs. ${fmtMoney(finalTotal)}`,
+    Subtotal: `₹${fmtMoney(subtotal)}`,
+    Discount: `${discountPercentage}% (₹${fmtMoney(discountAmount)})`,
+    'Final Total': `₹${fmtMoney(finalTotal)}`,
     order_id: orderId,
     submission_timestamp: new Date().toISOString(),
     from_name: safeName,

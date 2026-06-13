@@ -3,15 +3,13 @@ import { commerceSettings, notificationAttempts, orderLines, orders } from '@lot
 import { eq } from 'drizzle-orm';
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
-  USD: '$',
-  LKR: 'Rs. ',
   EUR: '€',
   GBP: '£',
   INR: '₹',
 };
 
 function resolveCurrencySymbol(isoCode: string | null | undefined): string {
-  if (!isoCode) return '$';
+  if (!isoCode) return '₹';
   return CURRENCY_SYMBOLS[isoCode.toUpperCase()] ?? `${isoCode} `;
 }
 
@@ -36,14 +34,14 @@ async function getCurrencySymbol(): Promise<string> {
     .from(commerceSettings)
     .where(eq(commerceSettings.key, 'currency'))
     .limit(1);
-  if (!row) return '$';
+  if (!row) return '₹';
   try {
     const parsed: unknown = JSON.parse(row.value);
     if (typeof parsed === 'string') return resolveCurrencySymbol(parsed);
   } catch {
     return resolveCurrencySymbol(row.value);
   }
-  return '$';
+  return '₹';
 }
 
 /**

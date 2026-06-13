@@ -8,15 +8,13 @@ import { calculateDiscount } from '../utils/pricing';
 import { validateEmail, validateName, validatePhone } from '../utils/validators';
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
-  USD: '$',
-  LKR: 'Rs. ',
   EUR: '€',
   GBP: '£',
   INR: '₹',
 };
 
 function resolveCurrencySymbol(isoCode: string | null | undefined): string {
-  if (!isoCode) return 'Rs. ';
+  if (!isoCode) return '₹';
   return CURRENCY_SYMBOLS[isoCode.toUpperCase()] ?? `${isoCode} `;
 }
 

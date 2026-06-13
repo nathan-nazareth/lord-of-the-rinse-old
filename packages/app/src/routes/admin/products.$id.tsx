@@ -70,7 +70,7 @@ function AdminProductDetail() {
         </div>
         <div>
           <dt className="inline font-medium">Price: </dt>
-          <dd className="inline">Rs. {product.price}</dd>
+          <dd className="inline">₹{product.price}</dd>
         </div>
       </dl>
     </div>

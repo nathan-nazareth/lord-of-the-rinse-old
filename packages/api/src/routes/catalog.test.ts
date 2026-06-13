@@ -144,7 +144,7 @@ describe('GET /api/catalog', () => {
     // Fourth select: settings
     setupSelectWithFieldsChain([
       { key: 'shop_open', value: 'true' },
-      { key: 'currency', value: '"USD"' },
+      { key: 'currency', value: '"INR"' },
     ]);
 
     const res = await app.request('/api/catalog');
@@ -168,7 +168,7 @@ describe('GET /api/catalog', () => {
     // Settings
     expect(body.settings).toBeDefined();
     expect(body.settings.shop_open).toBe(true);
-    expect(body.settings.currency).toBe('USD');
+    expect(body.settings.currency).toBe('INR');
   });
 
   it('returns empty arrays when no data exists', async () => {

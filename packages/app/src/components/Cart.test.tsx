@@ -44,9 +44,9 @@ describe('Cart sidebar totals', () => {
     vi.clearAllMocks();
   });
 
-  it('uses the admin-configured currency (USD → $) instead of hardcoded Rs.', () => {
+  it('uses the admin-configured currency (INR → ₹)', () => {
     vi.mocked(useCatalog).mockReturnValue({
-      data: { settings: { currency: 'USD' } } as unknown as ReturnType<typeof useCatalog>['data'],
+      data: { settings: { currency: 'INR' } } as unknown as ReturnType<typeof useCatalog>['data'],
       isLoading: false,
       error: null,
     } as unknown as ReturnType<typeof useCatalog>);
@@ -61,10 +61,8 @@ describe('Cart sidebar totals', () => {
       />,
     );
 
-    // The "Checkout — $ ..." CTA should now read dollars, not "Rs. ".
     const cta = screen.getByRole('button', { name: /checkout/i });
-    expect(cta.textContent).toContain('$');
-    expect(cta.textContent).not.toContain('Rs.');
+    expect(cta.textContent).toContain('₹');
   });
 
   it('uses admin-configured discount tiers, not the hardcoded defaults', () => {
@@ -74,7 +72,7 @@ describe('Cart sidebar totals', () => {
     vi.mocked(useCatalog).mockReturnValue({
       data: {
         settings: {
-          currency: 'LKR',
+          currency: 'INR',
           discount_tiers: [{ minItems: 3, percent: 20 }],
         },
       } as unknown as ReturnType<typeof useCatalog>['data'],
@@ -95,12 +93,9 @@ describe('Cart sidebar totals', () => {
     // Subtotal 3 * 200 = 600. 20% off = 120 discount, 480 total.
     // The hardcoded default would have been 10% off = 60 discount, 540 total.
     expect(screen.getByText(/20% off/i)).toBeTruthy();
-    expect(screen.getByText(/- Rs\. 120/)).toBeTruthy();
+    expect(screen.getByText(/- ₹\s*120/)).toBeTruthy();
     const cta = screen.getByRole('button', { name: /checkout/i });
-    // LKR resolves to "Rs. " (with trailing space), so the rendered
-    // string is "Rs.  480" (two spaces). Match the digits to stay
-    // resilient to that formatting.
-    expect(cta.textContent).toMatch(/Rs\.\s+480/);
+    expect(cta.textContent).toMatch(/₹\s*480/);
   });
 
   it('falls back to default tiers when the catalog returns none', () => {

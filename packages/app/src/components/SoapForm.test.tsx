@@ -58,7 +58,7 @@ const MOCK_CATALOG = {
       ],
     },
   ],
-  settings: { shop_open: 'true', currency: 'USD', discount_tiers: '[{"minItems":2,"percent":10}]' },
+  settings: { shop_open: 'true', currency: 'INR', discount_tiers: '[{"minItems":2,"percent":10}]' },
 };
 
 describe('SoapForm component', () => {
@@ -229,7 +229,7 @@ describe('SoapForm component', () => {
     expect(mockAddToCart).toHaveBeenCalledWith(
       'Square',
       'Lavender',
-      140,
+      50,
       'White',
       '2',
       '50',
@@ -238,17 +238,12 @@ describe('SoapForm component', () => {
     );
   });
 
-  it('disables Add to Cart when the catalog has no matching variant AND the formula price is zero (regression for C1: silent $0 cart lines)', () => {
-    // An unknown scent that the formula cannot price (no baseOption in
-    // SOAP_OPTIONS) drives `formulaPrice` to the default 100 fallback in
-    // useSoapPricing, so we can't easily force a $0 formula. Instead,
-    // use a known shape/scent and rely on the effective price being
-    // > 0 — the test asserts the button is *enabled* and the click
-    // wires up the cart line. A true $0 scenario is covered at the
-    // store level (useCartStore clamps `price` to 0 if non-finite).
-    // Here we lock in the button-enabled path so the regression stays
-    // visible: the button must be enabled when an effective price
-    // exists.
+  it('disables Add to Cart when the catalog has no matching variant AND the formula price is zero (regression for C1: silent ₹0 cart lines)', () => {
+    // With g = ₹, a 50g soap prices at ₹50, so the button is enabled.
+    // A true ₹0 scenario is covered at the store level (useCartStore
+    // clamps `price` to 0 if non-finite). Here we lock in the
+    // button-enabled path so the regression stays visible: the button
+    // must be enabled when an effective price exists.
     useFormStore.getState().setField('shape', 'Square');
     useFormStore.getState().setField('scent', 'Lavender');
     useFormStore.getState().setField('color', 'White');

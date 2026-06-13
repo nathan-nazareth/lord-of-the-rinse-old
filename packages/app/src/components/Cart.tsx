@@ -22,15 +22,13 @@ import { validateEmail, validateName, validatePhone } from '../utils/validators'
 const API_BASE = (import.meta.env.VITE_API_URL ?? '').replace(/\/+$/, '');
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
-  USD: '$',
-  LKR: 'Rs. ',
   EUR: '€',
   GBP: '£',
   INR: '₹',
 };
 
 function resolveCurrencySymbol(isoCode: string | null | undefined): string {
-  if (!isoCode) return 'Rs. ';
+  if (!isoCode) return '₹';
   return CURRENCY_SYMBOLS[isoCode.toUpperCase()] ?? `${isoCode} `;
 }
 
@@ -226,7 +224,7 @@ export const Cart: React.FC<CartProps> = ({
   const lastSubmission = useRateLimitStore((s) => s.lastSubmission);
   const recordSubmission = useRateLimitStore((s) => s.recordSubmission);
   // Use the same catalog-driven currency + discount tiers as CartPage and
-  // CheckoutPage. Hardcoding 'Rs.' / DEFAULT_TIERS here meant a configured
+  // CheckoutPage. Hardcoding '₹' / DEFAULT_TIERS here meant a configured
   // admin discount tier or non-LKR currency silently disagreed with the
   // cart and checkout pages.
   const { data: catalog } = useCatalog();

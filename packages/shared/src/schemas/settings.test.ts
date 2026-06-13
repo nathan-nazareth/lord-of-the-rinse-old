@@ -39,7 +39,7 @@ describe('shopStatusSchema', () => {
   it('accepts valid shop status', () => {
     const result = shopStatusSchema.safeParse({
       shop_open: true,
-      currency: 'USD',
+      currency: 'INR',
       discount_tiers: [
         { minItems: 2, percent: 10 },
         { minItems: 4, percent: 15 },
@@ -60,7 +60,7 @@ describe('shopStatusSchema', () => {
   it('rejects discount percent over 100', () => {
     const result = shopStatusSchema.safeParse({
       shop_open: true,
-      currency: 'USD',
+      currency: 'INR',
       discount_tiers: [{ minItems: 2, percent: 150 }],
     });
     expect(result.success).toBe(false);

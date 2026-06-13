@@ -11,15 +11,13 @@ import type { CartItem } from '../types/cart';
 import { calculateDiscount } from '../utils/pricing';
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
-  USD: '$',
-  LKR: 'Rs. ',
   EUR: '€',
   GBP: '£',
   INR: '₹',
 };
 
 function resolveCurrencySymbol(isoCode: string | null | undefined): string {
-  if (!isoCode) return 'Rs. ';
+  if (!isoCode) return '₹';
   return CURRENCY_SYMBOLS[isoCode.toUpperCase()] ?? `${isoCode} `;
 }
 

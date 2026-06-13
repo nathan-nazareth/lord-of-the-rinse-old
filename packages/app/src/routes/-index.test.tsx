@@ -39,7 +39,7 @@ const MOCK_CATALOG = {
       ],
     },
   ],
-  settings: { shop_open: 'true', currency: 'USD', discount_tiers: '[{"minItems":2,"percent":10}]' },
+  settings: { shop_open: 'true', currency: 'INR', discount_tiers: '[{"minItems":2,"percent":10}]' },
 };
 
 function createTestRouter(initialEntries: string[] = ['/']) {

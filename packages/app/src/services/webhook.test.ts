@@ -62,14 +62,14 @@ describe('submitCartToWebhook discount logic', () => {
 
   it('applies 0% discount for a single item', async () => {
     const payload = await extractPayload([makeItem()]);
-    expect(payload.Discount).toBe('0% (Rs. 0.00)');
-    expect(payload['Final Total']).toBe('Rs. 200.00');
+    expect(payload.Discount).toBe('0% (₹0.00)');
+    expect(payload['Final Total']).toBe('₹200.00');
   });
 
   it('applies 10% discount for 2 items', async () => {
     const payload = await extractPayload([makeItem({ id: 'a' }), makeItem({ id: 'b' })]);
-    expect(payload.Discount).toBe('10% (Rs. 40.00)');
-    expect(payload['Final Total']).toBe('Rs. 360.00');
+    expect(payload.Discount).toBe('10% (₹40.00)');
+    expect(payload['Final Total']).toBe('₹360.00');
   });
 
   it('applies 15% discount for 4 items', async () => {
@@ -77,8 +77,8 @@ describe('submitCartToWebhook discount logic', () => {
       makeItem({ id: 'a', quantity: 2 }),
       makeItem({ id: 'b', quantity: 2 }),
     ]);
-    expect(payload.Discount).toBe('15% (Rs. 120.00)');
-    expect(payload['Final Total']).toBe('Rs. 680.00');
+    expect(payload.Discount).toBe('15% (₹120.00)');
+    expect(payload['Final Total']).toBe('₹680.00');
   });
 
   it('keeps 10% discount for exactly 3 items (needs 4+ for 15%)', async () => {
@@ -87,8 +87,8 @@ describe('submitCartToWebhook discount logic', () => {
       makeItem({ id: 'b', quantity: 1 }),
     ]);
     // 3 items: still 10% tier (need 4+ for 15%)
-    expect(payload.Discount).toBe('10% (Rs. 60.00)');
-    expect(payload['Final Total']).toBe('Rs. 540.00');
+    expect(payload.Discount).toBe('10% (₹60.00)');
+    expect(payload['Final Total']).toBe('₹540.00');
   });
 
   it('honours admin-configured discount tiers instead of the hardcoded defaults', async () => {
@@ -116,8 +116,8 @@ describe('submitCartToWebhook discount logic', () => {
       const call = mockFetch.mock.calls[0];
       return JSON.parse(call[1].body);
     })();
-    expect(twoItemPayload.Discount).toBe('0% (Rs. 0.00)');
-    expect(twoItemPayload['Final Total']).toBe('Rs. 400.00');
+    expect(twoItemPayload.Discount).toBe('0% (₹0.00)');
+    expect(twoItemPayload['Final Total']).toBe('₹400.00');
 
     // 4 items: still 20% (the 30% tier only kicks in at 5+)
     const fourItemPayload = await (async () => {
@@ -133,8 +133,8 @@ describe('submitCartToWebhook discount logic', () => {
       const call = mockFetch.mock.calls[0];
       return JSON.parse(call[1].body);
     })();
-    expect(fourItemPayload.Discount).toBe('20% (Rs. 160.00)');
-    expect(fourItemPayload['Final Total']).toBe('Rs. 640.00');
+    expect(fourItemPayload.Discount).toBe('20% (₹160.00)');
+    expect(fourItemPayload['Final Total']).toBe('₹640.00');
 
     // 6 items: 30% (highest matching tier)
     const sixItemPayload = await (async () => {
@@ -150,8 +150,8 @@ describe('submitCartToWebhook discount logic', () => {
       const call = mockFetch.mock.calls[0];
       return JSON.parse(call[1].body);
     })();
-    expect(sixItemPayload.Discount).toBe('30% (Rs. 360.00)');
-    expect(sixItemPayload['Final Total']).toBe('Rs. 840.00');
+    expect(sixItemPayload.Discount).toBe('30% (₹360.00)');
+    expect(sixItemPayload['Final Total']).toBe('₹840.00');
   });
 
   it('regression: sleep() does not leak abort listeners on a long-lived signal across retries', async () => {

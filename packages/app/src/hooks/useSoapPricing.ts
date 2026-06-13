@@ -1,9 +1,7 @@
 import { useMemo } from 'react';
 import type { CatalogAttribute, CatalogVariant, DiscountTier } from '../types/catalog';
 import { calculateDiscount, getDiscountPercentage } from '../utils/pricing';
-import { LAVENDER_PIECES_PRICE, SOAP_OPTIONS } from '../../types';
-
-const SIZE_PRICE_PER_GRAM = 0.6;
+import { LAVENDER_PIECES_PRICE } from '../../types';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -99,15 +97,12 @@ export function useCartTotals(items: { price: number; quantity: number }[], tota
   }, [items, totalQuantity]);
 }
 
-export function useSoapPricing(scent: string | null, size: number, hasLavenderPieces: boolean) {
+export function useSoapPricing(_scent: string | null, size: number, hasLavenderPieces: boolean) {
   return useMemo(() => {
-    const baseOption = SOAP_OPTIONS.find((o) => o.scent === scent);
-    const basePrice = baseOption?.price ?? 100;
-    const sizeAdjustment = Math.max(0, size) * SIZE_PRICE_PER_GRAM;
     const addon = hasLavenderPieces ? LAVENDER_PIECES_PRICE : 0;
-    const totalPrice = Math.round((basePrice + sizeAdjustment + addon) * 100) / 100;
+    const totalPrice = Math.max(0, size) + addon;
     return { totalPrice };
-  }, [scent, size, hasLavenderPieces]);
+  }, [size, hasLavenderPieces]);
 }
 
 export { calculateDiscount, getDiscountPercentage };

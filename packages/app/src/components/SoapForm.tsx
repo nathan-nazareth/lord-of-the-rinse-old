@@ -284,7 +284,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({
   const isScentStepValid = scent && size !== null;
   // The effective price mirrors the cart-line price: catalog when
   // available and matched, otherwise the formula. Refuse to submit
-  // when the effective price would be $0 — that's the silent-$0-line
+  // when the effective price would be ₹0 — that's the silent-₹0-line
   // bug we want to prevent. The form being submittable on a
   // formula-only fallback (e.g. the catalog hasn't loaded yet, or no
   // variant matches the current shape/scent/color/size) is intentional
@@ -319,7 +319,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({
   const handleAddToCart = () => {
     // Defence in depth: even though the button is disabled, a future
     // refactor that wires a different submit path must not be able to
-    // push a $0 line into the cart.
+    // push a ₹0 line into the cart.
     if (!isFormValid) return;
     setShowAddedToast(true);
     if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
@@ -429,7 +429,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({
                 disabled={cart.totalQuantity === 0}
                 className="btn-apothecary btn-primary flex-1 text-sm py-3"
               >
-                Rs. {cartTotal} — Checkout
+                ₹ {cartTotal} — Checkout
               </button>
             </div>
           )}
@@ -606,7 +606,8 @@ export const SoapForm: React.FC<SoapFormProps> = ({
                             Dried Lavender Pieces
                           </span>
                           <span className="text-ink-400 text-sm">
-                            +Rs. {LAVENDER_PIECES_PRICE} — calming botanicals
+                            {' '}
+                            +₹{LAVENDER_PIECES_PRICE} — calming botanicals
                           </span>
                         </span>
                       </span>
@@ -623,7 +624,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({
                       {hasLavenderPieces && ' + Lavender'}
                     </span>
                     <span className="font-display text-xl font-semibold text-terra-500">
-                      Rs. {totalPrice}
+                      ₹ {totalPrice}
                     </span>
                   </div>
 
@@ -652,7 +653,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({
                     Choose a color
                   </h2>
                   <p className="text-ink-400 text-sm">
-                    {shape} · {scent} · {size ?? 0}g · Rs. {totalPrice}
+                    {shape} · {scent} · {size ?? 0}g · ₹ {totalPrice}
                   </p>
                 </div>
 
@@ -716,7 +717,7 @@ export const SoapForm: React.FC<SoapFormProps> = ({
                     How many soaps?
                   </h2>
                   <p className="text-ink-400 text-sm">
-                    {shape} · {scent} · {color} · {size ?? 0}g · Rs. {totalPrice} each
+                    {shape} · {scent} · {color} · {size ?? 0}g · ₹ {totalPrice} each
                   </p>
                 </div>
 
@@ -769,9 +770,9 @@ export const SoapForm: React.FC<SoapFormProps> = ({
                       <div className="bg-parchment-100 rounded-2xl p-5 border border-parchment-300 space-y-3">
                         <div className="flex justify-between text-ink-600">
                           <span className="text-sm">
-                            Subtotal ({qty} soaps × Rs. {totalPrice})
+                            Subtotal ({qty} soaps × ₹ {totalPrice})
                           </span>
-                          <span className="font-medium">Rs. {subtotal}</span>
+                          <span className="font-medium">₹ {subtotal}</span>
                         </div>
                         {discountPercentage > 0 ? (
                           <div className="bg-gradient-to-r from-botanical-100 to-botanical-200 rounded-xl p-4 border border-botanical-300">
@@ -783,11 +784,11 @@ export const SoapForm: React.FC<SoapFormProps> = ({
                               <IconSparkles className="w-4 h-4" />
                             </div>
                             <p className="text-botanical-600 text-sm text-center">
-                              {discountPercentage}% off — you save Rs. {discountAmount}
+                              {discountPercentage}% off — you save ₹ {discountAmount}
                             </p>
                             <div className="flex justify-between text-lg font-display font-semibold text-ink-700 pt-3 mt-2 border-t border-botanical-300">
                               <span>Total</span>
-                              <span>Rs. {total}</span>
+                              <span>₹ {total}</span>
                             </div>
                             {/* Only nudge from 10% → 15%; the 0% → 10%
                                 case is handled by the outer `else`. */}
