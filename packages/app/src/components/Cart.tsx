@@ -10,14 +10,29 @@ import {
   IconUser,
 } from '@tabler/icons-react';
 import React, { useState } from 'react';
+import { useCatalog } from '../hooks/useCatalog';
 import { submitCartToWebhook } from '../services/webhook';
 import { useRateLimitStore } from '../stores/useRateLimitStore';
 import type { CartItem as CartItemType } from '../types/cart';
+import type { DiscountTier } from '../types/catalog';
 import type { Customer } from '../types/webhook';
 import { calculateDiscount } from '../utils/pricing';
 import { validateEmail, validateName, validatePhone } from '../utils/validators';
 
 const API_BASE = (import.meta.env.VITE_API_URL ?? '').replace(/\/+$/, '');
+
+const CURRENCY_SYMBOLS: Record<string, string> = {
+  USD: '$',
+  LKR: 'Rs. ',
+  EUR: '€',
+  GBP: '£',
+  INR: '₹',
+};
+
+function resolveCurrencySymbol(isoCode: string | null | undefined): string {
+  if (!isoCode) return 'Rs. ';
+  return CURRENCY_SYMBOLS[isoCode.toUpperCase()] ?? `${isoCode} `;
+}
 
 interface CartProps {
   cart: {
@@ -210,7 +225,13 @@ export const Cart: React.FC<CartProps> = ({
   const isAllowed = useRateLimitStore((s) => s.isAllowed(10, 300_000));
   const lastSubmission = useRateLimitStore((s) => s.lastSubmission);
   const recordSubmission = useRateLimitStore((s) => s.recordSubmission);
-  const currency = 'Rs.';
+  // Use the same catalog-driven currency + discount tiers as CartPage and
+  // CheckoutPage. Hardcoding 'Rs.' / DEFAULT_TIERS here meant a configured
+  // admin discount tier or non-LKR currency silently disagreed with the
+  // cart and checkout pages.
+  const { data: catalog } = useCatalog();
+  const currency = resolveCurrencySymbol(catalog?.settings?.currency);
+  const discountTiers: DiscountTier[] | undefined = catalog?.settings?.discount_tiers;
   const WINDOW_MS = 300_000;
   const cooldownRemaining = React.useMemo(() => {
     if (lastSubmission <= 0) return null;
@@ -291,6 +312,7 @@ export const Cart: React.FC<CartProps> = ({
   const { discountPercentage, discountAmount, total } = calculateDiscount(
     subtotal,
     cart.totalQuantity,
+    discountTiers,
   );
 
   const handleClearCart = () => {
@@ -373,9 +395,14 @@ export const Cart: React.FC<CartProps> = ({
         return;
       }
 
-      const result = await submitCartToWebhook(customer, cart.items, undefined, undefined, {
-        signal: controller.signal,
-      });
+      const result = await submitCartToWebhook(
+        customer,
+        cart.items,
+        undefined,
+        undefined,
+        { signal: controller.signal },
+        discountTiers,
+      );
       if (result.success) {
         recordSubmission(WINDOW_MS);
         setOrderItemCount(cart.totalQuantity);

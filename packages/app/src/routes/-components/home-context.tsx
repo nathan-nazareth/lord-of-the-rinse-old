@@ -8,11 +8,13 @@ import {
   useRef,
   useState,
 } from 'react';
+import { useCatalog } from '../../hooks/useCatalog';
+import { submitCartToWebhook } from '../../services/webhook';
 import { detectAndClearLegacyCart, useCartStore } from '../../stores/useCartStore';
 import { useFormStore } from '../../stores/useFormStore';
 import type { CartItem } from '../../types/cart';
+import type { DiscountTier } from '../../types/catalog';
 import type { Customer } from '../../types/webhook';
-import { submitCartToWebhook } from '../../services/webhook';
 
 const API_BASE = (import.meta.env.VITE_API_URL ?? '').replace(/\/+$/, '');
 
@@ -66,6 +68,11 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
   const clearCart = useCartStore((s) => s.clearCart);
   const clearFormState = useFormStore((s) => s.clear);
   const setVisited = useFormStore((s) => s.setVisited);
+  // Read the catalog's discount tiers once per render so the Web3Forms
+  // fallback email matches the totals the customer saw on the cart page
+  // (admin-configured tiers, not the hardcoded defaults).
+  const { data: catalog } = useCatalog();
+  const discountTiers: DiscountTier[] | undefined = catalog?.settings?.discount_tiers;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmationItemCount, setConfirmationItemCount] = useState(0);
   const [lastOrderReference, setLastOrderReference] = useState('');
@@ -238,9 +245,14 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
       }
 
       try {
-        const result = await submitCartToWebhook(customer, items, undefined, undefined, {
-          signal: controller.signal,
-        });
+        const result = await submitCartToWebhook(
+          customer,
+          items,
+          undefined,
+          undefined,
+          { signal: controller.signal },
+          discountTiers,
+        );
         if (result.success) {
           const ref = `LTR-${result.orderId.slice(0, 8).toUpperCase()}`;
           return finalizeSuccess(ref);
@@ -258,7 +270,7 @@ export function HomeProvider({ children }: { children: React.ReactNode }) {
       releaseController();
       return undefined;
     },
-    [clearCart, clearFormState],
+    [clearCart, clearFormState, discountTiers],
   );
 
   const handleDismissOrdered = useCallback(() => {

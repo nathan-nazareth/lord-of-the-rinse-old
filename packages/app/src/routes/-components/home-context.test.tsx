@@ -5,6 +5,16 @@ import { useCartStore } from '../../stores/useCartStore';
 import { MockLocalStorage } from '../../test-utils/mock-local-storage';
 import { HomeProvider, useHomeContext } from './home-context';
 
+// Mock useCatalog — HomeProvider reads discount_tiers from the catalog
+// so the Web3Forms fallback email matches the totals shown on the cart.
+// The tests in this file exercise cart wiring, not catalog loading, so a
+// stable empty-catalog return value is enough.
+vi.mock('../../hooks/useCatalog', () => ({
+  useCatalog: vi.fn(),
+}));
+
+import { useCatalog } from '../../hooks/useCatalog';
+
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   React.createElement(HomeProvider, null, children);
 
@@ -17,6 +27,11 @@ describe('HomeProvider cart store wiring', () => {
     useCartStore.persist.clearStorage();
     useCartStore.setState({ items: [], totalQuantity: 0 });
     vi.clearAllMocks();
+    vi.mocked(useCatalog).mockReturnValue({
+      data: { settings: {} } as unknown as ReturnType<typeof useCatalog>['data'],
+      isLoading: false,
+      error: null,
+    } as unknown as ReturnType<typeof useCatalog>);
   });
 
   it('exposes empty cart on mount', () => {

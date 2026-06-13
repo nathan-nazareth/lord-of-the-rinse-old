@@ -1,4 +1,5 @@
 import type { CartItem } from '../types/cart';
+import type { DiscountTier } from '../types/catalog';
 import type { Customer, WebhookLogEntry, WebhookStatus } from '../types/webhook';
 import {
   logWeb3FormsError,
@@ -71,6 +72,7 @@ export async function submitCartToWebhook(
   onStatusChange?: (status: WebhookStatus) => void,
   onLog?: (log: WebhookLogEntry) => void,
   options: { signal?: AbortSignal } = {},
+  discountTiers?: DiscountTier[],
 ): Promise<{ success: boolean; orderId: string }> {
   const orderId = generateOrderId();
 
@@ -80,7 +82,7 @@ export async function submitCartToWebhook(
     discountPercentage,
     discountAmount,
     total: finalTotal,
-  } = calculateDiscount(subtotal, totalQuantity);
+  } = calculateDiscount(subtotal, totalQuantity, discountTiers);
 
   const orderItemsFormatted = items
     .map(
