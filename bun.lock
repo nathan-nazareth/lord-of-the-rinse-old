@@ -5,12 +5,18 @@
     "": {
       "name": "organic-soap-builder",
       "dependencies": {
+        "@hono/node-server": "^1.13.7",
         "@libsql/client": "^0.17.3",
+        "@lotr/db": "*",
+        "@lotr/shared": "*",
         "@tabler/icons-react": "^3.44.0",
         "@tanstack/react-query": "^5.100.11",
         "@tanstack/react-query-devtools": "^5.100.11",
         "@tanstack/react-router": "^1.170.4",
         "@tanstack/router-vite-plugin": "^1.167.6",
+        "better-auth": "^1.6.11",
+        "drizzle-orm": "^0.44.0",
+        "hono": "^4.7.0",
         "react": "^19.2.3",
         "react-dom": "^19.2.3",
         "zustand": "^5.0.13",
