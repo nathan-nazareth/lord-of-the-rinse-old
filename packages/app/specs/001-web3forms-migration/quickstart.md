@@ -6,7 +6,7 @@ This guide helps developers set up and understand the Web3Forms integration for 
 
 - Node.js 18+ with npm or bun
 - Git
-- Web3Forms API key (already provided: `***REMOVED***`)
+- Web3Forms API key (already provided: `<your-web3forms-access-key>`)
 
 ## Setup
 
@@ -22,7 +22,7 @@ npm install
 Create `.env.local` with the Web3Forms access key:
 
 ```bash
-echo "VITE_WEB3FORMS_ACCESS_KEY=***REMOVED***" > .env.local
+echo "VITE_WEB3FORMS_ACCESS_KEY=<your-web3forms-access-key>" > .env.local
 ```
 
 ### 3. Start Development Server
@@ -35,7 +35,7 @@ npm run dev
 
 | File | Changes |
 |------|---------|
-| `src/services/webhook.ts` | Replace Pabbly URL with Web3Forms endpoint, update payload structure |
+| `src/services/webhook.ts` | Replace legacy webhook URL with Web3Forms endpoint, update payload structure |
 | `src/hooks/useWebhook.ts` | Add localStorage state tracking, update submission flow |
 | `src/utils/errorLogging.ts` | Add Web3Forms-specific error logging |
 | `src/types/webhook.ts` | Add SubmissionState type and localStorage interfaces |

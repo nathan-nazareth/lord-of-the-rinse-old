@@ -5,7 +5,7 @@
 
 ## Summary
 
-Replace the Pabbly webhook integration with Web3Forms for order submission. The migration involves updating the webhook service to use Web3Forms API endpoint with the provided access key, implementing browser storage for submission state tracking, and ensuring graceful error handling with user feedback. All existing form fields and data structure will be preserved.
+Replace the legacy webhook webhook integration with Web3Forms for order submission. The migration involves updating the webhook service to use Web3Forms API endpoint with the provided access key, implementing browser storage for submission state tracking, and ensuring graceful error handling with user feedback. All existing form fields and data structure will be preserved.
 
 ## Technical Context
 
@@ -53,7 +53,7 @@ specs/001-web3forms-migration/
 ```text
 src/
 ├── services/
-│   └── webhook.ts       # Modify to use Web3Forms instead of Pabbly
+│   └── webhook.ts       # Modify to use Web3Forms instead of legacy webhook
 ├── hooks/
 │   └── useWebhook.ts    # Update to track submission state in localStorage
 ├── utils/

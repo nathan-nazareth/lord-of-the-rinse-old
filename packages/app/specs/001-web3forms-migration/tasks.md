@@ -40,7 +40,7 @@ description: "Task list template for feature implementation"
 **CRITICAL**: No user story work can begin until this phase is complete
 
 - [x] ~~T003~~ [P] Enhance `src/utils/errorLogging.ts` to add Web3Forms-specific error logging for rate limits
-- [x] ~~T004~~ [P] Update `src/services/webhook.ts` to use Web3Forms endpoint instead of Pabbly, including retry logic with exponential backoff
+- [x] ~~T004~~ [P] Update `src/services/webhook.ts` to use Web3Forms endpoint instead of legacy webhook, including retry logic with exponential backoff
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -66,7 +66,7 @@ description: "Task list template for feature implementation"
 **Independent Test**: Submit test order and verify order data in Web3Forms dashboard
 
 - [x] ~~T007~~ [US2] [P] Ensure `src/services/webhook.ts` transmits all required order fields per API contract (customer_name, customer_email, customer_phone, order_items, etc.)
-- [x] ~~T008~~ [US2] [P] Verify `src/services/webhook.ts` maintains same data structure as previous Pabbly integration
+- [x] ~~T008~~ [US2] [P] Verify `src/services/webhook.ts` maintains same data structure as previous legacy webhook integration
 
 **Checkpoint**: User Story 2 should be fully functional - business can receive orders
 

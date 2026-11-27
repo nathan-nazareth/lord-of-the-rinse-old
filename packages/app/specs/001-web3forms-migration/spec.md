@@ -3,7 +3,7 @@
 **Feature Branch**: `001-web3forms-migration`
 **Created**: 2026-01-26
 **Status**: Draft
-**Input**: User description: "i want to use web3forms instead of pabbly. this is the key for it: ***REMOVED***"
+**Input**: User description: "i want to use web3forms instead of the legacy webhook. this is the key for it: <your-web3forms-access-key>"
 
 ## Clarifications
 
@@ -11,7 +11,7 @@
 
 - **Q: When a customer submits an order and encounters an error (network failure, API timeout, server error), what should the system do?** → **A: Preserve all entered data, show specific error message, keep submit enabled for retry**
 - **Q: When the Web3Forms API rate limits the application or is temporarily unavailable, should the system log these events for monitoring, and how should rate limits be handled?** → **A: Log rate limits and errors to server logs, show specific message "Service busy, please wait and retry"**
-- **Q: What features or behaviors should be explicitly excluded from this Web3Forms migration?** → **A: Replace Pabbly webhook with Web3Forms only. Exclude: Email confirmations, order tracking, admin UI changes.**
+- **Q: What features or behaviors should be explicitly excluded from this Web3Forms migration?** → **A: Replace legacy webhook webhook with Web3Forms only. Exclude: Email confirmations, order tracking, admin UI changes.**
 - **Q: Should the system track the submission state (pending, sent, failed) to help ensure zero orders are lost?** → **A: Track submission state (pending/sent/failed) and allow retry of failed submissions from browser storage**
 
 ## User Scenarios & Testing *(mandatory)*
@@ -34,9 +34,9 @@ As a customer, I want to submit my soap customization order through the form and
 
 ### User Story 2 - Business Receives Order Notifications (Priority: P1)
 
-As a business owner, I want to receive customer orders through Web3Forms so that I can fulfill soap orders without disruption from the Pabbly service.
+As a business owner, I want to receive customer orders through Web3Forms so that I can fulfill soap orders without disruption from the legacy webhook service.
 
-**Why this priority**: The business must receive orders to operate; this replaces the existing Pabbly integration that was functioning.
+**Why this priority**: The business must receive orders to operate; this replaces the existing legacy webhook integration that was functioning.
 
 **Independent Test**: Can be verified by submitting a test order and checking the Web3Forms dashboard or configured notification channel.
 
@@ -75,7 +75,7 @@ As a customer, I want clear feedback if my order fails to submit, so that I know
 ### Scope
 
 **In Scope:**
-- Replace Pabbly webhook URL with Web3Forms API endpoint
+- Replace legacy webhook webhook URL with Web3Forms API endpoint
 - Include Web3Forms access key in form submissions
 - Preserve existing form fields and data structure
 - Handle submission errors gracefully with user feedback
@@ -90,9 +90,9 @@ As a customer, I want clear feedback if my order fails to submit, so that I know
 
 ### Functional Requirements
 
-- **FR-001**: System MUST send order submissions to the Web3Forms API endpoint instead of the Pabbly webhook URL.
-- **FR-002**: System MUST include the Web3Forms access key (***REMOVED***) in all API requests.
-- **FR-003**: System MUST transmit the same order data structure to Web3Forms that was previously sent to Pabbly (customer contact, scent selection, custom scent description, color choice, quantity).
+- **FR-001**: System MUST send order submissions to the Web3Forms API endpoint instead of the legacy webhook webhook URL.
+- **FR-002**: System MUST include the Web3Forms access key (<your-web3forms-access-key>) in all API requests.
+- **FR-003**: System MUST transmit the same order data structure to Web3Forms that was previously sent to legacy webhook (customer contact, scent selection, custom scent description, color choice, quantity).
 - **FR-004**: System MUST parse the Web3Forms response to determine submission success or failure.
 - **FR-005**: System MUST display appropriate feedback to the customer based on the submission result (success confirmation or error message). On error, form data MUST be preserved and submit MUST remain enabled for retry.
 - **FR-006**: System MUST NOT expose the Web3Forms access key in client-side code that is publicly accessible.
